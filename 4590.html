@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>鏡界折躍 · 雙重陷阱</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-touch-callout: none; }
+        body {
+            background: #0d0f14;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            touch-action: none;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+        #gameWrapper {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            aspect-ratio: 9 / 16;
+            background: #151a22;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(100, 200, 180, 0.08);
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            background: #161d26;
+        }
+
+        /* HUD 覆蓋層 */
+        #hud {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            padding: 0 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            pointer-events: none;
+        }
+        #hud > * { pointer-events: auto; }
+
+        #energyBar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(10, 20, 30, 0.6);
+            backdrop-filter: blur(8px);
+            padding: 8px 14px 8px 12px;
+            border-radius: 40px;
+            border: 1px solid rgba(100, 220, 200, 0.2);
+        }
+        #energyBar .icon {
+            font-size: 20px;
+            color: #66ddcc;
+        }
+        #energyFill {
+            width: 60px;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #energyFill .fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #44bbaa, #88ffee);
+            border-radius: 10px;
+            transition: width 0.15s;
+        }
+        #energyLabel {
+            color: rgba(180, 230, 220, 0.7);
+            font-size: 11px;
+            letter-spacing: 1px;
+            min-width: 28px;
+        }
+
+        #rotateBtn {
+            background: rgba(10, 20, 30, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(160, 130, 220, 0.25);
+            color: #c8b8ee;
+            padding: 10px 16px;
+            border-radius: 40px;
+            font-size: 14px;
+            letter-spacing: 1px;
+            touch-action: none;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #rotateBtn:active { background: rgba(60, 40, 100, 0.5); transform: scale(0.94); }
+
+        /* 教學覆蓋 */
+        #tutorialOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 30px;
+            pointer-events: auto;
+            z-index: 20;
+            transition: opacity 0.4s;
+        }
+        #tutorialOverlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #tutorialOverlay .title {
+            color: #aaffee;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+            text-shadow: 0 0 30px rgba(100, 255, 220, 0.15);
+        }
+        #tutorialOverlay .sub {
+            color: #88bbbb;
+            font-size: 14px;
+            margin-bottom: 24px;
+            opacity: 0.8;
+        }
+        #tutorialOverlay .stepBox {
+            background: rgba(20, 40, 50, 0.6);
+            border: 1px solid rgba(100, 220, 200, 0.15);
+            border-radius: 20px;
+            padding: 20px 24px;
+            max-width: 320px;
+            width: 100%;
+            text-align: center;
+        }
+        #tutorialOverlay .stepBox .emojiBig {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        #tutorialOverlay .stepBox .desc {
+            color: #d0e8e8;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        #tutorialOverlay .stepBox .highlight {
+            color: #88ffee;
+            font-weight: 600;
+        }
+        #tutorialOverlay .stepBox .subHint {
+            color: #88aabc;
+            font-size: 13px;
+            margin-top: 10px;
+            opacity: 0.7;
+        }
+        #tutorialOverlay .btnNext {
+            margin-top: 24px;
+            background: rgba(100, 220, 200, 0.15);
+            border: 1px solid rgba(100, 220, 200, 0.3);
+            color: #aaffee;
+            padding: 12px 40px;
+            border-radius: 40px;
+            font-size: 17px;
+            letter-spacing: 2px;
+            touch-action: none;
+            transition: 0.15s;
+        }
+        #tutorialOverlay .btnNext:active { background: rgba(100, 220, 200, 0.3); transform: scale(0.95); }
+        #tutorialOverlay .skip {
+            margin-top: 14px;
+            color: rgba(150, 180, 180, 0.4);
+            font-size: 12px;
+            background: none;
+            border: none;
+            padding: 8px;
+        }
+
+        /* 過關 */
+        #completeOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            z-index: 30;
+        }
+        #completeOverlay.show { display: flex; }
+        #completeOverlay .big {
+            color: #ffdd88;
+            font-size: 36px;
+            font-weight: 700;
+        }
+        #completeOverlay .sub {
+            color: #bbddee;
+            font-size: 18px;
+            margin-top: 8px;
+            text-align: center;
+            line-height: 1.6;
+        }
+        #completeOverlay .restartBtn {
+            margin-top: 30px;
+            background: rgba(255, 200, 100, 0.15);
+            border: 1px solid rgba(255, 200, 100, 0.3);
+            color: #ffdd88;
+            padding: 14px 44px;
+            border-radius: 40px;
+            font-size: 18px;
+        }
+
+        @media (max-width: 420px) {
+            #energyFill { width: 40px; }
+            #rotateBtn { font-size: 12px; padding: 8px 12px; }
+            #tutorialOverlay .title { font-size: 20px; }
+            #tutorialOverlay .stepBox .desc { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="gameWrapper">
+    <canvas id="gameCanvas" width="360" height="640"></canvas>
+
+    <!-- HUD -->
+    <div id="hud">
+        <div id="energyBar">
+            <span class="icon">⟡</span>
+            <div id="energyFill"><div class="fill" id="energyFillInner"></div></div>
+            <span id="energyLabel">100%</span>
+        </div>
+        <button id="rotateBtn">⟳ 旋轉</button>
+    </div>
+
+    <!-- 教學 -->
+    <div id="tutorialOverlay">
+        <div class="title">✦ 鏡界折躍 ✦</div>
+        <div class="sub">第 3 關 · 雙重陷阱</div>
+        <div class="stepBox" id="tutorialStepBox">
+            <span class="emojiBig" id="tEmoji">👆</span>
+            <div class="desc" id="tDesc">左半螢幕<span class="highlight">滑動</span>移動角色</div>
+            <div class="subHint" id="tSub">試試看往右走</div>
+        </div>
+        <button class="btnNext" id="tNextBtn">下一步 →</button>
+        <button class="skip" id="tSkipBtn">跳過教學</button>
+    </div>
+
+    <!-- 過關 -->
+    <div id="completeOverlay">
+        <div class="big">✦ 錨點校準完成 ✦</div>
+        <div class="sub">你利用視角錯位與折躍彈射，<br>成功穿越了雙重陷阱。</div>
+        <div class="sub" style="font-size:14px;color:#88aabc;margin-top:4px;">「記憶畫卡解鎖：破碎的幾何」</div>
+        <button class="restartBtn" id="restartBtn">↻ 重新挑戰</button>
+    </div>
+</div>
+
+<script>
+// ================================================================
+//  《鏡界折躍》— 雙重陷阱 (概念驗證)
+//  操作：左半屏滑動移動 | 兩指旋轉視角 | 角色上向下滑蓄力彈射 | 點能量條回溯
+// ================================================================
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const W = 360, H = 640;
+
+// ---- DOM 元素 ----
+const energyFill = document.getElementById('energyFillInner');
+const energyLabel = document.getElementById('energyLabel');
+const rotateBtn = document.getElementById('rotateBtn');
+const tutorialOverlay = document.getElementById('tutorialOverlay');
+const tEmoji = document.getElementById('tEmoji');
+const tDesc = document.getElementById('tDesc');
+const tSub = document.getElementById('tSub');
+const tNextBtn = document.getElementById('tNextBtn');
+const tSkipBtn = document.getElementById('tSkipBtn');
+const completeOverlay = document.getElementById('completeOverlay');
+const restartBtn = document.getElementById('restartBtn');
+
+// ---- 遊戲狀態 ----
+const G = {
+    // 視角
+    viewAngle: 0,        // 0, 45, 90, 135, 180...
+    targetAngle: 0,
+    animatingAngle: false,
+    angleProgress: 0,
+    startAngle: 0,
+    endAngle: 0,
+
+    // 玩家 (3D 座標)
+    player: { x: 60, z: 60, y: 0 }, // x, z 為水平，y 為垂直高度
+    playerScreen: { x: 0, y: 0 },
+    radius: 10,
+    vy: 0,
+    onGround: true,
+
+    // 平台 (3D)
+    platforms: [],
+    // 視覺碎片 (空中)
+    fragments: [],
+    // 終點
+    goal: { x: 280, z: 60, w: 30, d: 30 },
+
+    // 彈射
+    charging: false,
+    chargeStartY: 0,
+    chargePower: 0,      // 0~1
+    isLaunching: false,
+    launchVx: 0,
+    launchVz: 0,
+    launchTimer: 0,
+
+    // 殘影回溯
+    energy: 1.0,
+    maxEnergy: 1.0,
+    shadow: null,        // { x, z } 或 null
+    canShadow: true,
+    shadowCooldown: 0,
+
+    // 輸入
+    touchId: null,
+    moveStartX: 0,
+    moveStartY: 0,
+    isMoving: false,
+    isCharging: false,
+    chargeTouchId: null,
+
+    // 旋轉手勢 (兩指)
+    pinchTouchIds: [],
+    pinchStartDist: 0,
+    pinchStartAngle: 0,
+
+    // 過關
+    gameComplete: false,
+
+    // 坍縮裂縫
+    collapse: 0, // 0~1
+
+    // 教學步驟
+    tutorialStep: 0, // 0=移動, 1=旋轉, 2=彈射, 3=回溯, 4=過關
+    tutorialDone: false,
+};
+
+// ---- 初始化關卡 ----
+function initLevel() {
+    // 平台：構成一個立體迷宮
+    G.platforms = [
+        // 起點平台
+        { x: 40, z: 40, w: 50, d: 50, h: 4, color: '#3a5a5a' },
+        // 中間平台 (左)
+        { x: 130, z: 30, w: 35, d: 35, h: 4, color: '#4a6a6a' },
+        // 中間平台 (右)
+        { x: 200, z: 80, w: 35, d: 35, h: 4, color: '#4a6a6a' },
+        // 右側終點平台
+        { x: 290, z: 50, w: 45, d: 45, h: 4, color: '#5a7a7a' },
+        // 額外支撐平台 (視覺)
+        { x: 70, z: 100, w: 30, d: 30, h: 4, color: '#2a4a4a' },
+        { x: 250, z: 120, w: 30, d: 30, h: 4, color: '#2a4a4a' },
+    ];
+
+    // 視覺碎片 (空中) — 關鍵謎題
+    G.fragments = [
+        // 這個碎片在視角旋轉45度後，會與右平台視覺重疊
+        { x: 165, z: 55, radius: 12, color: '#88ddcc', active: true },
+        // 第二個碎片 (移動式)
+        { x: 230, z: 40, radius: 10, color: '#bb88ee', active: true, movePhase: 0 },
+    ];
+
+    G.goal = { x: 290, z: 50, w: 30, d: 30 };
+
+    G.player.x = 50;
+    G.player.z = 45;
+    G.player.y = 0;
+    G.player.vy = 0;
+    G.player.onGround = true;
+    G.energy = 1.0;
+    G.shadow = null;
+    G.gameComplete = false;
+    G.collapse = 0;
+    G.isLaunching = false;
+    G.charging = false;
+    G.chargePower = 0;
+    G.viewAngle = 0;
+    G.targetAngle = 0;
+    G.animatingAngle = false;
+    G.angleProgress = 0;
+    G.shadowCooldown = 0;
+
+    updateEnergyUI();
+}
+
+// ---- 3D → 2D 投影 (等距/旋轉) ----
+function project(px, pz, py) {
+    const angle = G.viewAngle * Math.PI / 180;
+    const cosA = Math.cos(angle);
+    const sinA = Math.sin(angle);
+    // 等距投影
+    const scale = 1.8;
+    const cx = (px * cosA - pz * sinA) * scale + W/2;
+    const cy = (px * sinA + pz * cosA) * scale * 0.5 - py * scale * 0.8 + H * 0.55;
+    return { x: cx, y: cy };
+}
+
+// ---- 碰撞檢測 (3D) ----
+function rectCircleCollide(px, pz, pr, rx, rz, rw, rd) {
+    const halfW = rw/2, halfD = rd/2;
+    const cx = px, cz = pz;
+    const nearX = Math.max(rx - halfW, Math.min(cx, rx + halfW));
+    const nearZ = Math.max(rz - halfD, Math.min(cz, rz + halfD));
+    const dx = cx - nearX, dz = cz - nearZ;
+    return (dx*dx + dz*dz) < (pr * pr);
+}
+
+// ---- 檢查是否在平台上 ----
+function checkOnGround(px, pz, py) {
+    const pr = G.radius;
+    for (const pl of G.platforms) {
+        if (py <= pl.h + 2 && py >= pl.h - 2) {
+            if (rectCircleCollide(px, pz, pr, pl.x, pl.z, pl.w, pl.d)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// ---- 取得地面高度 ----
+function getGroundHeight(px, pz) {
+    let maxH = -999;
+    for (const pl of G.platforms) {
+        if (rectCircleCollide(px, pz, G.radius * 0.6, pl.x, pl.z, pl.w, pl.d)) {
+            if (pl.h > maxH) maxH = pl.h;
+        }
+    }
+    return maxH === -999 ? -100 : maxH;
+}
+
+// ---- 更新玩家 ----
+function updatePlayer() {
+    if (G.gameComplete) return;
+
+    const p = G.player;
+    const pr = G.radius;
+
+    // 重力
+    if (!p.onGround) {
+        p.vy += 0.25;
+        if (p.vy > 8) p.vy = 8;
+        p.y += p.vy;
+    }
+
+    // 檢查地面
+    const groundY = getGroundHeight(p.x, p.z);
+    if (p.y <= groundY + 2 && p.vy >= 0) {
+        p.y = groundY;
+        p.vy = 0;
+        p.onGround = true;
+    } else if (p.y > groundY + 4) {
+        p.onGround = false;
+    }
+
+    // 邊界
+    p.x = Math.max(10, Math.min(W/0.9 - 10, p.x));
+    p.z = Math.max(10, Math.min(H/0.6 - 10, p.z));
+
+    // 彈射更新
+    if (G.isLaunching) {
+        G.launchTimer -= 0.02;
+        p.x += G.launchVx * 1.2;
+        p.z += G.launchVz * 1.2;
+        p.onGround = false;
+        if (G.launchTimer <= 0) {
+            G.isLaunching = false;
+            p.vy = -1.5;
+        }
+        // 落地停止
+        if (p.y <= getGroundHeight(p.x, p.z) + 2) {
+            G.isLaunching = false;
+            p.y = getGroundHeight(p.x, p.z);
+            p.onGround = true;
+        }
+    }
+
+    // 殘影冷卻
+    if (G.shadowCooldown > 0) G.shadowCooldown -= 0.02;
+
+    // 碎片碰撞 (拾取)
+    for (const f of G.fragments) {
+        if (!f.active) continue;
+        const dx = p.x - f.x, dz = p.z - f.z;
+        if (dx*dx + dz*dz < (pr + f.radius) * (pr + f.radius) && Math.abs(p.y - 2) < 8) {
+            f.active = false;
+            // 增加能量
+            G.energy = Math.min(1, G.energy + 0.15);
+            updateEnergyUI();
+            spawnParticles(f.x, f.z, f.color);
+            // 教學推進
+            if (G.tutorialStep === 2 && !G.tutorialDone) {
+                G.tutorialStep = 3;
+                updateTutorial();
+            }
+        }
+    }
+
+    // 碎片移動 (第二個)
+    if (G.fragments.length > 1) {
+        const f2 = G.fragments[1];
+        if (f2.active) {
+            f2.movePhase += 0.02;
+            f2.x = 230 + Math.sin(f2.movePhase) * 25;
+            f2.z = 40 + Math.cos(f2.movePhase * 0.7) * 20;
+        }
+    }
+
+    // 抵達終點
+    const g = G.goal;
+    if (rectCircleCollide(p.x, p.z, pr, g.x, g.z, g.w, g.d) && p.y < 6) {
+        G.gameComplete = true;
+        completeOverlay.classList.add('show');
+    }
+
+    // 坍縮進度 (隨時間)
+    G.collapse = Math.min(1, G.collapse + 0.0003);
+}
+
+// ---- 彈射 ----
+function launchPlayer(power) {
+    if (G.isLaunching) return;
+    const p = G.player;
+    // 方向：朝向玩家面對方向 (根據視角)
+    const angle = G.viewAngle * Math.PI / 180;
+    const dirX = Math.cos(angle);
+    const dirZ = Math.sin(angle);
+    const speed = 2 + power * 6;
+    G.launchVx = dirX * speed;
+    G.launchVz = dirZ * speed;
+    G.launchTimer = 0.4 + power * 0.3;
+    G.isLaunching = true;
+    p.onGround = false;
+    p.vy = -2;
+    // 消耗能量
+    G.energy = Math.max(0, G.energy - 0.2);
+    updateEnergyUI();
+    spawnParticles(p.x, p.z, '#88ffee');
+}
+
+// ---- 殘影回溯 ----
+function doShadow() {
+    if (G.shadowCooldown > 0) return;
+    if (G.energy < 0.25) return;
+    const p = G.player;
+    if (G.shadow) {
+        // 瞬移至殘影
+        p.x = G.shadow.x;
+        p.z = G.shadow.z;
+        p.y = getGroundHeight(p.x, p.z) + 2;
+        p.vy = 0;
+        p.onGround = true;
+        G.shadow = null;
+        G.energy = Math.max(0, G.energy - 0.25);
+        G.shadowCooldown = 0.8;
+        spawnParticles(p.x, p.z, '#8888ff');
+        updateEnergyUI();
+        if (G.tutorialStep === 3 && !G.tutorialDone) {
+            G.tutorialStep = 4;
+            updateTutorial();
+        }
+    } else {
+        // 生成殘影
+        G.shadow = { x: p.x, z: p.z };
+        G.energy = Math.max(0, G.energy - 0.1);
+        updateEnergyUI();
+        spawnParticles(p.x, p.z, '#6666dd');
+    }
+}
+
+// ---- 粒子特效 ----
+let particles = [];
+function spawnParticles(x, z, color) {
+    for (let i = 0; i < 14; i++) {
+        particles.push({
+            x, z,
+            vx: (Math.random() - 0.5) * 4,
+            vz: (Math.random() - 0.5) * 4,
+            life: 1,
+            color,
+            size: 3 + Math.random() * 5
+        });
+    }
+}
+
+// ---- 視角旋轉 ----
+function rotateView(delta) {
+    G.targetAngle = (G.targetAngle + delta) % 360;
+    if (G.targetAngle < 0) G.targetAngle += 360;
+    // 平滑動畫
+    G.animatingAngle = true;
+    G.startAngle = G.viewAngle;
+    G.endAngle = G.targetAngle;
+    G.angleProgress = 0;
+}
+
+// ---- 更新能量 UI ----
+function updateEnergyUI() {
+    const pct = Math.round(G.energy * 100);
+    energyFill.style.width = pct + '%';
+    energyLabel.textContent = pct + '%';
+}
+
+// ---- 教學系統 ----
+const tutorialSteps = [
+    {
+        emoji: '👆',
+        desc: '左半螢幕 <span class="highlight">滑動</span> 移動角色',
+        sub: '試試看往右走，熟悉操作'
+    },
+    {
+        emoji: '⟳',
+        desc: '點擊右下 <span class="highlight">旋轉</span> 按鈕或雙指旋轉',
+        sub: '旋轉視角讓碎片與平台重疊'
+    },
+    {
+        emoji: '⚡',
+        desc: '在 <span class="highlight">角色身上</span> 向下滑動蓄力',
+        sub: '鬆開彈射！快速滑=遠，慢=近'
+    },
+    {
+        emoji: '⟡',
+        desc: '點擊左下 <span class="highlight">能量條</span> 生成殘影',
+        sub: '再點一次瞬移至殘影位置'
+    },
+    {
+        emoji: '🏁',
+        desc: '利用所有技巧 <span class="highlight">抵達終點</span>',
+        sub: '碎片會補充能量，大膽嘗試！'
+    }
+];
+
+function updateTutorial() {
+    if (G.tutorialDone) return;
+    const step = tutorialSteps[G.tutorialStep] || tutorialSteps[0];
+    tEmoji.textContent = step.emoji;
+    tDesc.innerHTML = step.desc;
+    tSub.textContent = step.sub;
+    if (G.tutorialStep >= tutorialSteps.length - 1) {
+        tNextBtn.textContent = '開始挑戰 🎯';
+    } else {
+        tNextBtn.textContent = '下一步 →';
+    }
+}
+
+function nextTutorial() {
+    if (G.tutorialStep < tutorialSteps.length - 1) {
+        G.tutorialStep++;
+        updateTutorial();
+    } else {
+        // 完成教學
+        G.tutorialDone = true;
+        tutorialOverlay.classList.add('hidden');
+    }
+}
+
+// ---- 繪圖 ----
+function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // ---- 背景 ----
+    const grad = ctx.createRadialGradient(W/2, H/2, 50, W/2, H/2, 350);
+    grad.addColorStop(0, '#1a2533');
+    grad.addColorStop(1, '#0a0f16');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // ---- 坍縮裂縫 ----
+    if (G.collapse > 0.05) {
+        const alpha = G.collapse * 0.35;
+        ctx.fillStyle = `rgba(40, 0, 60, ${alpha})`;
+        const size = 80 + G.collapse * 200;
+        ctx.beginPath();
+        ctx.arc(W/2, H/2, size, 0, Math.PI * 2);
+        ctx.fill();
+        // 裂縫邊緣
+        ctx.strokeStyle = `rgba(120, 60, 180, ${G.collapse * 0.2})`;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 10]);
+        ctx.beginPath();
+        ctx.arc(W/2, H/2, size * 0.6, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    // ---- 網格 (低多邊形感) ----
+    ctx.strokeStyle = 'rgba(60, 120, 140, 0.06)';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i < 20; i++) {
+        const p1 = project(i * 18, 0, 0);
+        const p2 = project(i * 18, 160, 0);
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+    }
+    for (let i = 0; i < 20; i++) {
+        const p1 = project(0, i * 18, 0);
+        const p2 = project(300, i * 18, 0);
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+    }
+
+    // ---- 平台 ----
+    for (const pl of G.platforms) {
+        const corners = [
+            project(pl.x - pl.w/2, pl.z - pl.d/2, pl.h),
+            project(pl.x + pl.w/2, pl.z - pl.d/2, pl.h),
+            project(pl.x + pl.w/2, pl.z + pl.d/2, pl.h),
+            project(pl.x - pl.w/2, pl.z + pl.d/2, pl.h),
+        ];
+        // 頂面
+        ctx.beginPath();
+        ctx.moveTo(corners[0].x, corners[0].y);
+        for (let i = 1; i < 4; i++) ctx.lineTo(corners[i].x, corners[i].y);
+        ctx.closePath();
+        ctx.fillStyle = pl.color || '#3a5a5a';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(150, 220, 210, 0.15)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // 側面 (簡單)
+        const hOff = 6;
+        for (let i = 0; i < 4; i++) {
+            const j = (i + 1) % 4;
+            const p1 = corners[i], p2 = corners[j];
+            const p1b = project(
+                (i === 0 || i === 3) ? pl.x - pl.w/2 : pl.x + pl.w/2,
+                (i < 2) ? pl.z - pl.d/2 : pl.z + pl.d/2,
+                pl.h - hOff
+            );
+            const p2b = project(
+                (j === 0 || j === 3) ? pl.x - pl.w/2 : pl.x + pl.w/2,
+                (j < 2) ? pl.z - pl.d/2 : pl.z + pl.d/2,
+                pl.h - hOff
+            );
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.lineTo(p2b.x, p2b.y);
+            ctx.lineTo(p1b.x, p1b.y);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(30, 50, 60, 0.3)';
+            ctx.fill();
+        }
+    }
+
+    // ---- 視覺碎片 ----
+    for (const f of G.fragments) {
+        if (!f.active) continue;
+        const pos = project(f.x, f.z, 4);
+        // 發光
+        const grad2 = ctx.createRadialGradient(pos.x, pos.y, 2, pos.x, pos.y, 22);
+        grad2.addColorStop(0, f.color + 'cc');
+        grad2.addColorStop(1, f.color + '00');
+        ctx.fillStyle = grad2;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 22, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowColor = f.color;
+        ctx.shadowBlur = 30;
+        ctx.fillStyle = f.color;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, f.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // 內部菱形
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y - 6);
+        ctx.lineTo(pos.x + 5, pos.y);
+        ctx.lineTo(pos.x, pos.y + 6);
+        ctx.lineTo(pos.x - 5, pos.y);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    // ---- 終點 ----
+    const gPos = project(G.goal.x, G.goal.z, 2);
+    ctx.fillStyle = 'rgba(255, 215, 100, 0.12)';
+    ctx.beginPath();
+    ctx.arc(gPos.x, gPos.y, 28, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffdd66';
+    ctx.shadowColor = '#ffdd66';
+    ctx.shadowBlur = 25;
+    ctx.font = '26px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('✦', gPos.x, gPos.y - 2);
+    ctx.shadowBlur = 0;
+
+    // ---- 殘影 ----
+    if (G.shadow) {
+        const sPos = project(G.shadow.x, G.shadow.z, 2);
+        ctx.fillStyle = 'rgba(100, 100, 255, 0.25)';
+        ctx.shadowColor = '#6666ff';
+        ctx.shadowBlur = 30;
+        ctx.beginPath();
+        ctx.arc(sPos.x, sPos.y, 16, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(130, 130, 255, 0.4)';
+        ctx.beginPath();
+        ctx.arc(sPos.x, sPos.y, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(200, 200, 255, 0.5)';
+        ctx.font = '14px sans-serif';
+        ctx.fillText('⟡', sPos.x, sPos.y + 2);
+    }
+
+    // ---- 玩家 ----
+    const p = G.player;
+    const pp = project(p.x, p.z, p.y + 4);
+    // 陰影
+    const pShadow = project(p.x, p.z, 0);
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.beginPath();
+    ctx.ellipse(pShadow.x, pShadow.y + 4, 14, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 本體 (低多邊形風格)
+    ctx.shadowColor = '#88ffee';
+    ctx.shadowBlur = 20;
+    // 身體
+    ctx.fillStyle = '#66ddcc';
+    ctx.beginPath();
+    ctx.moveTo(pp.x, pp.y - 16);
+    ctx.lineTo(pp.x + 12, pp.y - 4);
+    ctx.lineTo(pp.x + 8, pp.y + 10);
+    ctx.lineTo(pp.x - 8, pp.y + 10);
+    ctx.lineTo(pp.x - 12, pp.y - 4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // 眼睛
+    ctx.fillStyle = '#0a1a1a';
+    ctx.fillRect(pp.x - 7, pp.y - 8, 4, 4);
+    ctx.fillRect(pp.x + 3, pp.y - 8, 4, 4);
+    // 發光點
+    ctx.fillStyle = '#88ffee';
+    ctx.fillRect(pp.x - 5, pp.y - 10, 2, 2);
+    ctx.fillRect(pp.x + 5, pp.y - 10, 2, 2);
+
+    // 蓄力圈
+    if (G.charging) {
+        const power = G.chargePower;
+        const r = 16 + power * 28;
+        ctx.strokeStyle = `rgba(200, 255, 240, ${0.3 + power * 0.5})`;
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#88ffee';
+        ctx.shadowBlur = 30;
+        ctx.beginPath();
+        ctx.arc(pp.x, pp.y, r, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        // 內部填充
+        ctx.fillStyle = `rgba(100, 255, 220, ${power * 0.08})`;
+        ctx.beginPath();
+        ctx.arc(pp.x, pp.y, r * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // ---- 粒子 ----
+    for (const pt of particles) {
+        const pos = project(pt.x, pt.z, 2 + Math.random() * 4);
+        ctx.globalAlpha = pt.life;
+        ctx.fillStyle = pt.color;
+        ctx.shadowColor = pt.color;
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, pt.size * pt.life * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        pt.x += pt.vx * 0.04;
+        pt.z += pt.vz * 0.04;
+        pt.life -= 0.025;
+    }
+    particles = particles.filter(p => p.life > 0);
+    ctx.globalAlpha = 1;
+
+    // ---- 操作提示 (HUD 文字) ----
+    if (!G.tutorialDone && G.tutorialStep < 4) {
+        ctx.fillStyle = 'rgba(150, 220, 210, 0.15)';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('👆 左半移動', 12, H - 70);
+        ctx.fillText('⟳ 右下旋轉', 12, H - 52);
+        ctx.fillText('⚡ 角色上蓄力', 12, H - 34);
+        ctx.fillText('⟡ 點能量條回溯', 12, H - 16);
+    }
+
+    // 視角顯示
+    ctx.fillStyle = 'rgba(150, 200, 200, 0.15)';
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'top';
+    ctx.fillText(`${G.viewAngle}°`, W - 12, 12);
+
+    // ---- 視角動畫 ----
+    if (G.animatingAngle) {
+        G.angleProgress += 0.06;
+        if (G.angleProgress >= 1) {
+            G.angleProgress = 1;
+            G.animatingAngle = false;
+            G.viewAngle = G.endAngle;
+        } else {
+            // 緩動
+            const t = G.angleProgress;
+            const ease = t < 0.5 ? 2*t*t : -1 + (4-2*t)*t;
+            G.viewAngle = G.startAngle + (G.endAngle - G.startAngle) * ease;
+        }
+    }
+}
+
+// ---- 遊戲迴圈 ----
+function gameLoop() {
+    if (!G.gameComplete) {
+        updatePlayer();
+    }
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+// ---- 觸控事件 ----
+let activeTouches = {};
+
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const touches = e.touches;
+    for (const t of touches) {
+        activeTouches[t.identifier] = { x: t.clientX, y: t.clientY };
+    }
+
+    // 兩指旋轉
+    if (touches.length >= 2) {
+        const t1 = touches[0], t2 = touches[1];
+        const dx = t2.clientX - t1.clientX;
+        const dy = t2.clientY - t1.clientY;
+        G.pinchStartDist = Math.hypot(dx, dy);
+        G.pinchStartAngle = Math.atan2(dy, dx);
+        G.pinchTouchIds = [t1.identifier, t2.identifier];
+        return;
+    }
+
+    // 單指：判斷在左半還是角色上
+    const t = touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const x = (t.clientX - rect.left) / rect.width * W;
+    const y = (t.clientY - rect.top) / rect.height * H;
+
+    // 檢查是否在角色身上 (蓄力)
+    const pp = project(G.player.x, G.player.z, G.player.y + 4);
+    const dist = Math.hypot(x - pp.x, y - pp.y);
+    if (dist < 50 && !G.isLaunching && G.tutorialDone) {
+        G.isCharging = true;
+        G.charging = true;
+        G.chargeTouchId = t.identifier;
+        G.chargeStartY = y;
+        G.chargePower = 0;
+        return;
+    }
+
+    // 左半屏移動
+    if (x < W * 0.5) {
+        G.isMoving = true;
+        G.moveStartX = x;
+        G.moveStartY = y;
+        G.touchId = t.identifier;
+        // 教學
+        if (G.tutorialStep === 0 && !G.tutorialDone) {
+            G.tutorialStep = 1;
+            updateTutorial();
+        }
+    }
+});
+
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const touches = e.touches;
+
+    // 兩指旋轉
+    if (touches.length >= 2 && G.pinchTouchIds.length === 2) {
+        const t1 = touches[0], t2 = touches[1];
+        const dx = t2.clientX - t1.clientX;
+        const dy = t2.clientY - t1.clientY;
+        const dist = Math.hypot(dx, dy);
+        const angle = Math.atan2(dy, dx);
+        if (G.pinchStartDist > 0) {
+            const deltaAngle = (angle - G.pinchStartAngle) * 180 / Math.PI;
+            if (Math.abs(deltaAngle) > 12) {
+                const snap = deltaAngle > 0 ? 45 : -45;
+                rotateView(snap);
+                G.pinchStartAngle = angle;
+                G.pinchStartDist = dist;
+                if (G.tutorialStep === 1 && !G.tutorialDone) {
+                    G.tutorialStep = 2;
+                    updateTutorial();
+                }
+            }
+        }
+        return;
+    }
+
+    // 蓄力
+    if (G.isCharging && G.chargeTouchId !== null) {
+        const t = Array.from(touches).find(tc => tc.identifier === G.chargeTouchId);
+        if (t) {
+            const rect = canvas.getBoundingClientRect();
+            const y = (t.clientY - rect.top) / rect.height * H;
+            const delta = (G.chargeStartY - y) / 80;
+            G.chargePower = Math.max(0, Math.min(1, delta));
+            // 能量消耗
+            if (G.chargePower > 0.1) {
+                G.energy = Math.max(0, G.energy - 0.002);
+                updateEnergyUI();
+            }
+        }
+        return;
+    }
+
+    // 移動
+    if (G.isMoving && G.touchId !== null) {
+        const t = Array.from(touches).find(tc => tc.identifier === G.touchId);
+        if (t) {
+            const rect = canvas.getBoundingClientRect();
+            const x = (t.clientX - rect.left) / rect.width * W;
+            const y = (t.clientY - rect.top) / rect.height * H;
+            const dx = (x - G.moveStartX) * 2.2;
+            const dy = (y - G.moveStartY) * 1.8;
+            const p = G.player;
+            if (!G.isLaunching) {
+                p.x += dx * 0.3;
+                p.z += dy * 0.3;
+                p.x = Math.max(8, Math.min(W/0.9 - 8, p.x));
+                p.z = Math.max(8, Math.min(H/0.6 - 8, p.z));
+                // 自動貼地
+                const gh = getGroundHeight(p.x, p.z);
+                if (gh > -50 && p.onGround) {
+                    p.y = gh;
+                }
+            }
+            G.moveStartX = x;
+            G.moveStartY = y;
+        }
+    }
+});
+
+canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    const touches = e.touches;
+
+    // 兩指結束
+    if (G.pinchTouchIds.length > 0) {
+        const remaining = Array.from(touches).map(t => t.identifier);
+        G.pinchTouchIds = G.pinchTouchIds.filter(id => remaining.includes(id));
+        if (G.pinchTouchIds.length < 2) {
+            G.pinchStartDist = 0;
+        }
+        return;
+    }
+
+    // 蓄力釋放
+    if (G.isCharging && G.chargeTouchId !== null) {
+        if (G.chargePower > 0.15) {
+            launchPlayer(G.chargePower);
+        }
+        G.isCharging = false;
+        G.charging = false;
+        G.chargePower = 0;
+        G.chargeTouchId = null;
+        // 教學推進
+        if (G.tutorialStep === 2 && !G.tutorialDone) {
+            // 等待碎片拾取觸發下一步
+        }
+        return;
+    }
+
+    // 移動結束
+    if (G.touchId !== null) {
+        const remaining = Array.from(touches).map(t => t.identifier);
+        if (!remaining.includes(G.touchId)) {
+            G.isMoving = false;
+            G.touchId = null;
+        }
+    }
+});
+
+// 殘影回溯 (點擊能量條)
+document.getElementById('energyBar').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (G.tutorialDone || G.tutorialStep >= 3) {
+        doShadow();
+    }
+});
+
+// 旋轉按鈕
+rotateBtn.addEventListener('click', () => {
+    rotateView(45);
+    if (G.tutorialStep === 1 && !G.tutorialDone) {
+        G.tutorialStep = 2;
+        updateTutorial();
+    }
+});
+
+// 教學按鈕
+tNextBtn.addEventListener('click', nextTutorial);
+tSkipBtn.addEventListener('click', () => {
+    G.tutorialDone = true;
+    G.tutorialStep = 4;
+    tutorialOverlay.classList.add('hidden');
+});
+
+// 重新開始
+restartBtn.addEventListener('click', () => {
+    completeOverlay.classList.remove('show');
+    initLevel();
+    G.tutorialDone = true;
+    G.tutorialStep = 4;
+    tutorialOverlay.classList.add('hidden');
+    updateEnergyUI();
+});
+
+// ---- 初始化 ----
+initLevel();
+updateTutorial();
+gameLoop();
+
+// 防止頁面滾動
+document.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
+</script>
+</body>
+</html>
