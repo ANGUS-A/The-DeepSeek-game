@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>文件加密/解密 - 纯原生版</title>
+    <style>
+        /* 样式和之前一样，为了节省字数此处省略，直接复制上面那个HTML的style部分 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, sans-serif;
+            background: #0f0f1a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .app {
+            width: 1300px;
+            max-width: 100%;
+            background: #1a1a2e;
+            border-radius: 32px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+        h1 {
+            text-align: center;
+            color: #e0e0ff;
+            font-weight: 300;
+            letter-spacing: 4px;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #8888aa;
+            font-size: 14px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid #2a2a44;
+            padding-bottom: 16px;
+        }
+        .columns {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        .column {
+            flex: 1;
+            min-width: 280px;
+            background: #12121f;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid #2a2a48;
+            display: flex;
+            flex-direction: column;
+        }
+        .column:hover {
+            border-color: #4a4a7a;
+        }
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            color: #c0c0e6;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        .column-header .badge {
+            font-size: 12px;
+            background: #2a2a50;
+            padding: 2px 12px;
+            border-radius: 30px;
+            color: #8888cc;
+            font-weight: 400;
+        }
+        .drop-zone {
+            border: 2px dashed #3a3a66;
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            color: #6666aa;
+            transition: background 0.3s, border-color 0.3s;
+            cursor: pointer;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 220px;
+        }
+        .drop-zone.dragover {
+            background: #1a1a3a;
+            border-color: #7a7aff;
+        }
+        .drop-zone .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .drop-zone .hint {
+            font-size: 14px;
+            color: #555588;
+        }
+        .drop-zone .file-name {
+            margin-top: 10px;
+            color: #a0a0dd;
+            font-size: 14px;
+            word-break: break-all;
+            background: #0a0a18;
+            padding: 4px 14px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        .key-area {
+            margin-top: 14px;
+            background: #0a0a18;
+            border-radius: 12px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #2a2a4a;
+        }
+        .key-area input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #c0c0ee;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            outline: none;
+            padding: 4px 0;
+            width: 0;
+        }
+        .key-area button {
+            background: #2a2a5a;
+            border: none;
+            color: #aaaadd;
+            padding: 4px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .key-area button:hover {
+            background: #3a3a7a;
+            color: #fff;
+        }
+        .action-btn {
+            margin-top: 14px;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #fff;
+            background: #2a2a5a;
+        }
+        .action-btn:hover:not(:disabled) {
+            transform: scale(1.02);
+            filter: brightness(1.2);
+        }
+        .action-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .action-btn.encrypt-btn {
+            background: #4a4a9a;
+        }
+        .action-btn.encrypt-btn:hover:not(:disabled) {
+            background: #5a5aba;
+        }
+        .action-btn.decrypt-btn {
+            background: #7a4a8a;
+        }
+        .action-btn.decrypt-btn:hover:not(:disabled) {
+            background: #9a5aaa;
+        }
+        .download-row {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .download-row button {
+            flex: 1;
+            background: #1a1a3a;
+            border: 1px solid #3a3a6a;
+            color: #8888bb;
+            padding: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .download-row button:hover:not(:disabled) {
+            background: #2a2a5a;
+            color: #ddd;
+            border-color: #5a5aaa;
+        }
+        .download-row button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #6666aa;
+            text-align: center;
+            min-height: 20px;
+        }
+        .status.success {
+            color: #66cc88;
+        }
+        .status.error {
+            color: #cc6677;
+        }
+        @media (max-width: 700px) {
+            .app {
+                padding: 16px;
+            }
+            .columns {
+                flex-direction: column;
+            }
+            .drop-zone {
+                min-height: 150px;
+                padding: 24px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <h1>🔐 文件加密 · 解密</h1>
+    <div class="subtitle">纯浏览器原生加密 (AES-GCM) · 无需任何外部库</div>
+
+    <div class="columns">
+
+        <!-- ===== 左栏：加密 ===== -->
+        <div class="column">
+            <div class="column-header">
+                <span>📦 加密</span>
+                <span class="badge">拖入文件 → 生成 .enc + 密钥</span>
+            </div>
+
+            <div class="drop-zone" id="encryptDrop">
+                <div class="icon">📄</div>
+                <div class="hint">拖拽文件到此处，或点击选择</div>
+                <div class="file-name" id="encryptFileName">未选择文件</div>
+                <input type="file" id="encryptFileInput" style="display:none;" />
+            </div>
+
+            <div class="key-area">
+                <span style="color:#6666aa;font-size:13px;">🔑 密钥</span>
+                <input type="text" id="encryptKeyOutput" readonly placeholder="加密后生成..." />
+                <button id="copyKeyBtn">复制</button>
+            </div>
+
+            <button class="action-btn encrypt-btn" id="encryptBtn" disabled>🔒 加密文件</button>
+
+            <div class="download-row">
+                <button id="downloadEncryptedBtn" disabled>⬇ 下载 .enc</button>
+                <button id="downloadKeyBtn" disabled>⬇ 下载 密钥.txt</button>
+            </div>
+
+            <div class="status" id="encryptStatus">等待操作...</div>
+        </div>
+
+        <!-- ===== 右栏：解密 ===== -->
+        <div class="column">
+            <div class="column-header">
+                <span>🔓 解密</span>
+                <span class="badge">拖入 .enc → 输入密钥 → 还原</span>
+            </div>
+
+            <div class="drop-zone" id="decryptDrop">
+                <div class="icon">🔐</div>
+                <div class="hint">拖拽 .enc 文件到此处，或点击选择</div>
+                <div class="file-name" id="decryptFileName">未选择文件</div>
+                <input type="file" id="decryptFileInput" style="display:none;" />
+            </div>
+
+            <div class="key-area">
+                <span style="color:#6666aa;font-size:13px;">🔑 密钥</span>
+                <input type="text" id="decryptKeyInput" placeholder="粘贴加密时生成的密钥..." />
+                <button id="pasteKeyBtn">粘贴</button>
+            </div>
+
+            <button class="action-btn decrypt-btn" id="decryptBtn" disabled>🔓 解密文件</button>
+
+            <div class="download-row">
+                <button id="downloadDecryptedBtn" disabled>⬇ 下载 还原文件</button>
+            </div>
+
+            <div class="status" id="decryptStatus">等待操作...</div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    (function() {
+        'use strict';
+
+        // ===== DOM引用 =====
+        const encryptDrop = document.getElementById('encryptDrop');
+        const encryptInput = document.getElementById('encryptFileInput');
+        const encryptFileName = document.getElementById('encryptFileName');
+        const encryptKeyOutput = document.getElementById('encryptKeyOutput');
+        const encryptBtn = document.getElementById('encryptBtn');
+        const downloadEncryptedBtn = document.getElementById('downloadEncryptedBtn');
+        const downloadKeyBtn = document.getElementById('downloadKeyBtn');
+        const encryptStatus = document.getElementById('encryptStatus');
+        const copyKeyBtn = document.getElementById('copyKeyBtn');
+
+        const decryptDrop = document.getElementById('decryptDrop');
+        const decryptInput = document.getElementById('decryptFileInput');
+        const decryptFileName = document.getElementById('decryptFileName');
+        const decryptKeyInput = document.getElementById('decryptKeyInput');
+        const decryptBtn = document.getElementById('decryptBtn');
+        const downloadDecryptedBtn = document.getElementById('downloadDecryptedBtn');
+        const decryptStatus = document.getElementById('decryptStatus');
+        const pasteKeyBtn = document.getElementById('pasteKeyBtn');
+
+        // ===== 状态 =====
+        let encryptFileData = null;      // ArrayBuffer
+        let encryptFileNameStr = '';
+        let currentEncryptKey = '';      // Base64 密钥
+        let encryptedFileBlob = null;    // 加密后的完整数据 (包含iv+密文)
+
+        let decryptFileData = null;      // ArrayBuffer
+        let decryptFileNameStr = '';
+
+        // ===== 工具 =====
+
+        function arrayBufferToBase64(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            for (let i = 0; i < bytes.length; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
+        }
+
+        function base64ToArrayBuffer(base64) {
+            const binary = atob(base64);
+            const len = binary.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function setStatus(el, msg, type) {
+            el.textContent = msg;
+            el.className = 'status' + (type ? ' ' + type : '');
+        }
+
+        function downloadBlob(blob, fileName) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        // ===== 加密核心 (AES-GCM, 使用 Web Crypto API) =====
+
+        async function encryptWithAES(dataArrayBuffer, keyBase64) {
+            // 解码密钥
+            const keyBytes = new Uint8Array(base64ToArrayBuffer(keyBase64));
+            const cryptoKey = await crypto.subtle.importKey(
+                'raw',
+                keyBytes,
+                { name: 'AES-GCM' },
+                false,
+                ['encrypt']
+            );
+
+            // 生成随机 IV (12字节)
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+
+            // 加密
+            const encrypted = await crypto.subtle.encrypt(
+                { name: 'AES-GCM', iv: iv },
+                cryptoKey,
+                dataArrayBuffer
+            );
+
+            // 拼接: iv (12字节) + 密文
+            const result = new Uint8Array(iv.length + encrypted.byteLength);
+            result.set(iv, 0);
+            result.set(new Uint8Array(encrypted), iv.length);
+            return result;
+        }
+
+        async function decryptWithAES(encryptedArrayBuffer, keyBase64) {
+            const encryptedBytes = new Uint8Array(encryptedArrayBuffer);
+
+            // 提取 IV (前12字节)
+            const iv = encryptedBytes.slice(0, 12);
+            const ciphertext = encryptedBytes.slice(12);
+
+            // 解码密钥
+            const keyBytes = new Uint8Array(base64ToArrayBuffer(keyBase64));
+            const cryptoKey = await crypto.subtle.importKey(
+                'raw',
+                keyBytes,
+                { name: 'AES-GCM' },
+                false,
+                ['decrypt']
+            );
+
+            // 解密
+            const decrypted = await crypto.subtle.decrypt(
+                { name: 'AES-GCM', iv: iv },
+                cryptoKey,
+                ciphertext
+            );
+            return decrypted;
+        }
+
+        // ===== 生成随机密钥 (32字节, Base64) =====
+
+        function generateKey() {
+            const bytes = crypto.getRandomValues(new Uint8Array(32));
+            return arrayBufferToBase64(bytes);
+        }
+
+        // ===== 加密流程 =====
+
+        function handleEncryptFile(file) {
+            encryptFileNameStr = file.name;
+            encryptFileName.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                encryptFileData = e.target.result;
+                encryptBtn.disabled = false;
+                setStatus(encryptStatus, '✅ 文件已加载，点击加密', 'success');
+            };
+            reader.onerror = function() {
+                setStatus(encryptStatus, '❌ 读取文件失败', 'error');
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        encryptBtn.addEventListener('click', async function() {
+            if (!encryptFileData) {
+                setStatus(encryptStatus, '⚠️ 请先选择文件', 'error');
+                return;
+            }
+
+            try {
+                setStatus(encryptStatus, '⏳ 加密中...', '');
+                encryptBtn.disabled = true;
+
+                // 生成密钥
+                const key = generateKey();
+                currentEncryptKey = key;
+                encryptKeyOutput.value = key;
+
+                // 加密
+                const encryptedBytes = await encryptWithAES(encryptFileData, key);
+                encryptedFileBlob = new Blob([encryptedBytes], { type: 'application/octet-stream' });
+
+                downloadEncryptedBtn.disabled = false;
+                downloadKeyBtn.disabled = false;
+                setStatus(encryptStatus, '✅ 加密完成！可下载 .enc 和密钥', 'success');
+            } catch (err) {
+                console.error(err);
+                setStatus(encryptStatus, '❌ 加密失败: ' + err.message, 'error');
+            } finally {
+                encryptBtn.disabled = false;
+            }
+        });
+
+        downloadEncryptedBtn.addEventListener('click', function() {
+            if (!encryptedFileBlob) return;
+            const baseName = encryptFileNameStr.replace(/\.[^.]+$/, '') || 'file';
+            downloadBlob(encryptedFileBlob, baseName + '.enc');
+        });
+
+        downloadKeyBtn.addEventListener('click', function() {
+            if (!currentEncryptKey) return;
+            const blob = new Blob([currentEncryptKey], { type: 'text/plain' });
+            downloadBlob(blob, '密钥.txt');
+        });
+
+        copyKeyBtn.addEventListener('click', function() {
+            if (!currentEncryptKey) {
+                setStatus(encryptStatus, '⚠️ 请先加密生成密钥', 'error');
+                return;
+            }
+            navigator.clipboard.writeText(currentEncryptKey).then(() => {
+                setStatus(encryptStatus, '✅ 密钥已复制到剪贴板', 'success');
+            }).catch(() => {
+                encryptKeyOutput.select();
+                document.execCommand('copy');
+                setStatus(encryptStatus, '✅ 密钥已复制', 'success');
+            });
+        });
+
+        // ===== 解密流程 =====
+
+        function handleDecryptFile(file) {
+            if (!file.name.endsWith('.enc')) {
+                setStatus(decryptStatus, '⚠️ 请拖入 .enc 加密文件', 'error');
+                return;
+            }
+            decryptFileNameStr = file.name;
+            decryptFileName.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                decryptFileData = e.target.result;
+                decryptBtn.disabled = false;
+                setStatus(decryptStatus, '✅ .enc 文件已加载，输入密钥后点击解密', 'success');
+            };
+            reader.onerror = function() {
+                setStatus(decryptStatus, '❌ 读取文件失败', 'error');
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        decryptBtn.addEventListener('click', async function() {
+            if (!decryptFileData) {
+                setStatus(decryptStatus, '⚠️ 请先拖入 .enc 文件', 'error');
+                return;
+            }
+            const key = decryptKeyInput.value.trim();
+            if (!key) {
+                setStatus(decryptStatus, '⚠️ 请粘贴密钥', 'error');
+                return;
+            }
+            // 验证密钥格式
+            try {
+                atob(key);
+                if (key.length < 32) throw new Error('密钥太短');
+            } catch {
+                setStatus(decryptStatus, '⚠️ 密钥格式无效，请检查', 'error');
+                return;
+            }
+
+            try {
+                setStatus(decryptStatus, '⏳ 解密中...', '');
+                decryptBtn.disabled = true;
+
+                const decrypted = await decryptWithAES(decryptFileData, key);
+                window._decryptedData = decrypted;
+                window._decryptedName = decryptFileNameStr.replace(/\.enc$/i, '') || '还原文件';
+
+                downloadDecryptedBtn.disabled = false;
+                setStatus(decryptStatus, '✅ 解密成功！点击下载还原文件', 'success');
+            } catch (err) {
+                console.error(err);
+                setStatus(decryptStatus, '❌ 解密失败: 密钥错误或文件损坏', 'error');
+            } finally {
+                decryptBtn.disabled = false;
+            }
+        });
+
+        downloadDecryptedBtn.addEventListener('click', function() {
+            if (!window._decryptedData) return;
+            const blob = new Blob([window._decryptedData], { type: 'application/octet-stream' });
+            const name = window._decryptedName || '还原文件';
+            downloadBlob(blob, name);
+        });
+
+        pasteKeyBtn.addEventListener('click', async function() {
+            try {
+                const text = await navigator.clipboard.readText();
+                decryptKeyInput.value = text;
+                setStatus(decryptStatus, '✅ 已从剪贴板粘贴密钥', 'success');
+            } catch {
+                setStatus(decryptStatus, '⚠️ 无法读取剪贴板，请手动粘贴', 'error');
+            }
+        });
+
+        // ===== 拖拽事件 =====
+
+        [encryptDrop, encryptInput].forEach(el => {
+            if (el === encryptInput) {
+                el.addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        handleEncryptFile(this.files[0]);
+                    }
+                    this.value = '';
+                });
+                return;
+            }
+            el.addEventListener('dragover', function(e) { e.preventDefault(); this.classList.add('dragover'); });
+            el.addEventListener('dragleave', function(e) { e.preventDefault(); this.classList.remove('dragover'); });
+            el.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) handleEncryptFile(e.dataTransfer.files[0]);
+            });
+            el.addEventListener('click', function() { encryptInput.click(); });
+        });
+
+        [decryptDrop, decryptInput].forEach(el => {
+            if (el === decryptInput) {
+                el.addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        handleDecryptFile(this.files[0]);
+                    }
+                    this.value = '';
+                });
+                return;
+            }
+            el.addEventListener('dragover', function(e) { e.preventDefault(); this.classList.add('dragover'); });
+            el.addEventListener('dragleave', function(e) { e.preventDefault(); this.classList.remove('dragover'); });
+            el.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) handleDecryptFile(e.dataTransfer.files[0]);
+            });
+            el.addEventListener('click', function() { decryptInput.click(); });
+        });
+
+        console.log('🔐 纯原生加密工具已启动 (AES-GCM)');
+    })();
+</script>
+
+</body>
+</html>
