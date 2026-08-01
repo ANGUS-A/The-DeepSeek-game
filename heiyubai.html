@@ -1,0 +1,732 @@
+[deepseek_html_20260801_32158c.html](https://github.com/user-attachments/files/30612353/deepseek_html_20260801_32158c.html)
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>黑與白 · 雙搖杆射擊</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            margin: 0;
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: none;  /* 防止雙擊縮放 */
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            z-index: 10;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .screen.active {
+            display: flex;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 10vw, 4rem);
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+            border-bottom: 4px solid #ffffff;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: clamp(0.9rem, 3vw, 1.4rem);
+            color: #aaaaaa;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .btn {
+            background: #000000;
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            padding: 12px 30px;
+            font-size: clamp(1rem, 3vw, 1.4rem);
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: 0.2s;
+            margin: 8px;
+            touch-action: manipulation;
+        }
+        .btn:hover, .btn:active {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        #game-container {
+            position: relative;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+        #game-container.active {
+            display: flex;
+        }
+
+        #ui-bar {
+            position: absolute;
+            top: 10px;
+            width: 90%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-around;
+            font-size: clamp(12px, 2.5vw, 18px);
+            font-weight: bold;
+            letter-spacing: 2px;
+            z-index: 5;
+            background: rgba(0,0,0,0.7);
+            padding: 6px 0;
+            border-bottom: 1px solid #333;
+            backdrop-filter: blur(2px);
+            border-radius: 4px;
+        }
+        .highlight {
+            color: #ffffff;
+            border-bottom: 1px solid #ffffff;
+        }
+
+        canvas {
+            background: #000000;
+            border: 2px solid #ffffff;
+            display: block;
+            touch-action: none;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        #mobile-controls {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            display: none;
+            z-index: 6;
+            touch-action: none;
+        }
+        .joystick-base {
+            position: absolute;
+            width: clamp(90px, 18vw, 140px);
+            height: clamp(90px, 18vw, 140px);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            pointer-events: auto;
+            transform: translate(-50%, -50%);
+            touch-action: none;
+        }
+        .joystick-stick {
+            position: absolute;
+            width: clamp(36px, 7vw, 56px);
+            height: clamp(36px, 7vw, 56px);
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        #roll-btn-mobile {
+            position: absolute;
+            width: clamp(60px, 12vw, 80px);
+            height: clamp(60px, 12vw, 80px);
+            border: 2px solid #ffffff;
+            background: rgba(0,0,0,0.6);
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(10px, 2vw, 16px);
+            font-weight: bold;
+            pointer-events: auto;
+            letter-spacing: 1px;
+            transform: translate(-50%, -50%);
+            touch-action: manipulation;
+        }
+        #roll-btn-mobile:active {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        /* 小螢幕時調整搖桿位置 */
+        @media (max-width: 600px) {
+            .joystick-base {
+                width: 100px;
+                height: 100px;
+            }
+            .joystick-stick {
+                width: 42px;
+                height: 42px;
+            }
+            #roll-btn-mobile {
+                width: 64px;
+                height: 64px;
+                font-size: 12px;
+            }
+        }
+        @media (max-width: 400px) {
+            .joystick-base {
+                width: 80px;
+                height: 80px;
+            }
+            .joystick-stick {
+                width: 34px;
+                height: 34px;
+            }
+            #roll-btn-mobile {
+                width: 54px;
+                height: 54px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen" class="screen active">
+        <h1>黑與白</h1>
+        <p>HIGH SCORE: <span id="menu-highscore">0</span></p>
+        <button class="btn" onclick="goToModeSelect()">START GAME</button>
+    </div>
+
+    <div id="mode-screen" class="screen">
+        <h1>SELECT MODE</h1>
+        <p>請選擇您的遊玩控制方式</p>
+        <button class="btn" onclick="startGame('mobile')">手機雙搖桿模式</button>
+        <button class="btn" onclick="startGame('pc')">鍵盤滑鼠模式</button>
+        <br>
+        <button class="btn" style="font-size: 0.9rem; padding: 10px 20px;" onclick="backToMain()">BACK</button>
+    </div>
+
+    <div id="game-container">
+        <div id="ui-bar">
+            <div>HP: <span id="hp-display" class="highlight">100</span></div>
+            <div>SCORE: <span id="score-display" class="highlight">0</span></div>
+            <div>DASH: <span id="cd-display" class="highlight">READY</span></div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="mobile-controls">
+            <div id="left-joystick" class="joystick-base" style="left: 15%; bottom: 18%;">
+                <div id="left-stick" class="joystick-stick"></div>
+            </div>
+            <div id="right-joystick" class="joystick-base" style="right: 15%; bottom: 18%;">
+                <div id="right-stick" class="joystick-stick"></div>
+            </div>
+            <div id="roll-btn-mobile" style="right: 15%; bottom: 42%;">DASH</div>
+        </div>
+    </div>
+
+    <div id="gameover-screen" class="screen">
+        <h1>GAME OVER</h1>
+        <p>FINAL SCORE: <span id="final-score">0</span></p>
+        <p>HIGH SCORE: <span id="final-highscore">0</span></p>
+        <button class="btn" onclick="backToMain()">CONFIRM</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 自適應尺寸
+        function resizeCanvas() {
+            const container = document.getElementById('game-container');
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            // 保持 4:3 比例，但填滿容器
+            const ratio = 4/3;
+            let width = w;
+            let height = w / ratio;
+            if (height > h) {
+                height = h;
+                width = h * ratio;
+            }
+            canvas.width = 800;
+            canvas.height = 600;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+        }
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resizeCanvas, 200);
+        });
+
+        // 螢幕切換
+        const startScreen = document.getElementById('start-screen');
+        const modeScreen = document.getElementById('mode-screen');
+        const gameContainer = document.getElementById('game-container');
+        const gameOverScreen = document.getElementById('gameover-screen');
+        const mobileControls = document.getElementById('mobile-controls');
+
+        const hpDisplay = document.getElementById('hp-display');
+        const scoreDisplay = document.getElementById('score-display');
+        const cdDisplay = document.getElementById('cd-display');
+        const menuHighscore = document.getElementById('menu-highscore');
+        const finalScore = document.getElementById('final-score');
+        const finalHighscore = document.getElementById('final-highscore');
+
+        let controlMode = 'pc';
+        let score = 0;
+        let hp = 100;
+        let isGameOver = false;
+        let highScore = localStorage.getItem('bw_highScore') || 0;
+        menuHighscore.innerText = highScore;
+
+        const player = {
+            x: 400,
+            y: 300,
+            radius: 16,
+            speed: 3.5,
+            isRolling: false,
+            rollDuration: 15,
+            rollTimer: 0,
+            rollCooldown: 0,
+            maxCooldown: 50,
+            rollSpeed: 9,
+            dx: 0,
+            dy: -1
+        };
+
+        const keys = { w: false, a: false, s: false, d: false, space: false };
+        let mousePressed = false;
+        let mouseX = 400;
+        let mouseY = 300;
+
+        let leftTouchData = { active: false, x: 0, y: 0, vx: 0, vy: 0 };
+        let rightTouchData = { active: false, x: 0, y: 0, vx: 0, vy: 0, fireTimer: 0 };
+
+        let bullets = [];
+        let enemies = [];
+        let enemySpawnTimer = 0;
+
+        function showScreen(screenEl) {
+            [startScreen, modeScreen, gameContainer, gameOverScreen].forEach(s => s.classList.remove('active'));
+            screenEl.classList.add('active');
+            if (screenEl === gameContainer) {
+                setTimeout(resizeCanvas, 50);
+            }
+        }
+
+        function goToModeSelect() {
+            showScreen(modeScreen);
+        }
+
+        function backToMain() {
+            isGameOver = true;
+            menuHighscore.innerText = localStorage.getItem('bw_highScore') || 0;
+            showScreen(startScreen);
+        }
+
+        function startGame(mode) {
+            controlMode = mode;
+            showScreen(gameContainer);
+            if (controlMode === 'mobile') {
+                mobileControls.style.display = 'block';
+            } else {
+                mobileControls.style.display = 'none';
+            }
+            resetGame();
+        }
+
+        // 防雙擊縮放 (全域)
+        document.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+
+        // 鍵盤
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'w' || e.key === 'W') keys.w = true;
+            if (e.key === 'a' || e.key === 'A') keys.a = true;
+            if (e.key === 's' || e.key === 'S') keys.s = true;
+            if (e.key === 'd' || e.key === 'D') keys.d = true;
+            if (e.code === 'Space') {
+                e.preventDefault();
+                triggerRoll();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'w' || e.key === 'W') keys.w = false;
+            if (e.key === 'a' || e.key === 'A') keys.a = false;
+            if (e.key === 's' || e.key === 'S') keys.s = false;
+            if (e.key === 'd' || e.key === 'D') keys.d = false;
+        });
+
+        // 滑鼠瞄準
+        canvas.addEventListener('mousemove', (e) => {
+            if (controlMode === 'pc') {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                mouseX = (e.clientX - rect.left) * scaleX;
+                mouseY = (e.clientY - rect.top) * scaleY;
+            }
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (controlMode === 'pc' && !isGameOver) {
+                mousePressed = true;
+                e.preventDefault();
+            }
+        });
+        window.addEventListener('mouseup', () => { mousePressed = false; });
+
+        // 觸控搖桿
+        const leftJoystick = document.getElementById('left-joystick');
+        const leftStick = document.getElementById('left-stick');
+        const rightJoystick = document.getElementById('right-joystick');
+        const rightStick = document.getElementById('right-stick');
+        const rollBtnMobile = document.getElementById('roll-btn-mobile');
+
+        function setupVirtualJoysticks() {
+            leftJoystick.addEventListener('pointerdown', (e) => {
+                leftTouchData.active = true;
+                updateLeftJoystick(e);
+                leftJoystick.setPointerCapture(e.pointerId);
+                e.preventDefault();
+            });
+            leftJoystick.addEventListener('pointermove', (e) => {
+                if (leftTouchData.active) updateLeftJoystick(e);
+                e.preventDefault();
+            });
+            leftJoystick.addEventListener('pointerup', (e) => {
+                leftTouchData.active = false;
+                leftTouchData.vx = 0;
+                leftTouchData.vy = 0;
+                leftStick.style.transform = `translate(-50%, -50%)`;
+                e.preventDefault();
+            });
+
+            rightJoystick.addEventListener('pointerdown', (e) => {
+                rightTouchData.active = true;
+                updateRightJoystick(e);
+                rightJoystick.setPointerCapture(e.pointerId);
+                e.preventDefault();
+            });
+            rightJoystick.addEventListener('pointermove', (e) => {
+                if (rightTouchData.active) updateRightJoystick(e);
+                e.preventDefault();
+            });
+            rightJoystick.addEventListener('pointerup', (e) => {
+                rightTouchData.active = false;
+                rightTouchData.vx = 0;
+                rightTouchData.vy = 0;
+                rightStick.style.transform = `translate(-50%, -50%)`;
+                e.preventDefault();
+            });
+
+            rollBtnMobile.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                triggerRoll();
+            });
+        }
+
+        function updateLeftJoystick(e) {
+            const rect = leftJoystick.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            let dx = e.clientX - centerX;
+            let dy = e.clientY - centerY;
+            const maxDist = rect.width / 2 - 6;
+
+            const dist = Math.hypot(dx, dy);
+            if (dist > maxDist) {
+                dx = (dx / dist) * maxDist;
+                dy = (dy / dist) * maxDist;
+            }
+            leftStick.style.transform = `translate(${dx - 50}%, ${dy - 50}%)`;
+            leftTouchData.vx = dx / maxDist;
+            leftTouchData.vy = dy / maxDist;
+        }
+
+        function updateRightJoystick(e) {
+            const rect = rightJoystick.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            let dx = e.clientX - centerX;
+            let dy = e.clientY - centerY;
+            const maxDist = rect.width / 2 - 6;
+
+            const dist = Math.hypot(dx, dy);
+            if (dist > maxDist) {
+                dx = (dx / dist) * maxDist;
+                dy = (dy / dist) * maxDist;
+            }
+            rightStick.style.transform = `translate(${dx - 50}%, ${dy - 50}%)`;
+            if (dist > 5) {
+                rightTouchData.vx = dx / maxDist;
+                rightTouchData.vy = dy / maxDist;
+            }
+        }
+
+        setupVirtualJoysticks();
+
+        function triggerRoll() {
+            if (!isGameOver && player.rollCooldown <= 0 && !player.isRolling) {
+                player.isRolling = true;
+                player.rollTimer = player.rollDuration;
+                player.rollCooldown = player.maxCooldown;
+            }
+        }
+
+        function fireBullet(angle) {
+            const speed = 9;
+            bullets.push({
+                x: player.x,
+                y: player.y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                radius: 4
+            });
+        }
+
+        function spawnEnemy() {
+            if (isGameOver) return;
+            const edge = Math.floor(Math.random() * 4);
+            let x, y;
+            if (edge === 0) { x = Math.random() * 800; y = -20; }
+            else if (edge === 1) { x = Math.random() * 800; y = 620; }
+            else if (edge === 2) { x = -20; y = Math.random() * 600; }
+            else { x = 820; y = Math.random() * 600; }
+
+            enemies.push({
+                x: x,
+                y: y,
+                radius: 12,
+                speed: 1.2 + Math.random() * 1.2
+            });
+        }
+
+        function resetGame() {
+            score = 0;
+            hp = 100;
+            isGameOver = false;
+            bullets = [];
+            enemies = [];
+            player.x = 400;
+            player.y = 300;
+            player.rollCooldown = 0;
+            player.isRolling = false;
+            enemySpawnTimer = 0;
+            rightTouchData.fireTimer = 0;
+            loop();
+        }
+
+        function update() {
+            if (isGameOver) return;
+
+            enemySpawnTimer++;
+            if (enemySpawnTimer > 60) {
+                spawnEnemy();
+                enemySpawnTimer = 0;
+            }
+
+            let moveX = 0;
+            let moveY = 0;
+
+            if (controlMode === 'pc') {
+                if (keys.w) moveY -= 1;
+                if (keys.s) moveY += 1;
+                if (keys.a) moveX -= 1;
+                if (keys.d) moveX += 1;
+                if (moveX !== 0 && moveY !== 0) {
+                    moveX *= 0.7071;
+                    moveY *= 0.7071;
+                }
+            } else {
+                moveX = leftTouchData.vx;
+                moveY = leftTouchData.vy;
+            }
+
+            if (moveX !== 0 || moveY !== 0) {
+                player.dx = moveX;
+                player.dy = moveY;
+            }
+
+            if (player.rollCooldown > 0) player.rollCooldown--;
+
+            let currentSpeed = player.speed;
+            if (player.isRolling) {
+                currentSpeed = player.rollSpeed;
+                player.rollTimer--;
+                if (player.rollTimer <= 0) player.isRolling = false;
+            }
+
+            if (player.isRolling) {
+                let rx = (player.dx !== 0 || player.dy !== 0) ? player.dx : 0;
+                let ry = (player.dx !== 0 || player.dy !== 0) ? player.dy : -1;
+                player.x += rx * currentSpeed;
+                player.y += ry * currentSpeed;
+            } else {
+                player.x += moveX * currentSpeed;
+                player.y += moveY * currentSpeed;
+            }
+
+            if (player.x - player.radius < 0) player.x = player.radius;
+            if (player.x + player.radius > 800) player.x = 800 - player.radius;
+            if (player.y - player.radius < 0) player.y = player.radius;
+            if (player.y + player.radius > 600) player.y = 600 - player.radius;
+
+            // 射擊
+            if (controlMode === 'pc') {
+                if (mousePressed) {
+                    const angle = Math.atan2(mouseY - player.y, mouseX - player.x);
+                    if (Math.random() < 0.35) fireBullet(angle);
+                }
+            } else {
+                if (rightTouchData.active) {
+                    rightTouchData.fireTimer++;
+                    if (rightTouchData.fireTimer % 12 === 0) {
+                        const angle = Math.atan2(rightTouchData.vy, rightTouchData.vx);
+                        fireBullet(angle);
+                    }
+                }
+            }
+
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                bullets[i].x += bullets[i].vx;
+                bullets[i].y += bullets[i].vy;
+                if (bullets[i].x < 0 || bullets[i].x > 800 || bullets[i].y < 0 || bullets[i].y > 600) {
+                    bullets.splice(i, 1);
+                }
+            }
+
+            const isInvulnerable = player.isRolling;
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const enemy = enemies[i];
+                const angle = Math.atan2(player.y - enemy.y, player.x - enemy.x);
+                enemy.x += Math.cos(angle) * enemy.speed;
+                enemy.y += Math.sin(angle) * enemy.speed;
+
+                const distToPlayer = Math.hypot(player.x - enemy.x, player.y - enemy.y);
+                if (distToPlayer < player.radius + enemy.radius) {
+                    if (!isInvulnerable) {
+                        hp -= 15;
+                        if (hp <= 0) {
+                            hp = 0;
+                            handleGameOver();
+                        }
+                    }
+                    enemies.splice(i, 1);
+                    continue;
+                }
+
+                for (let j = bullets.length - 1; j >= 0; j--) {
+                    const bullet = bullets[j];
+                    const distToBullet = Math.hypot(bullet.x - enemy.x, bullet.y - enemy.y);
+                    if (distToBullet < bullet.radius + enemy.radius) {
+                        enemies.splice(i, 1);
+                        bullets.splice(j, 1);
+                        score += 100;
+                        break;
+                    }
+                }
+            }
+
+            hpDisplay.innerText = hp;
+            scoreDisplay.innerText = score;
+            cdDisplay.innerText = player.rollCooldown === 0 ? "READY" : Math.ceil(player.rollCooldown / 10);
+        }
+
+        function handleGameOver() {
+            isGameOver = true;
+            mobileControls.style.display = 'none';
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('bw_highScore', highScore);
+            }
+            finalScore.innerText = score;
+            finalHighscore.innerText = highScore;
+            showScreen(gameOverScreen);
+        }
+
+        function draw() {
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, 800, 600);
+
+            // 玩家
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+            if (player.isRolling) {
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#000000';
+                ctx.stroke();
+            } else {
+                ctx.fillStyle = '#000000';
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+            }
+            ctx.closePath();
+
+            ctx.fillStyle = player.isRolling ? '#000000' : '#ffffff';
+            ctx.fillRect(player.x - 4, player.y - 2, 3, 3);
+            ctx.fillRect(player.x + 1, player.y - 2, 3, 3);
+
+            // 子彈
+            ctx.fillStyle = '#ffffff';
+            for (let bullet of bullets) {
+                ctx.beginPath();
+                ctx.arc(bullet.x, bullet.y, bullet.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            // 敵人
+            for (let enemy of enemies) {
+                ctx.beginPath();
+                ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#000000';
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+                ctx.closePath();
+            }
+        }
+
+        function loop() {
+            if (!isGameOver) {
+                update();
+                draw();
+                requestAnimationFrame(loop);
+            }
+        }
+
+        // 初始調整
+        resizeCanvas();
+    </script>
+</body>
+</html>
