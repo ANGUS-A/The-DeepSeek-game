@@ -261,7 +261,6 @@
             const container = document.getElementById('game-container');
             const w = container.clientWidth;
             const h = container.clientHeight;
-            // 保持 4:3 比例，但填滿容器
             const ratio = 4/3;
             let width = w;
             let height = w / ratio;
@@ -327,6 +326,9 @@
         let enemies = [];
         let enemySpawnTimer = 0;
 
+        // --- 新增：點擊射擊控制 (取消長按連射) ---
+        let clickShootPending = false;   // 標記是否要因點擊而發射
+
         function showScreen(screenEl) {
             [startScreen, modeScreen, gameContainer, gameOverScreen].forEach(s => s.classList.remove('active'));
             screenEl.classList.add('active');
@@ -356,7 +358,7 @@
             resetGame();
         }
 
-        // 防雙擊縮放 (全域)
+        // 防雙擊縮放
         document.addEventListener('dblclick', (e) => {
             e.preventDefault();
         }, { passive: false });
@@ -391,13 +393,17 @@
             }
         });
 
+        // --- 修改：滑鼠點擊只觸發單發射擊 (取消長按連射) ---
         canvas.addEventListener('mousedown', (e) => {
             if (controlMode === 'pc' && !isGameOver) {
-                mousePressed = true;
+                // 取消 mousePressed 的長按行為，改為單次點擊標記
+                // mousePressed = true;   // 不再使用長按
+                clickShootPending = true;   // 標記需要發射一發
                 e.preventDefault();
             }
         });
-        window.addEventListener('mouseup', () => { mousePressed = false; });
+        // 移除 mouseup 的處理，因為我們不需要追蹤按壓狀態
+        // window.addEventListener('mouseup', () => { mousePressed = false; });
 
         // 觸控搖桿
         const leftJoystick = document.getElementById('left-joystick');
@@ -537,6 +543,7 @@
             player.isRolling = false;
             enemySpawnTimer = 0;
             rightTouchData.fireTimer = 0;
+            clickShootPending = false;   // 重置點擊標記
             loop();
         }
 
@@ -595,13 +602,17 @@
             if (player.y - player.radius < 0) player.y = player.radius;
             if (player.y + player.radius > 600) player.y = 600 - player.radius;
 
-            // 射擊
+            // --- 修改射擊邏輯 (PC 模式) ---
             if (controlMode === 'pc') {
-                if (mousePressed) {
+                // 如果 clickShootPending 為 true，則發射一發子彈，然後清除標記
+                if (clickShootPending) {
                     const angle = Math.atan2(mouseY - player.y, mouseX - player.x);
-                    if (Math.random() < 0.35) fireBullet(angle);
+                    fireBullet(angle);
+                    clickShootPending = false;   // 只發射一發
                 }
+                // 完全移除 mousePressed 的長按判斷
             } else {
+                // 手機模式保持自動連射 (右搖桿)
                 if (rightTouchData.active) {
                     rightTouchData.fireTimer++;
                     if (rightTouchData.fireTimer % 12 === 0) {
