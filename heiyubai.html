@@ -3,27 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>黑與白 · 雙搖杆射擊</title>
+    <title>黑與白 · 技能射擊</title>
     <style>
         * {
             box-sizing: border-box;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
         }
         body {
             margin: 0;
-            background-color: #000000;
-            color: #ffffff;
+            background: #000;
+            color: #fff;
             font-family: 'Courier New', Courier, monospace;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             overflow: hidden;
-            touch-action: none;  /* 防止雙擊縮放 */
+            touch-action: none;
         }
 
+        /* ===== 通用屏幕 ===== */
         .screen {
             display: none;
             flex-direction: column;
@@ -33,9 +35,9 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            background: #000000;
+            background: #000;
             z-index: 10;
-            padding: 20px;
+            padding: 16px;
             box-sizing: border-box;
         }
         .screen.active {
@@ -45,36 +47,51 @@
         h1 {
             font-size: clamp(2rem, 10vw, 4rem);
             letter-spacing: 4px;
-            margin-bottom: 10px;
-            border-bottom: 4px solid #ffffff;
-            padding-bottom: 10px;
+            border-bottom: 4px solid #fff;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
         }
         p {
-            font-size: clamp(0.9rem, 3vw, 1.4rem);
-            color: #aaaaaa;
-            margin-bottom: 20px;
+            font-size: clamp(0.8rem, 2.5vw, 1.2rem);
+            color: #aaa;
+            margin-bottom: 12px;
             letter-spacing: 1px;
         }
-
         .btn {
-            background: #000000;
-            color: #ffffff;
-            border: 2px solid #ffffff;
-            padding: 12px 30px;
-            font-size: clamp(1rem, 3vw, 1.4rem);
-            font-family: 'Courier New', Courier, monospace;
+            background: #000;
+            color: #fff;
+            border: 2px solid #fff;
+            padding: 10px 28px;
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            font-family: inherit;
             font-weight: bold;
             cursor: pointer;
             letter-spacing: 2px;
             transition: 0.2s;
-            margin: 8px;
+            margin: 6px;
             touch-action: manipulation;
+            border-radius: 2px;
         }
-        .btn:hover, .btn:active {
-            background: #ffffff;
-            color: #000000;
+        .btn:hover,
+        .btn:active {
+            background: #fff;
+            color: #000;
+        }
+        .btn-sm {
+            padding: 6px 16px;
+            font-size: clamp(0.7rem, 1.8vw, 0.9rem);
+        }
+        .btn-gold {
+            border-color: #ffd700;
+            color: #ffd700;
+        }
+        .btn-gold:hover,
+        .btn-gold:active {
+            background: #ffd700;
+            color: #000;
         }
 
+        /* ===== 遊戲容器 ===== */
         #game-container {
             position: relative;
             display: none;
@@ -91,29 +108,30 @@
 
         #ui-bar {
             position: absolute;
-            top: 10px;
-            width: 90%;
-            max-width: 800px;
+            top: 6px;
+            width: 92%;
+            max-width: 820px;
             display: flex;
             justify-content: space-around;
-            font-size: clamp(12px, 2.5vw, 18px);
+            font-size: clamp(11px, 2.2vw, 16px);
             font-weight: bold;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             z-index: 5;
-            background: rgba(0,0,0,0.7);
-            padding: 6px 0;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 4px 0;
             border-bottom: 1px solid #333;
             backdrop-filter: blur(2px);
-            border-radius: 4px;
+            border-radius: 3px;
         }
         .highlight {
-            color: #ffffff;
-            border-bottom: 1px solid #ffffff;
+            color: #fff;
+            border-bottom: 1px solid #fff;
+            padding: 0 4px;
         }
 
         canvas {
-            background: #000000;
-            border: 2px solid #ffffff;
+            background: #000;
+            border: 2px solid #fff;
             display: block;
             touch-action: none;
             width: 100%;
@@ -121,6 +139,7 @@
             object-fit: contain;
         }
 
+        /* ===== 手機控制 ===== */
         #mobile-controls {
             position: absolute;
             width: 100%;
@@ -134,171 +153,450 @@
         }
         .joystick-base {
             position: absolute;
-            width: clamp(90px, 18vw, 140px);
-            height: clamp(90px, 18vw, 140px);
-            border: 2px solid rgba(255, 255, 255, 0.4);
+            width: clamp(80px, 16vw, 130px);
+            height: clamp(80px, 16vw, 130px);
+            border: 2px solid rgba(255, 255, 255, 0.35);
             border-radius: 50%;
             pointer-events: auto;
             transform: translate(-50%, -50%);
             touch-action: none;
+            background: rgba(0, 0, 0, 0.3);
         }
         .joystick-stick {
             position: absolute;
-            width: clamp(36px, 7vw, 56px);
-            height: clamp(36px, 7vw, 56px);
-            background: rgba(255, 255, 255, 0.6);
+            width: clamp(32px, 6.5vw, 50px);
+            height: clamp(32px, 6.5vw, 50px);
+            background: rgba(255, 255, 255, 0.55);
             border-radius: 50%;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             pointer-events: none;
         }
-        #roll-btn-mobile {
+        #left-joystick {
+            left: 14%;
+            bottom: 12%;
+        }
+        #right-joystick {
+            right: 14%;
+            bottom: 12%;
+        }
+
+        /* 技能釋放按鈕 (左搖桿上方) */
+        #skill-btn-mobile {
             position: absolute;
-            width: clamp(60px, 12vw, 80px);
-            height: clamp(60px, 12vw, 80px);
-            border: 2px solid #ffffff;
-            background: rgba(0,0,0,0.6);
-            color: #ffffff;
+            left: 14%;
+            bottom: 34%;
+            width: clamp(56px, 11vw, 76px);
+            height: clamp(56px, 11vw, 76px);
+            border: 2px solid #ffd700;
+            background: rgba(0, 0, 0, 0.7);
+            color: #ffd700;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: clamp(10px, 2vw, 16px);
+            font-size: clamp(9px, 1.6vw, 13px);
             font-weight: bold;
             pointer-events: auto;
-            letter-spacing: 1px;
             transform: translate(-50%, -50%);
             touch-action: manipulation;
+            text-align: center;
+            line-height: 1.2;
+            letter-spacing: 0.5px;
+            z-index: 7;
         }
-        #roll-btn-mobile:active {
-            background: #ffffff;
-            color: #000000;
+        #skill-btn-mobile:active {
+            background: #ffd700;
+            color: #000;
+        }
+        #skill-btn-mobile .cd-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(10px, 1.8vw, 14px);
+            color: #ff6b6b;
+            pointer-events: none;
         }
 
-        /* 小螢幕時調整搖桿位置 */
+        /* ===== 裝備界面 ===== */
+        #equip-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 20;
+            padding: 12px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        #equip-screen.active {
+            display: flex;
+        }
+        #equip-screen h2 {
+            font-size: clamp(1.2rem, 4vw, 2rem);
+            letter-spacing: 3px;
+            border-bottom: 2px solid #555;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+        }
+        .equip-layout {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            width: 100%;
+            max-width: 780px;
+            padding: 6px;
+        }
+        /* 左側技能列表 */
+        .skill-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            flex: 2;
+            min-width: 200px;
+            max-width: 400px;
+        }
+        .skill-card {
+            background: #111;
+            border: 1px solid #333;
+            padding: 8px 6px;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: clamp(0.7rem, 1.6vw, 0.9rem);
+            min-height: 64px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+        }
+        .skill-card:hover {
+            border-color: #888;
+        }
+        .skill-card .sname {
+            font-weight: bold;
+            color: #fff;
+            font-size: clamp(0.75rem, 1.6vw, 0.95rem);
+        }
+        .skill-card .sprice {
+            color: #ffd700;
+            font-size: clamp(0.6rem, 1.2vw, 0.75rem);
+        }
+        .skill-card .sstatus {
+            font-size: clamp(0.55rem, 1.1vw, 0.7rem);
+            color: #aaa;
+        }
+        .skill-card.owned {
+            border-color: #4a4;
+        }
+        .skill-card.equipped {
+            border-color: #ffd700;
+            background: #1a1a0a;
+        }
+        .skill-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 右側技能槽 */
+        .slot-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 120px;
+        }
+        .slot-row {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .slot-box {
+            width: clamp(60px, 12vw, 90px);
+            height: clamp(60px, 12vw, 90px);
+            border: 2px solid #444;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+            background: #0a0a0a;
+            transition: 0.2s;
+            position: relative;
+            text-align: center;
+            padding: 4px;
+        }
+        .slot-box.unlocked {
+            border-color: #666;
+        }
+        .slot-box.active {
+            border-color: #ffd700;
+            background: #1a1a0a;
+        }
+        .slot-box .slot-label {
+            color: #888;
+            font-size: clamp(0.5rem, 1vw, 0.65rem);
+        }
+        .slot-box .slot-skill {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+        }
+        .slot-box .slot-lock {
+            color: #f55;
+            font-size: clamp(1rem, 2vw, 1.4rem);
+        }
+        .slot-box .slot-unlock-btn {
+            margin-top: 4px;
+            padding: 2px 10px;
+            font-size: clamp(0.5rem, 1vw, 0.65rem);
+            border: 1px solid #ffd700;
+            background: transparent;
+            color: #ffd700;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .slot-box .slot-unlock-btn:hover {
+            background: #ffd700;
+            color: #000;
+        }
+
+        .equip-close-btn {
+            margin-top: 12px;
+        }
+
+        /* ===== 手機自適應 ===== */
         @media (max-width: 600px) {
             .joystick-base {
-                width: 100px;
-                height: 100px;
+                width: 86px;
+                height: 86px;
             }
             .joystick-stick {
-                width: 42px;
-                height: 42px;
+                width: 36px;
+                height: 36px;
             }
-            #roll-btn-mobile {
-                width: 64px;
-                height: 64px;
-                font-size: 12px;
+            #skill-btn-mobile {
+                width: 56px;
+                height: 56px;
+                font-size: 9px;
+            }
+            #left-joystick {
+                left: 12%;
+                bottom: 10%;
+            }
+            #right-joystick {
+                right: 12%;
+                bottom: 10%;
+            }
+            #skill-btn-mobile {
+                left: 12%;
+                bottom: 32%;
+            }
+            .equip-layout {
+                flex-direction: column;
+                align-items: center;
+            }
+            .skill-grid {
+                max-width: 320px;
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .slot-row {
+                gap: 8px;
+            }
+            .slot-box {
+                width: 56px;
+                height: 56px;
             }
         }
         @media (max-width: 400px) {
             .joystick-base {
-                width: 80px;
-                height: 80px;
+                width: 70px;
+                height: 70px;
             }
             .joystick-stick {
-                width: 34px;
-                height: 34px;
+                width: 28px;
+                height: 28px;
             }
-            #roll-btn-mobile {
-                width: 54px;
-                height: 54px;
-                font-size: 10px;
+            #skill-btn-mobile {
+                width: 48px;
+                height: 48px;
+                font-size: 8px;
             }
+            .slot-box {
+                width: 48px;
+                height: 48px;
+            }
+        }
+
+        /* ===== 通用 ===== */
+        .text-gold {
+            color: #ffd700;
+        }
+        .text-red {
+            color: #ff6b6b;
+        }
+        .text-green {
+            color: #6f6;
+        }
+        .mt-4 {
+            margin-top: 4px;
+        }
+        .mb-4 {
+            margin-bottom: 4px;
+        }
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .gap-8 {
+            gap: 8px;
+        }
+        .fw-bold {
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
+    <!-- ===== 開始畫面 ===== -->
     <div id="start-screen" class="screen active">
         <h1>黑與白</h1>
         <p>HIGH SCORE: <span id="menu-highscore">0</span></p>
+        <p>💰 <span id="menu-money">0</span></p>
         <button class="btn" onclick="goToModeSelect()">START GAME</button>
+        <button class="btn btn-sm" onclick="openEquip()">🔧 整理裝備</button>
     </div>
 
+    <!-- ===== 選擇模式 ===== -->
     <div id="mode-screen" class="screen">
         <h1>SELECT MODE</h1>
-        <p>請選擇您的遊玩控制方式</p>
-        <button class="btn" onclick="startGame('mobile')">手機雙搖桿模式</button>
-        <button class="btn" onclick="startGame('pc')">鍵盤滑鼠模式</button>
+        <p>請選擇遊玩控制方式</p>
+        <button class="btn" onclick="startGame('mobile')">📱 手機雙搖桿</button>
+        <button class="btn" onclick="startGame('pc')">⌨️ 鍵盤滑鼠</button>
         <br>
-        <button class="btn" style="font-size: 0.9rem; padding: 10px 20px;" onclick="backToMain()">BACK</button>
+        <button class="btn btn-sm" onclick="backToMain()">BACK</button>
     </div>
 
+    <!-- ===== 遊戲容器 ===== -->
     <div id="game-container">
         <div id="ui-bar">
-            <div>HP: <span id="hp-display" class="highlight">100</span></div>
-            <div>SCORE: <span id="score-display" class="highlight">0</span></div>
-            <div>DASH: <span id="cd-display" class="highlight">READY</span></div>
+            <div>❤️ <span id="hp-display" class="highlight">100</span></div>
+            <div>⭐ <span id="score-display" class="highlight">0</span></div>
+            <div>💰 <span id="money-display" class="highlight">0</span></div>
+            <div>DASH <span id="cd-display" class="highlight">READY</span></div>
+            <div>技能 <span id="skill-status" class="highlight">⚡</span></div>
         </div>
         <canvas id="gameCanvas"></canvas>
 
         <div id="mobile-controls">
-            <div id="left-joystick" class="joystick-base" style="left: 15%; bottom: 18%;">
+            <div id="left-joystick" class="joystick-base">
                 <div id="left-stick" class="joystick-stick"></div>
             </div>
-            <div id="right-joystick" class="joystick-base" style="right: 15%; bottom: 18%;">
+            <div id="right-joystick" class="joystick-base">
                 <div id="right-stick" class="joystick-stick"></div>
             </div>
-            <div id="roll-btn-mobile" style="right: 15%; bottom: 42%;">DASH</div>
+            <div id="skill-btn-mobile">
+                技能
+                <div id="skill-cd-overlay" class="cd-overlay" style="display:none;"></div>
+            </div>
         </div>
     </div>
 
+    <!-- ===== 裝備界面 ===== -->
+    <div id="equip-screen">
+        <h2>🔧 整理裝備</h2>
+        <p style="font-size:clamp(0.7rem,1.6vw,0.9rem);">💰 持有金錢: <span id="equip-money" class="text-gold">0</span></p>
+        <div class="equip-layout">
+            <!-- 左側技能列表 -->
+            <div class="skill-grid" id="skill-grid-container"></div>
+
+            <!-- 右側技能槽 -->
+            <div class="slot-area">
+                <div class="slot-row" id="slot-row-container"></div>
+                <div style="font-size:clamp(0.6rem,1.2vw,0.75rem);color:#888;margin-top:4px;">
+                    點擊技能 → 點擊槽位裝備 | 點擊已裝備技能卸下
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-sm equip-close-btn" onclick="closeEquip()">✔ 完成</button>
+    </div>
+
+    <!-- ===== 遊戲結束 ===== -->
     <div id="gameover-screen" class="screen">
         <h1>GAME OVER</h1>
-        <p>FINAL SCORE: <span id="final-score">0</span></p>
-        <p>HIGH SCORE: <span id="final-highscore">0</span></p>
+        <p>⭐ FINAL: <span id="final-score">0</span></p>
+        <p>💰 獲得: <span id="final-earn">0</span></p>
+        <p>🏆 HIGH: <span id="final-highscore">0</span></p>
         <button class="btn" onclick="backToMain()">CONFIRM</button>
     </div>
 
     <script>
+        // ================================================================
+        //  1. DOM 引用
+        // ================================================================
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // 自適應尺寸
-        function resizeCanvas() {
-            const container = document.getElementById('game-container');
-            const w = container.clientWidth;
-            const h = container.clientHeight;
-            const ratio = 4/3;
-            let width = w;
-            let height = w / ratio;
-            if (height > h) {
-                height = h;
-                width = h * ratio;
-            }
-            canvas.width = 800;
-            canvas.height = 600;
-            canvas.style.width = width + 'px';
-            canvas.style.height = height + 'px';
-        }
-        window.addEventListener('resize', resizeCanvas);
-        window.addEventListener('orientationchange', () => {
-            setTimeout(resizeCanvas, 200);
-        });
-
-        // 螢幕切換
         const startScreen = document.getElementById('start-screen');
         const modeScreen = document.getElementById('mode-screen');
         const gameContainer = document.getElementById('game-container');
         const gameOverScreen = document.getElementById('gameover-screen');
+        const equipScreen = document.getElementById('equip-screen');
         const mobileControls = document.getElementById('mobile-controls');
 
         const hpDisplay = document.getElementById('hp-display');
         const scoreDisplay = document.getElementById('score-display');
+        const moneyDisplay = document.getElementById('money-display');
         const cdDisplay = document.getElementById('cd-display');
+        const skillStatus = document.getElementById('skill-status');
         const menuHighscore = document.getElementById('menu-highscore');
+        const menuMoney = document.getElementById('menu-money');
         const finalScore = document.getElementById('final-score');
+        const finalEarn = document.getElementById('final-earn');
         const finalHighscore = document.getElementById('final-highscore');
+        const equipMoney = document.getElementById('equip-money');
 
+        const skillGridContainer = document.getElementById('skill-grid-container');
+        const slotRowContainer = document.getElementById('slot-row-container');
+        const skillBtnMobile = document.getElementById('skill-btn-mobile');
+        const skillCdOverlay = document.getElementById('skill-cd-overlay');
+
+        // ================================================================
+        //  2. 遊戲狀態
+        // ================================================================
         let controlMode = 'pc';
         let score = 0;
         let hp = 100;
         let isGameOver = false;
-        let highScore = localStorage.getItem('bw_highScore') || 0;
-        menuHighscore.innerText = highScore;
+        let highScore = parseInt(localStorage.getItem('bw_highScore')) || 0;
+        let money = parseInt(localStorage.getItem('bw_money')) || 0;
+        let gameLoopId = null;
 
+        // 玩家
         const player = {
             x: 400,
             y: 300,
@@ -315,194 +613,377 @@
         };
 
         const keys = { w: false, a: false, s: false, d: false, space: false };
-        let mousePressed = false;
-        let mouseX = 400;
-        let mouseY = 300;
-
-        let leftTouchData = { active: false, x: 0, y: 0, vx: 0, vy: 0 };
-        let rightTouchData = { active: false, x: 0, y: 0, vx: 0, vy: 0, fireTimer: 0 };
-
+        let mouseX = 400,
+            mouseY = 300;
         let bullets = [];
         let enemies = [];
         let enemySpawnTimer = 0;
+        let leftTouchData = { active: false, vx: 0, vy: 0 };
+        let rightTouchData = { active: false, vx: 0, vy: 0, fireTimer: 0 };
+        let clickShootPending = false;
 
-        // --- 新增：點擊射擊控制 (取消長按連射) ---
-        let clickShootPending = false;   // 標記是否要因點擊而發射
-
-        function showScreen(screenEl) {
-            [startScreen, modeScreen, gameContainer, gameOverScreen].forEach(s => s.classList.remove('active'));
-            screenEl.classList.add('active');
-            if (screenEl === gameContainer) {
-                setTimeout(resizeCanvas, 50);
+        // ================================================================
+        //  3. 技能系統
+        // ================================================================
+        const SKILL_DEFS = {
+            wall: {
+                id: 'wall',
+                name: '小型牆',
+                desc: '放置一面50HP的牆',
+                cost: 10,
+                cooldown: 60, // 1秒 (60帧)
+                type: 'placement',
+                color: '#4af'
+            },
+            freeze: {
+                id: 'freeze',
+                name: '凍結',
+                desc: '凍結所有敵人2秒',
+                cost: 10,
+                cooldown: 1800, // 30秒
+                type: 'instant',
+                color: '#6cf'
+            },
+            serum: {
+                id: 'serum',
+                name: '血清',
+                desc: '回復15 HP',
+                cost: 25,
+                cooldown: 18000, // 5分鐘
+                type: 'instant',
+                color: '#6f6'
+            },
+            loot: {
+                id: 'loot',
+                name: '掠奪',
+                desc: '雙倍分數10秒',
+                cost: 30,
+                cooldown: 10800, // 3分鐘
+                type: 'instant',
+                color: '#fd6'
+            },
+            calm: {
+                id: 'calm',
+                name: '冷靜',
+                desc: '站著10秒回2HP',
+                cost: 20,
+                cooldown: 0,
+                type: 'passive',
+                color: '#aaa'
+            },
+            missile: {
+                id: 'missile',
+                name: '追蹤飛彈',
+                desc: '追蹤敵人穿透10次',
+                cost: 10,
+                cooldown: 1800, // 30秒
+                type: 'instant',
+                color: '#f84'
             }
-        }
+        };
 
-        function goToModeSelect() {
-            showScreen(modeScreen);
-        }
+        // 玩家擁有的技能 (已購買)
+        let ownedSkills = {};
+        // 已裝備的技能 (陣列，對應槽位)
+        let equippedSkills = [];
+        // 最大技能槽數
+        let maxSlots = 1;
+        // 技能冷卻狀態
+        let skillCooldowns = {};
+        // 技能效果狀態
+        let skillEffects = {
+            freezeTimer: 0,
+            lootTimer: 0,
+            lootMultiplier: 1,
+            calmStandTimer: 0,
+            calmLastX: 400,
+            calmLastY: 300,
+            calmHealCooldown: 0,
+        };
+        // 牆體列表
+        let walls = [];
+        // 追蹤飛彈列表
+        let missiles = [];
 
-        function backToMain() {
-            isGameOver = true;
-            menuHighscore.innerText = localStorage.getItem('bw_highScore') || 0;
-            showScreen(startScreen);
-        }
-
-        function startGame(mode) {
-            controlMode = mode;
-            showScreen(gameContainer);
-            if (controlMode === 'mobile') {
-                mobileControls.style.display = 'block';
+        // 初始化技能狀態
+        function initSkills() {
+            // 從 localStorage 讀取已購買技能
+            const saved = localStorage.getItem('bw_ownedSkills');
+            if (saved) {
+                try {
+                    ownedSkills = JSON.parse(saved);
+                } catch (e) { ownedSkills = {}; }
             } else {
-                mobileControls.style.display = 'none';
+                ownedSkills = {};
             }
-            resetGame();
+            // 讀取技能槽數量
+            const savedSlots = parseInt(localStorage.getItem('bw_maxSlots')) || 1;
+            maxSlots = Math.min(3, savedSlots);
+            // 讀取裝備
+            const savedEquip = localStorage.getItem('bw_equippedSkills');
+            if (savedEquip) {
+                try {
+                    const arr = JSON.parse(savedEquip);
+                    equippedSkills = arr.filter(id => id && ownedSkills[id]);
+                } catch (e) { equippedSkills = []; }
+            } else {
+                equippedSkills = [];
+            }
+            // 確保裝備數量不超過槽位
+            while (equippedSkills.length > maxSlots) {
+                equippedSkills.pop();
+            }
+            // 初始化冷卻
+            for (let id in SKILL_DEFS) {
+                skillCooldowns[id] = 0;
+            }
+            // 重置效果
+            skillEffects.freezeTimer = 0;
+            skillEffects.lootTimer = 0;
+            skillEffects.lootMultiplier = 1;
+            skillEffects.calmStandTimer = 0;
+            skillEffects.calmLastX = player.x;
+            skillEffects.calmLastY = player.y;
+            skillEffects.calmHealCooldown = 0;
+            walls = [];
+            missiles = [];
         }
 
-        // 防雙擊縮放
-        document.addEventListener('dblclick', (e) => {
-            e.preventDefault();
-        }, { passive: false });
-
-        // 鍵盤
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'w' || e.key === 'W') keys.w = true;
-            if (e.key === 'a' || e.key === 'A') keys.a = true;
-            if (e.key === 's' || e.key === 'S') keys.s = true;
-            if (e.key === 'd' || e.key === 'D') keys.d = true;
-            if (e.code === 'Space') {
-                e.preventDefault();
-                triggerRoll();
-            }
-        });
-
-        window.addEventListener('keyup', (e) => {
-            if (e.key === 'w' || e.key === 'W') keys.w = false;
-            if (e.key === 'a' || e.key === 'A') keys.a = false;
-            if (e.key === 's' || e.key === 'S') keys.s = false;
-            if (e.key === 'd' || e.key === 'D') keys.d = false;
-        });
-
-        // 滑鼠瞄準
-        canvas.addEventListener('mousemove', (e) => {
-            if (controlMode === 'pc') {
-                const rect = canvas.getBoundingClientRect();
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                mouseX = (e.clientX - rect.left) * scaleX;
-                mouseY = (e.clientY - rect.top) * scaleY;
-            }
-        });
-
-        // --- 修改：滑鼠點擊只觸發單發射擊 (取消長按連射) ---
-        canvas.addEventListener('mousedown', (e) => {
-            if (controlMode === 'pc' && !isGameOver) {
-                // 取消 mousePressed 的長按行為，改為單次點擊標記
-                // mousePressed = true;   // 不再使用長按
-                clickShootPending = true;   // 標記需要發射一發
-                e.preventDefault();
-            }
-        });
-        // 移除 mouseup 的處理，因為我們不需要追蹤按壓狀態
-        // window.addEventListener('mouseup', () => { mousePressed = false; });
-
-        // 觸控搖桿
-        const leftJoystick = document.getElementById('left-joystick');
-        const leftStick = document.getElementById('left-stick');
-        const rightJoystick = document.getElementById('right-joystick');
-        const rightStick = document.getElementById('right-stick');
-        const rollBtnMobile = document.getElementById('roll-btn-mobile');
-
-        function setupVirtualJoysticks() {
-            leftJoystick.addEventListener('pointerdown', (e) => {
-                leftTouchData.active = true;
-                updateLeftJoystick(e);
-                leftJoystick.setPointerCapture(e.pointerId);
-                e.preventDefault();
-            });
-            leftJoystick.addEventListener('pointermove', (e) => {
-                if (leftTouchData.active) updateLeftJoystick(e);
-                e.preventDefault();
-            });
-            leftJoystick.addEventListener('pointerup', (e) => {
-                leftTouchData.active = false;
-                leftTouchData.vx = 0;
-                leftTouchData.vy = 0;
-                leftStick.style.transform = `translate(-50%, -50%)`;
-                e.preventDefault();
-            });
-
-            rightJoystick.addEventListener('pointerdown', (e) => {
-                rightTouchData.active = true;
-                updateRightJoystick(e);
-                rightJoystick.setPointerCapture(e.pointerId);
-                e.preventDefault();
-            });
-            rightJoystick.addEventListener('pointermove', (e) => {
-                if (rightTouchData.active) updateRightJoystick(e);
-                e.preventDefault();
-            });
-            rightJoystick.addEventListener('pointerup', (e) => {
-                rightTouchData.active = false;
-                rightTouchData.vx = 0;
-                rightTouchData.vy = 0;
-                rightStick.style.transform = `translate(-50%, -50%)`;
-                e.preventDefault();
-            });
-
-            rollBtnMobile.addEventListener('pointerdown', (e) => {
-                e.preventDefault();
-                triggerRoll();
-            });
+        function saveSkills() {
+            localStorage.setItem('bw_ownedSkills', JSON.stringify(ownedSkills));
+            localStorage.setItem('bw_maxSlots', String(maxSlots));
+            localStorage.setItem('bw_equippedSkills', JSON.stringify(equippedSkills));
         }
 
-        function updateLeftJoystick(e) {
-            const rect = leftJoystick.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            let dx = e.clientX - centerX;
-            let dy = e.clientY - centerY;
-            const maxDist = rect.width / 2 - 6;
-
-            const dist = Math.hypot(dx, dy);
-            if (dist > maxDist) {
-                dx = (dx / dist) * maxDist;
-                dy = (dy / dist) * maxDist;
-            }
-            leftStick.style.transform = `translate(${dx - 50}%, ${dy - 50}%)`;
-            leftTouchData.vx = dx / maxDist;
-            leftTouchData.vy = dy / maxDist;
+        function saveMoney() {
+            localStorage.setItem('bw_money', String(money));
         }
 
-        function updateRightJoystick(e) {
-            const rect = rightJoystick.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            let dx = e.clientX - centerX;
-            let dy = e.clientY - centerY;
-            const maxDist = rect.width / 2 - 6;
-
-            const dist = Math.hypot(dx, dy);
-            if (dist > maxDist) {
-                dx = (dx / dist) * maxDist;
-                dy = (dy / dist) * maxDist;
-            }
-            rightStick.style.transform = `translate(${dx - 50}%, ${dy - 50}%)`;
-            if (dist > 5) {
-                rightTouchData.vx = dx / maxDist;
-                rightTouchData.vy = dy / maxDist;
-            }
+        // 購買技能
+        function buySkill(id) {
+            if (ownedSkills[id]) return true;
+            const def = SKILL_DEFS[id];
+            if (!def) return false;
+            if (money < def.cost) return false;
+            money -= def.cost;
+            ownedSkills[id] = true;
+            saveMoney();
+            saveSkills();
+            renderEquip();
+            updateMainUI();
+            return true;
         }
 
-        setupVirtualJoysticks();
-
-        function triggerRoll() {
-            if (!isGameOver && player.rollCooldown <= 0 && !player.isRolling) {
-                player.isRolling = true;
-                player.rollTimer = player.rollDuration;
-                player.rollCooldown = player.maxCooldown;
+        // 裝備技能到槽位
+        function equipSkill(id) {
+            if (!ownedSkills[id]) return false;
+            // 如果已裝備，卸下
+            const idx = equippedSkills.indexOf(id);
+            if (idx !== -1) {
+                equippedSkills.splice(idx, 1);
+                saveSkills();
+                renderEquip();
+                return true;
             }
+            // 檢查是否已滿
+            if (equippedSkills.length >= maxSlots) return false;
+            // 檢查是否已在列表中
+            if (equippedSkills.includes(id)) return false;
+            equippedSkills.push(id);
+            saveSkills();
+            renderEquip();
+            return true;
         }
 
+        // 卸下技能
+        function unequipSkill(id) {
+            const idx = equippedSkills.indexOf(id);
+            if (idx !== -1) {
+                equippedSkills.splice(idx, 1);
+                saveSkills();
+                renderEquip();
+                return true;
+            }
+            return false;
+        }
+
+        // 升級技能槽
+        function upgradeSlot() {
+            if (maxSlots >= 3) return false;
+            const cost = maxSlots === 1 ? 70 : 120;
+            if (money < cost) return false;
+            money -= cost;
+            maxSlots++;
+            saveMoney();
+            saveSkills();
+            renderEquip();
+            updateMainUI();
+            return true;
+        }
+
+        // 獲取當前裝備的技能列表 (用於遊戲)
+        function getEquippedSkills() {
+            return equippedSkills.filter(id => ownedSkills[id]);
+        }
+
+        // ================================================================
+        //  4. 技能釋放邏輯
+        // ================================================================
+        let skillPlacementMode = false; // 是否在放置模式 (牆)
+        let placementPreviewX = 0,
+            placementPreviewY = 0;
+        let placementValid = false;
+
+        function useSkill(skillId, targetX, targetY) {
+            if (isGameOver) return;
+            const def = SKILL_DEFS[skillId];
+            if (!def) return;
+            // 檢查冷卻
+            if (skillCooldowns[skillId] > 0) return;
+            // 檢查是否裝備
+            if (!equippedSkills.includes(skillId)) return;
+
+            // 根據類型執行
+            switch (skillId) {
+                case 'wall':
+                    // 放置牆
+                    if (!targetX && !targetY) return;
+                    const wx = Math.max(20, Math.min(780, targetX));
+                    const wy = Math.max(20, Math.min(530, targetY));
+                    // 檢查是否與玩家重疊
+                    if (Math.hypot(wx - player.x, wy - player.y) < 40) return;
+                    walls.push({
+                        x: wx,
+                        y: wy,
+                        radius: 16,
+                        hp: 50,
+                        maxHp: 50
+                    });
+                    skillCooldowns[skillId] = def.cooldown;
+                    break;
+                case 'freeze':
+                    skillEffects.freezeTimer = 120; // 2秒
+                    skillCooldowns[skillId] = def.cooldown;
+                    break;
+                case 'serum':
+                    hp = Math.min(100, hp + 15);
+                    skillCooldowns[skillId] = def.cooldown;
+                    break;
+                case 'loot':
+                    skillEffects.lootTimer = 600; // 10秒
+                    skillEffects.lootMultiplier = 2;
+                    skillCooldowns[skillId] = def.cooldown;
+                    break;
+                case 'missile':
+                    // 發射追蹤飛彈
+                    if (enemies.length === 0) return;
+                    missiles.push({
+                        x: player.x,
+                        y: player.y,
+                        radius: 6,
+                        speed: 2.8,
+                        target: null,
+                        penetrate: 10,
+                        angle: 0
+                    });
+                    skillCooldowns[skillId] = def.cooldown;
+                    break;
+                case 'calm':
+                    // 被動，不需主動釋放
+                    break;
+                default:
+                    break;
+            }
+            updateSkillUI();
+        }
+
+        // 更新技能冷卻UI
+        function updateSkillUI() {
+            const equipped = getEquippedSkills();
+            // 更新手機按鈕
+            if (equipped.length > 0) {
+                const id = equipped[0];
+                const cd = skillCooldowns[id] || 0;
+                if (cd > 0) {
+                    const sec = Math.ceil(cd / 60);
+                    skillCdOverlay.style.display = 'flex';
+                    skillCdOverlay.textContent = sec + 's';
+                    skillBtnMobile.style.borderColor = '#666';
+                } else {
+                    skillCdOverlay.style.display = 'none';
+                    skillBtnMobile.style.borderColor = '#ffd700';
+                }
+                const def = SKILL_DEFS[id];
+                skillBtnMobile.textContent = def ? def.name.slice(0, 2) : '技能';
+                skillBtnMobile.appendChild(skillCdOverlay);
+            } else {
+                skillBtnMobile.textContent = '無';
+                skillCdOverlay.style.display = 'none';
+                skillBtnMobile.style.borderColor = '#555';
+            }
+            // 更新UI狀態
+            const statusText = equipped.length > 0 ? equipped.map(id => SKILL_DEFS[id].name).join(' ') : '無';
+            skillStatus.textContent = statusText;
+        }
+
+        // ================================================================
+        //  5. 遊戲核心 (修改版)
+        // ================================================================
+        function resizeCanvas() {
+            const container = document.getElementById('game-container');
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            // 更寬的比例 16:9
+            const ratio = 16 / 9;
+            let width = w;
+            let height = w / ratio;
+            if (height > h) {
+                height = h;
+                width = h * ratio;
+            }
+            canvas.width = 800;
+            canvas.height = 550;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 200));
+
+        // 重置遊戲
+        function resetGame() {
+            score = 0;
+            hp = 100;
+            isGameOver = false;
+            bullets = [];
+            enemies = [];
+            walls = [];
+            missiles = [];
+            player.x = 400;
+            player.y = 275;
+            player.isRolling = false;
+            player.rollCooldown = 0;
+            enemySpawnTimer = 0;
+            rightTouchData.fireTimer = 0;
+            clickShootPending = false;
+            skillEffects.freezeTimer = 0;
+            skillEffects.lootTimer = 0;
+            skillEffects.lootMultiplier = 1;
+            skillEffects.calmStandTimer = 0;
+            skillEffects.calmLastX = player.x;
+            skillEffects.calmLastY = player.y;
+            skillEffects.calmHealCooldown = 0;
+            // 重置技能冷卻
+            for (let id in SKILL_DEFS) {
+                skillCooldowns[id] = 0;
+            }
+            // 清除放置模式
+            skillPlacementMode = false;
+            updateSkillUI();
+            updateMainUI();
+        }
+
+        // 發射子彈
         function fireBullet(angle) {
             const speed = 9;
             bullets.push({
@@ -514,60 +995,46 @@
             });
         }
 
+        // 生成敵人
         function spawnEnemy() {
             if (isGameOver) return;
             const edge = Math.floor(Math.random() * 4);
             let x, y;
-            if (edge === 0) { x = Math.random() * 800; y = -20; }
-            else if (edge === 1) { x = Math.random() * 800; y = 620; }
-            else if (edge === 2) { x = -20; y = Math.random() * 600; }
-            else { x = 820; y = Math.random() * 600; }
-
+            if (edge === 0) { x = Math.random() * 800;
+                y = -20; } else if (edge === 1) { x = Math.random() * 800;
+                y = 570; } else if (edge === 2) { x = -20;
+                y = Math.random() * 550; } else { x = 820;
+                y = Math.random() * 550; }
             enemies.push({
                 x: x,
                 y: y,
                 radius: 12,
-                speed: 1.2 + Math.random() * 1.2
+                speed: 1.2 + Math.random() * 1.2,
+                frozen: 0
             });
         }
 
-        function resetGame() {
-            score = 0;
-            hp = 100;
-            isGameOver = false;
-            bullets = [];
-            enemies = [];
-            player.x = 400;
-            player.y = 300;
-            player.rollCooldown = 0;
-            player.isRolling = false;
-            enemySpawnTimer = 0;
-            rightTouchData.fireTimer = 0;
-            clickShootPending = false;   // 重置點擊標記
-            loop();
-        }
-
+        // 更新遊戲
         function update() {
             if (isGameOver) return;
 
+            // ----- 生成敵人 -----
             enemySpawnTimer++;
-            if (enemySpawnTimer > 60) {
+            if (enemySpawnTimer > 55 - Math.min(30, Math.floor(score / 5000))) {
                 spawnEnemy();
                 enemySpawnTimer = 0;
             }
 
-            let moveX = 0;
-            let moveY = 0;
-
+            // ----- 玩家移動 -----
+            let moveX = 0,
+                moveY = 0;
             if (controlMode === 'pc') {
                 if (keys.w) moveY -= 1;
                 if (keys.s) moveY += 1;
                 if (keys.a) moveX -= 1;
                 if (keys.d) moveX += 1;
-                if (moveX !== 0 && moveY !== 0) {
-                    moveX *= 0.7071;
-                    moveY *= 0.7071;
-                }
+                if (moveX !== 0 && moveY !== 0) { moveX *= 0.7071;
+                    moveY *= 0.7071; }
             } else {
                 moveX = leftTouchData.vx;
                 moveY = leftTouchData.vy;
@@ -578,8 +1045,28 @@
                 player.dy = moveY;
             }
 
-            if (player.rollCooldown > 0) player.rollCooldown--;
+            // 冷靜技能：追蹤移動
+            if (equippedSkills.includes('calm')) {
+                const moved = Math.hypot(player.x - skillEffects.calmLastX, player.y - skillEffects.calmLastY);
+                if (moved > 2) {
+                    skillEffects.calmStandTimer = 0;
+                } else {
+                    skillEffects.calmStandTimer++;
+                    if (skillEffects.calmStandTimer >= 600) { // 10秒
+                        if (skillEffects.calmHealCooldown <= 0) {
+                            hp = Math.min(100, hp + 2);
+                            skillEffects.calmHealCooldown = 60; // 1秒冷卻
+                        }
+                        skillEffects.calmStandTimer = 540; // 重置但保留部分進度
+                    }
+                }
+                skillEffects.calmLastX = player.x;
+                skillEffects.calmLastY = player.y;
+                if (skillEffects.calmHealCooldown > 0) skillEffects.calmHealCooldown--;
+            }
 
+            // 翻滾
+            if (player.rollCooldown > 0) player.rollCooldown--;
             let currentSpeed = player.speed;
             if (player.isRolling) {
                 currentSpeed = player.rollSpeed;
@@ -597,22 +1084,18 @@
                 player.y += moveY * currentSpeed;
             }
 
-            if (player.x - player.radius < 0) player.x = player.radius;
-            if (player.x + player.radius > 800) player.x = 800 - player.radius;
-            if (player.y - player.radius < 0) player.y = player.radius;
-            if (player.y + player.radius > 600) player.y = 600 - player.radius;
+            // 邊界
+            player.x = Math.max(player.radius, Math.min(800 - player.radius, player.x));
+            player.y = Math.max(player.radius, Math.min(550 - player.radius, player.y));
 
-            // --- 修改射擊邏輯 (PC 模式) ---
+            // ----- 射擊 -----
             if (controlMode === 'pc') {
-                // 如果 clickShootPending 為 true，則發射一發子彈，然後清除標記
                 if (clickShootPending) {
                     const angle = Math.atan2(mouseY - player.y, mouseX - player.x);
                     fireBullet(angle);
-                    clickShootPending = false;   // 只發射一發
+                    clickShootPending = false;
                 }
-                // 完全移除 mousePressed 的長按判斷
             } else {
-                // 手機模式保持自動連射 (右搖桿)
                 if (rightTouchData.active) {
                     rightTouchData.fireTimer++;
                     if (rightTouchData.fireTimer % 12 === 0) {
@@ -622,121 +1105,765 @@
                 }
             }
 
+            // ----- 子彈移動 -----
             for (let i = bullets.length - 1; i >= 0; i--) {
                 bullets[i].x += bullets[i].vx;
                 bullets[i].y += bullets[i].vy;
-                if (bullets[i].x < 0 || bullets[i].x > 800 || bullets[i].y < 0 || bullets[i].y > 600) {
+                if (bullets[i].x < 0 || bullets[i].x > 800 || bullets[i].y < 0 || bullets[i].y > 550) {
                     bullets.splice(i, 1);
                 }
             }
 
+            // ----- 凍結計時 -----
+            if (skillEffects.freezeTimer > 0) {
+                skillEffects.freezeTimer--;
+            }
+
+            // ----- 掠奪計時 -----
+            if (skillEffects.lootTimer > 0) {
+                skillEffects.lootTimer--;
+                if (skillEffects.lootTimer === 0) {
+                    skillEffects.lootMultiplier = 1;
+                }
+            }
+
+            // ----- 敵人移動 & 碰撞 -----
             const isInvulnerable = player.isRolling;
+            const frozen = skillEffects.freezeTimer > 0;
+
             for (let i = enemies.length - 1; i >= 0; i--) {
                 const enemy = enemies[i];
-                const angle = Math.atan2(player.y - enemy.y, player.x - enemy.x);
-                enemy.x += Math.cos(angle) * enemy.speed;
-                enemy.y += Math.sin(angle) * enemy.speed;
 
+                if (!frozen) {
+                    const angle = Math.atan2(player.y - enemy.y, player.x - enemy.x);
+                    enemy.x += Math.cos(angle) * enemy.speed;
+                    enemy.y += Math.sin(angle) * enemy.speed;
+                }
+
+                // 與玩家碰撞
                 const distToPlayer = Math.hypot(player.x - enemy.x, player.y - enemy.y);
                 if (distToPlayer < player.radius + enemy.radius) {
                     if (!isInvulnerable) {
                         hp -= 15;
-                        if (hp <= 0) {
-                            hp = 0;
-                            handleGameOver();
-                        }
+                        if (hp <= 0) { hp = 0;
+                            handleGameOver(); }
                     }
                     enemies.splice(i, 1);
                     continue;
                 }
 
+                // 與牆體碰撞
+                let wallHit = false;
+                for (let wi = walls.length - 1; wi >= 0; wi--) {
+                    const w = walls[wi];
+                    const d = Math.hypot(enemy.x - w.x, enemy.y - w.y);
+                    if (d < enemy.radius + w.radius) {
+                        // 牆體扣血
+                        w.hp -= 10;
+                        if (w.hp <= 0) {
+                            walls.splice(wi, 1);
+                        }
+                        enemies.splice(i, 1);
+                        wallHit = true;
+                        break;
+                    }
+                }
+                if (wallHit) continue;
+
+                // 與子彈碰撞
                 for (let j = bullets.length - 1; j >= 0; j--) {
                     const bullet = bullets[j];
                     const distToBullet = Math.hypot(bullet.x - enemy.x, bullet.y - enemy.y);
                     if (distToBullet < bullet.radius + enemy.radius) {
                         enemies.splice(i, 1);
                         bullets.splice(j, 1);
-                        score += 100;
+                        const addScore = 100 * skillEffects.lootMultiplier;
+                        score += addScore;
                         break;
                     }
                 }
             }
 
+            // ----- 追蹤飛彈 -----
+            for (let mi = missiles.length - 1; mi >= 0; mi--) {
+                const m = missiles[mi];
+                // 找最近敵人
+                let nearest = null;
+                let nearDist = Infinity;
+                for (const e of enemies) {
+                    const d = Math.hypot(e.x - m.x, e.y - m.y);
+                    if (d < nearDist) { nearDist = d;
+                        nearest = e; }
+                }
+                if (nearest) {
+                    const angle = Math.atan2(nearest.y - m.y, nearest.x - m.x);
+                    m.x += Math.cos(angle) * m.speed;
+                    m.y += Math.sin(angle) * m.speed;
+                    // 碰撞敵人
+                    for (let ei = enemies.length - 1; ei >= 0; ei--) {
+                        const e = enemies[ei];
+                        if (Math.hypot(e.x - m.x, e.y - m.y) < e.radius + m.radius) {
+                            enemies.splice(ei, 1);
+                            m.penetrate--;
+                            const addScore = 100 * skillEffects.lootMultiplier;
+                            score += addScore;
+                            if (m.penetrate <= 0) {
+                                missiles.splice(mi, 1);
+                                break;
+                            }
+                            // 重新找目標
+                            nearest = null;
+                            nearDist = Infinity;
+                            for (const e2 of enemies) {
+                                const d = Math.hypot(e2.x - m.x, e2.y - m.y);
+                                if (d < nearDist) { nearDist = d;
+                                    nearest = e2; }
+                            }
+                            if (!nearest) {
+                                missiles.splice(mi, 1);
+                                break;
+                            }
+                            break;
+                        }
+                    }
+                } else {
+                    // 沒有敵人，直線前進
+                    m.x += Math.cos(m.angle || 0) * m.speed;
+                    m.y += Math.sin(m.angle || 0) * m.speed;
+                    if (m.x < -50 || m.x > 850 || m.y < -50 || m.y > 600) {
+                        missiles.splice(mi, 1);
+                    }
+                }
+            }
+
+            // ----- 技能冷卻更新 -----
+            for (let id in SKILL_DEFS) {
+                if (skillCooldowns[id] > 0) {
+                    skillCooldowns[id]--;
+                }
+            }
+
+            // ----- UI更新 -----
             hpDisplay.innerText = hp;
             scoreDisplay.innerText = score;
+            moneyDisplay.innerText = money;
             cdDisplay.innerText = player.rollCooldown === 0 ? "READY" : Math.ceil(player.rollCooldown / 10);
-        }
+            updateSkillUI();
 
-        function handleGameOver() {
-            isGameOver = true;
-            mobileControls.style.display = 'none';
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('bw_highScore', highScore);
+            // 檢查是否獲得金錢 (每10000分)
+            const earned = Math.floor(score / 10000);
+            if (earned > 0) {
+                money += earned;
+                saveMoney();
+                // 重置分數累積 (保留餘數)
+                score = score % 10000;
             }
-            finalScore.innerText = score;
-            finalHighscore.innerText = highScore;
-            showScreen(gameOverScreen);
         }
 
+        // 繪製
         function draw() {
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(0, 0, 800, 600);
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, 800, 550);
 
-            // 玩家
-            ctx.beginPath();
-            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-            if (player.isRolling) {
-                ctx.fillStyle = '#ffffff';
+            // ---- 牆體 ----
+            for (const w of walls) {
+                ctx.beginPath();
+                ctx.arc(w.x, w.y, w.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(68,170,255,0.5)';
                 ctx.fill();
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = '#000000';
-                ctx.stroke();
-            } else {
-                ctx.fillStyle = '#000000';
-                ctx.fill();
+                ctx.strokeStyle = '#4af';
                 ctx.lineWidth = 2;
-                ctx.strokeStyle = '#ffffff';
                 ctx.stroke();
+                ctx.closePath();
+                // HP條
+                const hpRatio = w.hp / w.maxHp;
+                ctx.fillStyle = '#333';
+                ctx.fillRect(w.x - 16, w.y - w.radius - 8, 32, 4);
+                ctx.fillStyle = hpRatio > 0.4 ? '#4f4' : '#f44';
+                ctx.fillRect(w.x - 16, w.y - w.radius - 8, 32 * hpRatio, 4);
             }
-            ctx.closePath();
 
-            ctx.fillStyle = player.isRolling ? '#000000' : '#ffffff';
-            ctx.fillRect(player.x - 4, player.y - 2, 3, 3);
-            ctx.fillRect(player.x + 1, player.y - 2, 3, 3);
+            // ---- 追蹤飛彈 ----
+            for (const m of missiles) {
+                ctx.beginPath();
+                ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#f84';
+                ctx.fill();
+                ctx.strokeStyle = '#fa0';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.closePath();
+                // 尾跡
+                ctx.fillStyle = 'rgba(255,136,68,0.3)';
+                ctx.beginPath();
+                ctx.arc(m.x - 4, m.y - 4, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
 
-            // 子彈
-            ctx.fillStyle = '#ffffff';
-            for (let bullet of bullets) {
+            // ---- 敵人 ----
+            for (const enemy of enemies) {
+                ctx.beginPath();
+                ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
+                ctx.fillStyle = skillEffects.freezeTimer > 0 ? '#4488aa' : '#000';
+                ctx.fill();
+                ctx.strokeStyle = skillEffects.freezeTimer > 0 ? '#6cf' : '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.closePath();
+                // 眼睛
+                const ang = Math.atan2(player.y - enemy.y, player.x - enemy.x);
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(enemy.x + Math.cos(ang) * 4 - 3, enemy.y + Math.sin(ang) * 4 - 2, 3, 3);
+                ctx.fillRect(enemy.x + Math.cos(ang) * 4 + 2, enemy.y + Math.sin(ang) * 4 - 2, 3, 3);
+            }
+
+            // ---- 子彈 ----
+            ctx.fillStyle = '#fff';
+            for (const bullet of bullets) {
                 ctx.beginPath();
                 ctx.arc(bullet.x, bullet.y, bullet.radius, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.closePath();
             }
 
-            // 敵人
-            for (let enemy of enemies) {
-                ctx.beginPath();
-                ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
-                ctx.fillStyle = '#000000';
+            // ---- 玩家 ----
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+            if (player.isRolling) {
+                ctx.fillStyle = '#fff';
                 ctx.fill();
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = '#ffffff';
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 3;
                 ctx.stroke();
+            } else {
+                ctx.fillStyle = '#000';
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+            ctx.closePath();
+            // 眼睛
+            ctx.fillStyle = player.isRolling ? '#000' : '#fff';
+            const eyeAng = Math.atan2(player.dy, player.dx);
+            ctx.fillRect(player.x + Math.cos(eyeAng) * 6 - 3, player.y + Math.sin(eyeAng) * 6 - 2, 3, 3);
+            ctx.fillRect(player.x + Math.cos(eyeAng) * 6 + 2, player.y + Math.sin(eyeAng) * 6 - 2, 3, 3);
+
+            // ---- 放置預覽 (牆) ----
+            if (skillPlacementMode && equippedSkills.includes('wall')) {
+                ctx.beginPath();
+                ctx.arc(placementPreviewX, placementPreviewY, 16, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(68,170,255,0.25)';
+                ctx.fill();
+                ctx.strokeStyle = placementValid ? 'rgba(68,170,255,0.7)' : 'rgba(255,68,68,0.7)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([4, 6]);
+                ctx.stroke();
+                ctx.setLineDash([]);
                 ctx.closePath();
+            }
+
+            // ---- 掠奪計時器 ----
+            if (skillEffects.lootTimer > 0) {
+                ctx.fillStyle = 'rgba(255,215,0,0.15)';
+                ctx.fillRect(0, 0, 800, 550);
+                ctx.fillStyle = '#ffd700';
+                ctx.font = '18px "Courier New", monospace';
+                ctx.fillText('x2 分數!', 20, 40);
             }
         }
 
+        // 遊戲循環
         function loop() {
             if (!isGameOver) {
                 update();
                 draw();
-                requestAnimationFrame(loop);
+                gameLoopId = requestAnimationFrame(loop);
             }
         }
 
-        // 初始調整
+        // 遊戲結束
+        function handleGameOver() {
+            isGameOver = true;
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);
+            // 結算金錢
+            const earned = Math.floor(score / 10000);
+            if (earned > 0) {
+                money += earned;
+                saveMoney();
+            }
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('bw_highScore', highScore);
+            }
+            finalScore.innerText = score;
+            finalEarn.innerText = earned;
+            finalHighscore.innerText = highScore;
+            mobileControls.style.display = 'none';
+            showScreen(gameOverScreen);
+        }
+
+        // ================================================================
+        //  6. UI 渲染
+        // ================================================================
+        function renderEquip() {
+            // 更新金錢
+            equipMoney.textContent = money;
+
+            // 渲染技能列表
+            skillGridContainer.innerHTML = '';
+            for (const [id, def] of Object.entries(SKILL_DEFS)) {
+                const card = document.createElement('div');
+                card.className = 'skill-card';
+                const owned = !!ownedSkills[id];
+                const equipped = equippedSkills.includes(id);
+                if (owned) card.classList.add('owned');
+                if (equipped) card.classList.add('equipped');
+
+                const nameSpan = document.createElement('div');
+                nameSpan.className = 'sname';
+                nameSpan.textContent = def.name;
+
+                const priceSpan = document.createElement('div');
+                priceSpan.className = 'sprice';
+                priceSpan.textContent = owned ? (equipped ? '✅ 已裝備' : '💰 已購買') : `💰 $${def.cost}`;
+
+                const statusSpan = document.createElement('div');
+                statusSpan.className = 'sstatus';
+                if (!owned) {
+                    statusSpan.textContent = '點擊購買';
+                } else if (equipped) {
+                    statusSpan.textContent = '點擊卸下';
+                } else {
+                    statusSpan.textContent = '點擊裝備';
+                }
+
+                card.appendChild(nameSpan);
+                card.appendChild(priceSpan);
+                card.appendChild(statusSpan);
+
+                card.addEventListener('click', () => {
+                    if (owned) {
+                        if (equipped) {
+                            unequipSkill(id);
+                        } else {
+                            equipSkill(id);
+                        }
+                    } else {
+                        if (buySkill(id)) {
+                            // 購買後自動裝備到空槽
+                            if (equippedSkills.length < maxSlots && !equippedSkills.includes(id)) {
+                                equipSkill(id);
+                            }
+                            renderEquip();
+                        } else {
+                            alert('金錢不足!');
+                        }
+                    }
+                });
+
+                skillGridContainer.appendChild(card);
+            }
+
+            // 渲染技能槽
+            slotRowContainer.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const box = document.createElement('div');
+                box.className = 'slot-box';
+                const isUnlocked = i < maxSlots;
+                if (isUnlocked) box.classList.add('unlocked');
+
+                if (isUnlocked) {
+                    const skillId = equippedSkills[i] || null;
+                    if (skillId && ownedSkills[skillId]) {
+                        const def = SKILL_DEFS[skillId];
+                        box.classList.add('active');
+                        const nameDiv = document.createElement('div');
+                        nameDiv.className = 'slot-skill';
+                        nameDiv.textContent = def.name;
+                        box.appendChild(nameDiv);
+                        const label = document.createElement('div');
+                        label.className = 'slot-label';
+                        label.textContent = `槽 ${i+1}`;
+                        box.appendChild(label);
+                        // 點擊卸下
+                        box.addEventListener('click', () => {
+                            unequipSkill(skillId);
+                        });
+                    } else {
+                        const label = document.createElement('div');
+                        label.className = 'slot-label';
+                        label.textContent = `槽 ${i+1}`;
+                        box.appendChild(label);
+                        const empty = document.createElement('div');
+                        empty.className = 'slot-label';
+                        empty.textContent = '空';
+                        empty.style.color = '#555';
+                        box.appendChild(empty);
+                        // 點擊可從已購買技能中裝備
+                        box.addEventListener('click', () => {
+                            // 找第一個已購買但未裝備的技能
+                            for (const [id, owned] of Object.entries(ownedSkills)) {
+                                if (owned && !equippedSkills.includes(id)) {
+                                    equipSkill(id);
+                                    break;
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    // 鎖定
+                    const lock = document.createElement('div');
+                    lock.className = 'slot-lock';
+                    lock.textContent = '🔒';
+                    box.appendChild(lock);
+                    const cost = i === 1 ? 70 : 120;
+                    const btn = document.createElement('button');
+                    btn.className = 'slot-unlock-btn';
+                    btn.textContent = `解鎖 $${cost}`;
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        upgradeSlot();
+                    });
+                    box.appendChild(btn);
+                }
+                slotRowContainer.appendChild(box);
+            }
+        }
+
+        function updateMainUI() {
+            menuMoney.textContent = money;
+            menuHighscore.textContent = highScore;
+            equipMoney.textContent = money;
+            moneyDisplay.textContent = money;
+        }
+
+        // ================================================================
+        //  7. 屏幕切換
+        // ================================================================
+        function showScreen(screenEl) {
+            [startScreen, modeScreen, gameContainer, gameOverScreen, equipScreen].forEach(s => s.classList.remove(
+            'active'));
+            screenEl.classList.add('active');
+            if (screenEl === gameContainer) {
+                setTimeout(resizeCanvas, 50);
+                mobileControls.style.display = controlMode === 'mobile' ? 'block' : 'none';
+            }
+            if (screenEl === startScreen || screenEl === gameOverScreen) {
+                updateMainUI();
+            }
+        }
+
+        function goToModeSelect() {
+            showScreen(modeScreen);
+        }
+
+        function backToMain() {
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);
+            isGameOver = true;
+            updateMainUI();
+            showScreen(startScreen);
+        }
+
+        function openEquip() {
+            renderEquip();
+            showScreen(equipScreen);
+        }
+
+        function closeEquip() {
+            showScreen(startScreen);
+            updateMainUI();
+        }
+
+        // ================================================================
+        //  8. 開始遊戲
+        // ================================================================
+        function startGame(mode) {
+            controlMode = mode;
+            showScreen(gameContainer);
+            if (controlMode === 'mobile') {
+                mobileControls.style.display = 'block';
+            } else {
+                mobileControls.style.display = 'none';
+            }
+            // 初始化技能 (讀取存檔)
+            initSkills();
+            resetGame();
+            // 開始循環
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);
+            loop();
+        }
+
+        // ================================================================
+        //  9. 事件綁定
+        // ================================================================
+        // 鍵盤
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'w' || e.key === 'W') keys.w = true;
+            if (e.key === 'a' || e.key === 'A') keys.a = true;
+            if (e.key === 's' || e.key === 'S') keys.s = true;
+            if (e.key === 'd' || e.key === 'D') keys.d = true;
+            if (e.code === 'Space') { e.preventDefault();
+                triggerRoll(); }
+            // 技能鍵 1,2,3 對應裝備槽
+            if (e.key === '1' || e.key === '1') {
+                e.preventDefault();
+                handlePcSkill(0);
+            }
+            if (e.key === '2' || e.key === '2') {
+                e.preventDefault();
+                handlePcSkill(1);
+            }
+            if (e.key === '3' || e.key === '3') {
+                e.preventDefault();
+                handlePcSkill(2);
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'w' || e.key === 'W') keys.w = false;
+            if (e.key === 'a' || e.key === 'A') keys.a = false;
+            if (e.key === 's' || e.key === 'S') keys.s = false;
+            if (e.key === 'd' || e.key === 'D') keys.d = false;
+            // 放開技能鍵 (牆)
+            if (e.key === '1' || e.key === '1') {
+                if (skillPlacementMode) {
+                    // 放置牆
+                    const skillId = equippedSkills[0];
+                    if (skillId === 'wall' && placementValid) {
+                        useSkill('wall', placementPreviewX, placementPreviewY);
+                    }
+                    skillPlacementMode = false;
+                }
+            }
+        });
+
+        function handlePcSkill(slotIndex) {
+            if (isGameOver) return;
+            const skillId = equippedSkills[slotIndex];
+            if (!skillId) return;
+            const def = SKILL_DEFS[skillId];
+            if (!def) return;
+            if (skillCooldowns[skillId] > 0) return;
+
+            if (skillId === 'wall') {
+                // 進入放置模式
+                skillPlacementMode = true;
+                placementPreviewX = mouseX;
+                placementPreviewY = mouseY;
+                placementValid = true;
+                // 檢查是否與玩家重疊
+                if (Math.hypot(placementPreviewX - player.x, placementPreviewY - player.y) < 40) {
+                    placementValid = false;
+                }
+                return;
+            }
+
+            // 其他技能立即釋放
+            useSkill(skillId);
+        }
+
+        // 滑鼠
+        canvas.addEventListener('mousemove', (e) => {
+            if (controlMode === 'pc') {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                mouseX = (e.clientX - rect.left) * scaleX;
+                mouseY = (e.clientY - rect.top) * scaleY;
+                // 更新放置預覽
+                if (skillPlacementMode) {
+                    placementPreviewX = Math.max(20, Math.min(780, mouseX));
+                    placementPreviewY = Math.max(20, Math.min(530, mouseY));
+                    placementValid = Math.hypot(placementPreviewX - player.x, placementPreviewY - player.y) >= 40;
+                }
+            }
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (controlMode === 'pc' && !isGameOver) {
+                clickShootPending = true;
+                e.preventDefault();
+            }
+        });
+
+        // 觸控搖桿
+        const leftJoystick = document.getElementById('left-joystick');
+        const leftStick = document.getElementById('left-stick');
+        const rightJoystick = document.getElementById('right-joystick');
+        const rightStick = document.getElementById('right-stick');
+        const rollBtnMobile = document.getElementById('roll-btn-mobile');
+
+        function setupJoysticks() {
+            leftJoystick.addEventListener('pointerdown', (e) => {
+                leftTouchData.active = true;
+                updateLeftJoystick(e);
+                leftJoystick.setPointerCapture(e.pointerId);
+                e.preventDefault();
+            });
+            leftJoystick.addEventListener('pointermove', (e) => {
+                if (leftTouchData.active) updateLeftJoystick(e);
+                e.preventDefault();
+            });
+            leftJoystick.addEventListener('pointerup', (e) => {
+                leftTouchData.active = false;
+                leftTouchData.vx = 0;
+                leftTouchData.vy = 0;
+                leftStick.style.transform = 'translate(-50%,-50%)';
+                e.preventDefault();
+            });
+            leftJoystick.addEventListener('pointercancel', (e) => {
+                leftTouchData.active = false;
+                leftTouchData.vx = 0;
+                leftTouchData.vy = 0;
+                leftStick.style.transform = 'translate(-50%,-50%)';
+            });
+
+            rightJoystick.addEventListener('pointerdown', (e) => {
+                rightTouchData.active = true;
+                updateRightJoystick(e);
+                rightJoystick.setPointerCapture(e.pointerId);
+                e.preventDefault();
+            });
+            rightJoystick.addEventListener('pointermove', (e) => {
+                if (rightTouchData.active) updateRightJoystick(e);
+                e.preventDefault();
+            });
+            rightJoystick.addEventListener('pointerup', (e) => {
+                rightTouchData.active = false;
+                rightTouchData.vx = 0;
+                rightTouchData.vy = 0;
+                rightStick.style.transform = 'translate(-50%,-50%)';
+                e.preventDefault();
+            });
+            rightJoystick.addEventListener('pointercancel', (e) => {
+                rightTouchData.active = false;
+                rightTouchData.vx = 0;
+                rightTouchData.vy = 0;
+                rightStick.style.transform = 'translate(-50%,-50%)';
+            });
+
+            // 技能按鈕 (手機)
+            skillBtnMobile.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                if (isGameOver) return;
+                const skillId = equippedSkills[0];
+                if (!skillId) return;
+                if (skillCooldowns[skillId] > 0) return;
+                const def = SKILL_DEFS[skillId];
+                if (!def) return;
+
+                if (skillId === 'wall') {
+                    // 進入放置模式 (手機: 長按技能, 右搖桿控制位置)
+                    skillPlacementMode = true;
+                    // 初始位置在玩家前方
+                    const ang = Math.atan2(rightTouchData.vy || -1, rightTouchData.vx || 0);
+                    placementPreviewX = player.x + Math.cos(ang) * 60;
+                    placementPreviewY = player.y + Math.sin(ang) * 60;
+                    placementPreviewX = Math.max(20, Math.min(780, placementPreviewX));
+                    placementPreviewY = Math.max(20, Math.min(530, placementPreviewY));
+                    placementValid = Math.hypot(placementPreviewX - player.x, placementPreviewY - player.y) >= 40;
+                } else {
+                    useSkill(skillId);
+                }
+            });
+
+            // 手機：右搖桿移動時更新牆預覽
+            rightJoystick.addEventListener('pointermove', (e) => {
+                if (skillPlacementMode && equippedSkills.includes('wall')) {
+                    // 用右搖桿方向控制預覽位置
+                    const strength = Math.hypot(rightTouchData.vx, rightTouchData.vy);
+                    if (strength > 0.1) {
+                        const ang = Math.atan2(rightTouchData.vy, rightTouchData.vx);
+                        placementPreviewX = player.x + Math.cos(ang) * 70;
+                        placementPreviewY = player.y + Math.sin(ang) * 70;
+                        placementPreviewX = Math.max(20, Math.min(780, placementPreviewX));
+                        placementPreviewY = Math.max(20, Math.min(530, placementPreviewY));
+                        placementValid = Math.hypot(placementPreviewX - player.x, placementPreviewY - player.y) >= 40;
+                    }
+                }
+                e.preventDefault();
+            });
+
+            // 手機：放開技能按鈕 (建牆)
+            skillBtnMobile.addEventListener('pointerup', (e) => {
+                e.preventDefault();
+                if (skillPlacementMode) {
+                    const skillId = equippedSkills[0];
+                    if (skillId === 'wall' && placementValid) {
+                        useSkill('wall', placementPreviewX, placementPreviewY);
+                    }
+                    skillPlacementMode = false;
+                }
+            });
+            skillBtnMobile.addEventListener('pointercancel', (e) => {
+                skillPlacementMode = false;
+            });
+
+            // 翻滾按鈕
+            rollBtnMobile.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                triggerRoll();
+            });
+        }
+
+        function updateLeftJoystick(e) {
+            const rect = leftJoystick.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            let dx = e.clientX - cx;
+            let dy = e.clientY - cy;
+            const maxDist = rect.width / 2 - 6;
+            const dist = Math.hypot(dx, dy);
+            if (dist > maxDist) { dx = (dx / dist) * maxDist;
+                dy = (dy / dist) * maxDist; }
+            leftStick.style.transform = `translate(${dx - 50}%, ${dy - 50}%)`;
+            leftTouchData.vx = dx / maxDist;
+            leftTouchData.vy = dy / maxDist;
+        }
+
+        function updateRightJoystick(e) {
+            const rect = rightJoystick.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            let dx = e.clientX - cx;
+            let dy = e.clientY - cy;
+            const maxDist = rect.width / 2 - 6;
+            const dist = Math.hypot(dx, dy);
+            if (dist > maxDist) { dx = (dx / dist) * maxDist;
+                dy = (dy / dist) * maxDist; }
+            rightStick.style.transform = `translate(${dx - 50}%, ${dy - 50}%)`;
+            if (dist > 5) {
+                rightTouchData.vx = dx / maxDist;
+                rightTouchData.vy = dy / maxDist;
+            } else {
+                rightTouchData.vx = 0;
+                rightTouchData.vy = 0;
+            }
+        }
+
+        function triggerRoll() {
+            if (!isGameOver && player.rollCooldown <= 0 && !player.isRolling) {
+                player.isRolling = true;
+                player.rollTimer = player.rollDuration;
+                player.rollCooldown = player.maxCooldown;
+            }
+        }
+
+        // ================================================================
+        //  10. 初始化
+        // ================================================================
+        setupJoysticks();
+        document.addEventListener('dblclick', e => e.preventDefault(), { passive: false });
         resizeCanvas();
+        initSkills();
+        updateMainUI();
+        showScreen(startScreen);
+
+        console.log('🎮 黑與白 · 技能系統已載入');
+        console.log('💰 金錢:', money);
+        console.log('📦 已購買技能:', Object.keys(ownedSkills));
+        console.log('⚡ 已裝備:', equippedSkills);
+        console.log('🔓 技能槽:', maxSlots);
     </script>
 </body>
 </html>
