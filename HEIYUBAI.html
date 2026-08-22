@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>黑與白 · 技能射擊 (雲端存檔版)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            margin: 0;
+            background: #000;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        /* ===== 通用屏幕 ===== */
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 10;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+        .screen.active {
+            display: flex;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 10vw, 4rem);
+            letter-spacing: 4px;
+            border-bottom: 4px solid #fff;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+        }
+        p {
+            font-size: clamp(0.8rem, 2.5vw, 1.2rem);
+            color: #aaa;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+        .btn {
+            background: #000;
+            color: #fff;
+            border: 2px solid #fff;
+            padding: 10px 28px;
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: 0.2s;
+            margin: 6px;
+            touch-action: manipulation;
+            border-radius: 2px;
+        }
+        .btn:hover,
+        .btn:active {
+            background: #fff;
+            color: #000;
+        }
+        .btn-sm {
+            padding: 6px 16px;
+            font-size: clamp(0.7rem, 1.8vw, 0.9rem);
+        }
+        .btn-gold {
+            border-color: #ffd700;
+            color: #ffd700;
+        }
+        .btn-gold:hover,
+        .btn-gold:active {
+            background: #ffd700;
+            color: #000;
+        }
+        .btn-google {
+            border-color: #4285F4;
+            color: #4285F4;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-google:hover {
+            background: #4285F4;
+            color: #fff;
+        }
+
+        /* ===== 用戶狀態面板 ===== */
+        #user-bar {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 15;
+            font-size: 0.85rem;
+            background: rgba(20,20,20,0.8);
+            padding: 6px 12px;
+            border: 1px solid #444;
+            border-radius: 4px;
+        }
+
+        /* ===== 遊戲容器 ===== */
+        #game-container {
+            position: relative;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+        #game-container.active {
+            display: flex;
+        }
+
+        #ui-bar {
+            position: absolute;
+            top: 6px;
+            width: 92%;
+            max-width: 820px;
+            display: flex;
+            justify-content: space-around;
+            font-size: clamp(11px, 2.2vw, 16px);
+            font-weight: bold;
+            letter-spacing: 1px;
+            z-index: 5;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 4px 0;
+            border-bottom: 1px solid #333;
+            backdrop-filter: blur(2px);
+            border-radius: 3px;
+        }
+        .highlight {
+            color: #fff;
+            border-bottom: 1px solid #fff;
+            padding: 0 4px;
+        }
+
+        canvas {
+            background: #000;
+            border: 2px solid #fff;
+            display: block;
+            touch-action: none;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* ===== 手機控制 ===== */
+        #mobile-controls {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            display: none;
+            z-index: 6;
+            touch-action: none;
+        }
+        .joystick-base {
+            position: absolute;
+            width: clamp(80px, 16vw, 130px);
+            height: clamp(80px, 16vw, 130px);
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            border-radius: 50%;
+            pointer-events: auto;
+            transform: translate(-50%, -50%);
+            touch-action: none;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .joystick-stick {
+            position: absolute;
+            width: clamp(32px, 6.5vw, 50px);
+            height: clamp(32px, 6.5vw, 50px);
+            background: rgba(255, 255, 255, 0.55);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        #left-joystick { left: 14%; bottom: 12%; }
+        #right-joystick { right: 14%; bottom: 12%; }
+
+        #skill-btn-mobile {
+            position: absolute;
+            left: 30%;
+            bottom: 28%;
+            width: clamp(56px, 11vw, 76px);
+            height: clamp(56px, 11vw, 76px);
+            border: 2px solid #ffd700;
+            background: rgba(0, 0, 0, 0.7);
+            color: #ffd700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(9px, 1.6vw, 13px);
+            font-weight: bold;
+            pointer-events: auto;
+            transform: translate(-50%, -50%);
+            touch-action: manipulation;
+            text-align: center;
+            line-height: 1.2;
+            letter-spacing: 0.5px;
+            z-index: 7;
+        }
+        #skill-btn-mobile .cd-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(10px, 1.8vw, 14px);
+            color: #ff6b6b;
+            pointer-events: none;
+        }
+
+        /* ===== 裝備界面 ===== */
+        #equip-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 20;
+            padding: 12px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        #equip-screen.active { display: flex; }
+        #equip-screen h2 {
+            font-size: clamp(1.2rem, 4vw, 2rem);
+            letter-spacing: 3px;
+            border-bottom: 2px solid #555;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+        }
+        .equip-layout {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            width: 100%;
+            max-width: 780px;
+            padding: 6px;
+        }
+        .skill-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            flex: 2;
+            min-width: 200px;
+            max-width: 400px;
+        }
+        .skill-card {
+            background: #111;
+            border: 1px solid #333;
+            padding: 8px 6px;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: clamp(0.7rem, 1.6vw, 0.9rem);
+            min-height: 64px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+        }
+        .skill-card:hover { border-color: #888; }
+        .skill-card .sname { font-weight: bold; color: #fff; font-size: clamp(0.75rem, 1.6vw, 0.95rem); }
+        .skill-card .sprice { color: #ffd700; font-size: clamp(0.6rem, 1.2vw, 0.75rem); }
+        .skill-card .sstatus { font-size: clamp(0.55rem, 1.1vw, 0.7rem); color: #aaa; }
+        .skill-card.owned { border-color: #4a4; }
+        .skill-card.equipped { border-color: #ffd700; background: #1a1a0a; }
+
+        .slot-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 120px;
+        }
+        .slot-row {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .slot-box {
+            width: clamp(60px, 12vw, 90px);
+            height: clamp(60px, 12vw, 90px);
+            border: 2px solid #444;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+            background: #0a0a0a;
+            position: relative;
+            text-align: center;
+            padding: 4px;
+        }
+        .slot-box.unlocked { border-color: #666; }
+        .slot-box.active { border-color: #ffd700; background: #1a1a0a; }
+        .slot-box .slot-label { color: #888; font-size: clamp(0.5rem, 1vw, 0.65rem); }
+        .slot-box .slot-skill { color: #ffd700; font-weight: bold; font-size: clamp(0.6rem, 1.2vw, 0.8rem); }
+        .slot-box .slot-unlock-btn {
+            margin-top: 4px;
+            padding: 2px 10px;
+            font-size: clamp(0.5rem, 1vw, 0.65rem);
+            border: 1px solid #ffd700;
+            background: transparent;
+            color: #ffd700;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .slot-unlock-btn:hover { background: #ffd700; color: #000; }
+        .equip-close-btn { margin-top: 12px; }
+    </style>
+</head>
+<body>
+
+    <!-- 用戶登入狀態懸浮列 -->
+    <div id="user-bar">
+        <span id="user-status-text">未登入 (本機存檔)</span>
+        <button id="auth-btn" class="btn btn-sm btn-google" onclick="toggleGoogleAuth()">Google 登入</button>
+    </div>
+
+    <!-- ===== 開始畫面 ===== -->
+    <div id="start-screen" class="screen active">
+        <h1>黑與白</h1>
+        <p>HIGH SCORE: <span id="menu-highscore">0</span></p>
+        <p>💰 <span id="menu-money">0</span></p>
+        <button class="btn" onclick="goToModeSelect()">START GAME</button>
+        <button class="btn btn-sm" onclick="openEquip()">🔧 整理裝備</button>
+    </div>
+
+    <!-- ===== 選擇模式 ===== -->
+    <div id="mode-screen" class="screen">
+        <h1>SELECT MODE</h1>
+        <p>請選擇遊玩控制方式</p>
+        <button class="btn" onclick="startGame('mobile')">📱 手機雙搖桿</button>
+        <button class="btn" onclick="startGame('pc')">⌨️ 鍵盤滑鼠</button>
+        <br>
+        <button class="btn btn-sm" onclick="backToMain()">BACK</button>
+    </div>
+
+    <!-- ===== 遊戲容器 ===== -->
+    <div id="game-container">
+        <div id="ui-bar">
+            <div>❤️ <span id="hp-display" class="highlight">100</span></div>
+            <div>⭐ <span id="score-display" class="highlight">0</span></div>
+            <div>💰 <span id="money-display" class="highlight">0</span></div>
+            <div>DASH <span id="cd-display" class="highlight">READY</span></div>
+            <div>技能 <span id="skill-status" class="highlight">⚡</span></div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="mobile-controls">
+            <div id="left-joystick" class="joystick-base">
+                <div id="left-stick" class="joystick-stick"></div>
+            </div>
+            <div id="right-joystick" class="joystick-base">
+                <div id="right-stick" class="joystick-stick"></div>
+            </div>
+            <div id="skill-btn-mobile">
+                技能
+                <div id="skill-cd-overlay" class="cd-overlay" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 裝備界面 ===== -->
+    <div id="equip-screen">
+        <h2>🔧 整理裝備</h2>
+        <p style="font-size:clamp(0.7rem,1.6vw,0.9rem);">💰 持有金錢: <span id="equip-money" class="text-gold">0</span></p>
+        <div class="equip-layout">
+            <div class="skill-grid" id="skill-grid-container"></div>
+            <div class="slot-area">
+                <div class="slot-row" id="slot-row-container"></div>
+                <div style="font-size:clamp(0.6rem,1.2vw,0.75rem);color:#888;margin-top:4px;">
+                    點擊技能 → 點擊槽位裝備 | 點擊已裝備技能卸下
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-sm equip-close-btn" onclick="closeEquip()">✔ 完成</button>
+    </div>
+
+    <!-- ===== 遊戲結束 ===== -->
+    <div id="gameover-screen" class="screen">
+        <h1>GAME OVER</h1>
+        <p>⭐ FINAL: <span id="final-score">0</span></p>
+        <p>💰 獲得: <span id="final-earn">0</span></p>
+        <p>🏆 HIGH: <span id="final-highscore">0</span></p>
+        <button class="btn" onclick="backToMain()">CONFIRM</button>
+    </div>
+
+    <!-- Firebase SDK 引入 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ==========================================
+        //  ⚠️ 請替換為您自己的 Firebase 專案設定
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        let currentUser = null;
+
+        window.toggleGoogleAuth = async function() {
+            if (currentUser) {
+                try {
+                    await signOut(auth);
+                    alert("已登出 Google 帳號");
+                } catch (error) {
+                    console.error("登出失敗", error);
+                }
+            } else {
+                try {
+                    await signInWithPopup(auth, provider);
+                } catch (error) {
+                    console.error("Google 登入失敗", error);
+                    alert("登入失敗，請檢查網路或 Firebase 設定。");
+                }
+            }
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            const statusText = document.getElementById('user-status-text');
+            const authBtn = document.getElementById('auth-btn');
+
+            if (user) {
+                statusText.textContent = `Hi, ${user.displayName || user.email}`;
+                authBtn.textContent = "登出";
+                await loadCloudData(user.uid);
+            } else {
+                statusText.textContent = "未登入 (本機存檔)";
+                authBtn.textContent = "Google 登入";
+                loadLocalData();
+            }
+            updateMainUI();
+        });
+
+        async function loadCloudData(uid) {
+            try {
+                const docRef = doc(db, "game_saves", uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    highScore = data.highScore || 0;
+                    money = data.money || 0;
+                    ownedSkills = data.ownedSkills || {};
+                    maxSlots = data.maxSlots || 1;
+                    equippedSkills = data.equippedSkills || [];
+                } else {
+                    saveCloudData(); // 初始化雲端
+                }
+            } catch (e) {
+                console.error("載入雲端存檔失敗", e);
+            }
+        }
+
+        window.saveGameData = async function() {
+            // 同時儲存至 localStorage 作為備份
+            localStorage.setItem('bw_highScore', highScore);
+            localStorage.setItem('bw_money', money);
+            localStorage.setItem('bw_ownedSkills', JSON.stringify(ownedSkills));
+            localStorage.setItem('bw_maxSlots', String(maxSlots));
+            localStorage.setItem('bw_equippedSkills', JSON.stringify(equippedSkills));
+
+            if (currentUser) {
+                try {
+                    const docRef = doc(db, "game_saves", currentUser.uid);
+                    await setDoc(docRef, {
+                        highScore,
+                        money,
+                        ownedSkills,
+                        maxSlots,
+                        equippedSkills,
+                        updatedAt: new Date()
+                    }, { merge: true });
+                } catch (e) {
+                    console.error("同步雲端存檔失敗", e);
+                }
+            }
+        };
+
+        function loadLocalData() {
+            highScore = parseInt(localStorage.getItem('bw_highScore')) || 0;
+            money = parseInt(localStorage.getItem('bw_money')) || 0;
+            const savedSkills = localStorage.getItem('bw_ownedSkills');
+            ownedSkills = savedSkills ? JSON.parse(savedSkills) : {};
+            maxSlots = Math.min(3, parseInt(localStorage.getItem('bw_maxSlots')) || 1);
+            const savedEquip = localStorage.getItem('bw_equippedSkills');
+            equippedSkills = savedEquip ? JSON.parse(savedEquip) : [];
+        }
+    </script>
+
+    <!-- ===== 遊戲主要邏輯碼 ===== -->
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const startScreen = document.getElementById('start-screen');
+        const modeScreen = document.getElementById('mode-screen');
+        const gameContainer = document.getElementById('game-container');
+        const gameOverScreen = document.getElementById('gameover-screen');
+        const equipScreen = document.getElementById('equip-screen');
+        const mobileControls = document.getElementById('mobile-controls');
+
+        const hpDisplay = document.getElementById('hp-display');
+        const scoreDisplay = document.getElementById('score-display');
+        const moneyDisplay = document.getElementById('money-display');
+        const cdDisplay = document.getElementById('cd-display');
+        const skillStatus = document.getElementById('skill-status');
+        const menuHighscore = document.getElementById('menu-highscore');
+        const menuMoney = document.getElementById('menu-money');
+        const finalScore = document.getElementById('final-score');
+        const finalEarn = document.getElementById('final-earn');
+        const finalHighscore = document.getElementById('final-highscore');
+        const equipMoney = document.getElementById('equip-money');
+
+        const skillGridContainer = document.getElementById('skill-grid-container');
+        const slotRowContainer = document.getElementById('slot-row-container');
+        const skillBtnMobile = document.getElementById('skill-btn-mobile');
+        const skillCdOverlay = document.getElementById('skill-cd-overlay');
+
+        let controlMode = 'pc';
+        let score = 0;
+        let hp = 100;
+        let isGameOver = false;
+        let highScore = 0;
+        let money = 0;
+        let gameLoopId = null;
+
+        const player = { x: 400, y: 275, radius: 16, speed: 3.5, isRolling: false, rollDuration: 15, rollTimer: 0, rollCooldown: 0, maxCooldown: 50, rollSpeed: 9, dx: 0, dy: -1 };
+        const keys = { w: false, a: false, s: false, d: false, space: false };
+        let mouseX = 400, mouseY = 275;
+        let bullets = [], enemies = [], walls = [], missiles = [];
+        let enemySpawnTimer = 0;
+        let leftTouchData = { active: false, vx: 0, vy: 0 };
+        let rightTouchData = { active: false, vx: 0, vy: 0, fireTimer: 0 };
+        let clickShootPending = false;
+
+        const SKILL_DEFS = {
+            wall: { id: 'wall', name: '小型牆', desc: '放置一面50HP的牆', cost: 10, cooldown: 60, type: 'placement', color: '#4af' },
+            freeze: { id: 'freeze', name: '凍結', desc: '凍結所有敵人2秒', cost: 10, cooldown: 1800, type: 'instant', color: '#6cf' },
+            serum: { id: 'serum', name: '血清', desc: '回復15 HP', cost: 25, cooldown: 18000, type: 'instant', color: '#6f6' },
+            loot: { id: 'loot', name: '掠奪', desc: '雙倍分數10秒', cost: 30, cooldown: 10800, type: 'instant', color: '#fd6' },
+            calm: { id: 'calm', name: '冷靜', desc: '站著10秒回2HP', cost: 20, cooldown: 0, type: 'passive', color: '#aaa' },
+            missile: { id: 'missile', name: '追蹤飛彈', desc: '追蹤敵人穿透10次', cost: 10, cooldown: 1800, type: 'instant', color: '#f84' }
+        };
+
+        let ownedSkills = {};
+        let equippedSkills = [];
+        let maxSlots = 1;
+        let skillCooldowns = {};
+        let skillEffects = { freezeTimer: 0, lootTimer: 0, lootMultiplier: 1, calmStandTimer: 0, calmLastX: 400, calmLastY: 275, calmHealCooldown: 0 };
+
+        function initSkills() {
+            for (let id in SKILL_DEFS) skillCooldowns[id] = 0;
+            skillEffects.freezeTimer = 0;
+            skillEffects.lootTimer = 0;
+            skillEffects.lootMultiplier = 1;
+            walls = [];
+            missiles = [];
+        }
+
+        function buySkill(id) {
+            if (ownedSkills[id]) return true;
+            const def = SKILL_DEFS[id];
+            if (!def || money < def.cost) return false;
+            money -= def.cost;
+            ownedSkills[id] = true;
+            window.saveGameData();
+            renderEquip();
+            updateMainUI();
+            return true;
+        }
+
+        function equipSkill(id) {
+            if (!ownedSkills[id]) return false;
+            const idx = equippedSkills.indexOf(id);
+            if (idx !== -1) { equippedSkills.splice(idx, 1); window.saveGameData(); renderEquip(); return true; }
+            if (equippedSkills.length >= maxSlots || equippedSkills.includes(id)) return false;
+            equippedSkills.push(id);
+            window.saveGameData();
+            renderEquip();
+            return true;
+        }
+
+        function unequipSkill(id) {
+            const idx = equippedSkills.indexOf(id);
+            if (idx !== -1) { equippedSkills.splice(idx, 1); window.saveGameData(); renderEquip(); return true; }
+            return false;
+        }
+
+        function upgradeSlot() {
+            if (maxSlots >= 3) return false;
+            const cost = maxSlots === 1 ? 70 : 120;
+            if (money < cost) return false;
+            money -= cost;
+            maxSlots++;
+            window.saveGameData();
+            renderEquip();
+            updateMainUI();
+            return true;
+        }
+
+        function getEquippedSkills() { return equippedSkills.filter(id => ownedSkills[id]); }
+
+        let skillPlacementMode = false;
+        let placementPreviewX = 0, placementPreviewY = 0;
+        let placementValid = false;
+
+        function useSkill(skillId, targetX, targetY) {
+            if (isGameOver) return;
+            const def = SKILL_DEFS[skillId];
+            if (!def || skillCooldowns[skillId] > 0 || !equippedSkills.includes(skillId)) return;
+
+            switch (skillId) {
+                case 'wall':
+                    if (!targetX && !targetY) return;
+                    const wx = Math.max(20, Math.min(780, targetX));
+                    const wy = Math.max(20, Math.min(530, targetY));
+                    if (Math.hypot(wx - player.x, wy - player.y) < 40) return;
+                    walls.push({ x: wx, y: wy, radius: 16, hp: 50, maxHp: 50 });
+                    skillCooldowns[skillId] = def.cooldown;
+                    break;
+                case 'freeze':
+                    skillEffects.freezeTimer = 120;
+                    skillCooldowns[skillId] = def.cooldown;
+                    break;
+                case 'serum':
+                    hp = Math.min(100, hp + 15);
+                    skillCooldowns[skillId] = def.cooldown;
+                    break;
+                case 'loot':
+                    skillEffects.lootTimer = 600;
+                    skillEffects.lootMultiplier = 2;
+                    skillCooldowns[skillId] = def.cooldown;
+                    break;
+                case 'missile':
+                    if (enemies.length === 0) return;
+                    missiles.push({ x: player.x, y: player.y, radius: 6, speed: 2.8, penetrate: 10, angle: 0 });
+                    skillCooldowns[skillId] = def.cooldown;
+                    break;
+            }
+            updateSkillUI();
+        }
+
+        function updateSkillUI() {
+            const equipped = getEquippedSkills();
+            if (equipped.length > 0) {
+                const id = equipped[0];
+                const cd = skillCooldowns[id] || 0;
+                if (cd > 0) {
+                    skillCdOverlay.style.display = 'flex';
+                    skillCdOverlay.textContent = Math.ceil(cd / 60) + 's';
+                    skillBtnMobile.style.borderColor = '#666';
+                } else {
+                    skillCdOverlay.style.display = 'none';
+                    skillBtnMobile.style.borderColor = '#ffd700';
+                }
+                skillBtnMobile.textContent = SKILL_DEFS[id].name.slice(0, 2);
+                skillBtnMobile.appendChild(skillCdOverlay);
+            } else {
+                skillBtnMobile.textContent = '無';
+                skillCdOverlay.style.display = 'none';
+                skillBtnMobile.style.borderColor = '#555';
+            }
+            skillStatus.textContent = equipped.length > 0 ? equipped.map(id => SKILL_DEFS[id].name).join(' ') : '無';
+        }
+
+        function resizeCanvas() {
+            const container = document.getElementById('game-container');
+            const w = container.clientWidth, h = container.clientHeight;
+            const ratio = 16 / 9;
+            let width = w, height = w / ratio;
+            if (height > h) { height = h; width = h * ratio; }
+            canvas.width = 800; canvas.height = 550;
+            canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        function resetGame() {
+            score = 0; hp = 100; isGameOver = false;
+            bullets = []; enemies = []; walls = []; missiles = [];
+            player.x = 400; player.y = 275; player.isRolling = false; player.rollCooldown = 0;
+            enemySpawnTimer = 0; rightTouchData.fireTimer = 0; clickShootPending = false;
+            initSkills();
+            updateSkillUI();
+            updateMainUI();
+        }
+
+        function fireBullet(angle) {
+            const speed = 9;
+            bullets.push({ x: player.x, y: player.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, radius: 4 });
+        }
+
+        function spawnEnemy() {
+            if (isGameOver) return;
+            const edge = Math.floor(Math.random() * 4);
+            let x, y;
+            if (edge === 0) { x = Math.random() * 800; y = -20; }
+            else if (edge === 1) { x = Math.random() * 800; y = 570; }
+            else if (edge === 2) { x = -20; y = Math.random() * 550; }
+            else { x = 820; y = Math.random() * 550; }
+            enemies.push({ x, y, radius: 12, speed: 1.2 + Math.random() * 1.2 });
+        }
+
+        function update() {
+            if (isGameOver) return;
+            enemySpawnTimer++;
+            if (enemySpawnTimer > 55 - Math.min(30, Math.floor(score / 5000))) { spawnEnemy(); enemySpawnTimer = 0; }
+
+            let moveX = 0, moveY = 0;
+            if (controlMode === 'pc') {
+                if (keys.w) moveY -= 1; if (keys.s) moveY += 1;
+                if (keys.a) moveX -= 1; if (keys.d) moveX += 1;
+                if (moveX !== 0 && moveY !== 0) { moveX *= 0.7071; moveY *= 0.7071; }
+            } else {
+                moveX = leftTouchData.vx; moveY = leftTouchData.vy;
+            }
+            if (moveX !== 0 || moveY !== 0) { player.dx = moveX; player.dy = moveY; }
+
+            if (player.rollCooldown > 0) player.rollCooldown--;
+            let currentSpeed = player.speed;
+            if (player.isRolling) {
+                currentSpeed = player.rollSpeed;
+                player.rollTimer--;
+                if (player.rollTimer <= 0) player.isRolling = false;
+            }
+            player.x += (player.isRolling && (player.dx || player.dy) ? player.dx : moveX) * currentSpeed;
+            player.y += (player.isRolling && (player.dx || player.dy) ? player.dy : (moveY || (player.isRolling ? -1 : 0))) * currentSpeed;
+            player.x = Math.max(player.radius, Math.min(800 - player.radius, player.x));
+            player.y = Math.max(player.radius, Math.min(550 - player.radius, player.y));
+
+            if (controlMode === 'pc' && clickShootPending) {
+                fireBullet(Math.atan2(mouseY - player.y, mouseX - player.x));
+                clickShootPending = false;
+            } else if (controlMode === 'mobile' && rightTouchData.active) {
+                rightTouchData.fireTimer++;
+                if (rightTouchData.fireTimer % 12 === 0) fireBullet(Math.atan2(rightTouchData.vy, rightTouchData.vx));
+            }
+
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                bullets[i].x += bullets[i].vx; bullets[i].y += bullets[i].vy;
+                if (bullets[i].x < 0 || bullets[i].x > 800 || bullets[i].y < 0 || bullets[i].y > 550) bullets.splice(i, 1);
+            }
+
+            if (skillEffects.freezeTimer > 0) skillEffects.freezeTimer--;
+            if (skillEffects.lootTimer > 0 && --skillEffects.lootTimer === 0) skillEffects.lootMultiplier = 1;
+
+            const frozen = skillEffects.freezeTimer > 0;
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const enemy = enemies[i];
+                if (!frozen) {
+                    const angle = Math.atan2(player.y - enemy.y, player.x - enemy.x);
+                    enemy.x += Math.cos(angle) * enemy.speed;
+                    enemy.y += Math.sin(angle) * enemy.speed;
+                }
+                if (Math.hypot(player.x - enemy.x, player.y - enemy.y) < player.radius + enemy.radius) {
+                    if (!player.isRolling) { hp -= 15; if (hp <= 0) { hp = 0; handleGameOver(); } }
+                    enemies.splice(i, 1); continue;
+                }
+                for (let j = bullets.length - 1; j >= 0; j--) {
+                    if (Math.hypot(bullets[j].x - enemy.x, bullets[j].y - enemy.y) < bullets[j].radius + enemy.radius) {
+                        enemies.splice(i, 1); bullets.splice(j, 1);
+                        score += 100 * skillEffects.lootMultiplier;
+                        break;
+                    }
+                }
+            }
+
+            for (let id in SKILL_DEFS) if (skillCooldowns[id] > 0) skillCooldowns[id]--;
+
+            hpDisplay.innerText = hp;
+            scoreDisplay.innerText = score;
+            moneyDisplay.innerText = money;
+            cdDisplay.innerText = player.rollCooldown === 0 ? "READY" : Math.ceil(player.rollCooldown / 10);
+            updateSkillUI();
+
+            const earned = Math.floor(score / 10000);
+            if (earned > 0) { money += earned; window.saveGameData(); score %= 10000; }
+        }
+
+        function draw() {
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 800, 550);
+            for (const enemy of enemies) {
+                ctx.beginPath(); ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
+                ctx.fillStyle = skillEffects.freezeTimer > 0 ? '#4488aa' : '#000'; ctx.fill();
+                ctx.strokeStyle = skillEffects.freezeTimer > 0 ? '#6cf' : '#fff'; ctx.lineWidth = 2; ctx.stroke();
+                ctx.closePath();
+            }
+            for (const bullet of bullets) {
+                ctx.beginPath(); ctx.arc(bullet.x, bullet.y, bullet.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff'; ctx.fill(); ctx.closePath();
+            }
+            ctx.beginPath(); ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+            ctx.fillStyle = player.isRolling ? '#fff' : '#000'; ctx.fill();
+            ctx.strokeStyle = player.isRolling ? '#000' : '#fff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.closePath();
+        }
+
+        function loop() {
+            if (!isGameOver) { update(); draw(); gameLoopId = requestAnimationFrame(loop); }
+        }
+
+        function handleGameOver() {
+            isGameOver = true;
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);
+            const earned = Math.floor(score / 10000);
+            if (earned > 0) { money += earned; }
+            if (score > highScore) { highScore = score; }
+            window.saveGameData();
+
+            finalScore.innerText = score;
+            finalEarn.innerText = earned;
+            finalHighscore.innerText = highScore;
+            mobileControls.style.display = 'none';
+            showScreen(gameOverScreen);
+        }
+
+        function renderEquip() {
+            equipMoney.textContent = money;
+            skillGridContainer.innerHTML = '';
+            for (const [id, def] of Object.entries(SKILL_DEFS)) {
+                const card = document.createElement('div');
+                card.className = `skill-card ${ownedSkills[id] ? 'owned' : ''} ${equippedSkills.includes(id) ? 'equipped' : ''}`;
+                card.innerHTML = `<div class="sname">${def.name}</div><div class="sprice">${ownedSkills[id] ? (equippedSkills.includes(id) ? '✅ 已裝備' : '💰 已購買') : `💰 $${def.cost}`}</div><div class="sstatus">${!ownedSkills[id] ? '點擊購買' : (equippedSkills.includes(id) ? '點擊卸下' : '點擊裝備')}</div>`;
+                card.onclick = () => {
+                    if (ownedSkills[id]) { if (equippedSkills.includes(id)) unequipSkill(id); else equipSkill(id); }
+                    else { if (buySkill(id)) { if (equippedSkills.length < maxSlots) equipSkill(id); } else alert('金錢不足!'); }
+                };
+                skillGridContainer.appendChild(card);
+            }
+
+            slotRowContainer.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const box = document.createElement('div');
+                box.className = `slot-box ${i < maxSlots ? 'unlocked' : ''}`;
+                if (i < maxSlots) {
+                    const skillId = equippedSkills[i] || null;
+                    if (skillId && ownedSkills[skillId]) {
+                        box.classList.add('active');
+                        box.innerHTML = `<div class="slot-skill">${SKILL_DEFS[skillId].name}</div><div class="slot-label">槽 ${i+1}</div>`;
+                        box.onclick = () => unequipSkill(skillId);
+                    } else {
+                        box.innerHTML = `<div class="slot-label">槽 ${i+1}</div><div class="slot-label" style="color:#555">空</div>`;
+                        box.onclick = () => {
+                            for (const [id, owned] of Object.entries(ownedSkills)) {
+                                if (owned && !equippedSkills.includes(id)) { equipSkill(id); break; }
+                            }
+                        };
+                    }
+                } else {
+                    box.innerHTML = `<div style="font-size:1.2rem;">🔒</div><button class="slot-unlock-btn" onclick="upgradeSlot()">解鎖 $${i === 1 ? 70 : 120}</button>`;
+                }
+                slotRowContainer.appendChild(box);
+            }
+        }
+
+        function updateMainUI() {
+            menuMoney.textContent = money;
+            menuHighscore.textContent = highScore;
+            equipMoney.textContent = money;
+            moneyDisplay.textContent = money;
+        }
+
+        function showScreen(screenEl) {
+            [startScreen, modeScreen, gameContainer, gameOverScreen, equipScreen].forEach(s => s.classList.remove('active'));
+            screenEl.classList.add('active');
+            if (screenEl === gameContainer) { setTimeout(resizeCanvas, 50); mobileControls.style.display = controlMode === 'mobile' ? 'block' : 'none'; }
+            if (screenEl === startScreen || screenEl === gameOverScreen) updateMainUI();
+        }
+
+        function goToModeSelect() { showScreen(modeScreen); }
+        function backToMain() { if (gameLoopId) cancelAnimationFrame(gameLoopId); isGameOver = true; updateMainUI(); showScreen(startScreen); }
+        function openEquip() { renderEquip(); showScreen(equipScreen); }
+        function closeEquip() { showScreen(startScreen); updateMainUI(); }
+        function startGame(mode) {
+            controlMode = mode; showScreen(gameContainer);
+            if (controlMode === 'mobile') mobileControls.style.display = 'block';
+            resetGame(); if (gameLoopId) cancelAnimationFrame(gameLoopId); loop();
+        }
+
+        // 鍵盤與滑鼠事件
+        window.addEventListener('keydown', (e) => {
+            if (['w','W'].includes(e.key)) keys.w = true;
+            if (['a','A'].includes(e.key)) keys.a = true;
+            if (['s','S'].includes(e.key)) keys.s = true;
+            if (['d','D'].includes(e.key)) keys.d = true;
+            if (e.code === 'Space') { e.preventDefault(); if (!isGameOver && player.rollCooldown <= 0 && !player.isRolling) { player.isRolling = true; player.rollTimer = player.rollDuration; player.rollCooldown = player.maxCooldown; } }
+        });
+        window.addEventListener('keyup', (e) => {
+            if (['w','W'].includes(e.key)) keys.w = false;
+            if (['a','A'].includes(e.key)) keys.a = false;
+            if (['s','S'].includes(e.key)) keys.s = false;
+            if (['d','D'].includes(e.key)) keys.d = false;
+        });
+        canvas.addEventListener('mousemove', (e) => {
+            if (controlMode === 'pc') {
+                const rect = canvas.getBoundingClientRect();
+                mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+                mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+            }
+        });
+        canvas.addEventListener('mousedown', (e) => { if (controlMode === 'pc' && !isGameOver) { clickShootPending = true; e.preventDefault(); } });
+
+        // 觸控搖桿事件處理
+        const leftJoystick = document.getElementById('left-joystick'), leftStick = document.getElementById('left-stick');
+        const rightJoystick = document.getElementById('right-joystick'), rightStick = document.getElementById('right-stick');
+        
+        leftJoystick.addEventListener('pointerdown', (e) => { leftTouchData.active = true; updateJoystick(e, leftJoystick, leftStick, leftTouchData); leftJoystick.setPointerCapture(e.pointerId); e.preventDefault(); });
+        leftJoystick.addEventListener('pointermove', (e) => { if (leftTouchData.active) updateJoystick(e, leftJoystick, leftStick, leftTouchData); e.preventDefault(); });
+        leftJoystick.addEventListener('pointerup', () => { leftTouchData.active = false; leftTouchData.vx = 0; leftTouchData.vy = 0; leftStick.style.transform = 'translate(-50%,-50%)'; });
+
+        rightJoystick.addEventListener('pointerdown', (e) => { rightTouchData.active = true; updateJoystick(e, rightJoystick, rightStick, rightTouchData); rightJoystick.setPointerCapture(e.pointerId); e.preventDefault(); });
+        rightJoystick.addEventListener('pointermove', (e) => { if (rightTouchData.active) updateJoystick(e, rightJoystick, rightStick, rightTouchData); e.preventDefault(); });
+        rightJoystick.addEventListener('pointerup', () => { rightTouchData.active = false; rightTouchData.vx = 0; rightTouchData.vy = 0; rightStick.style.transform = 'translate(-50%,-50%)'; });
+
+        function updateJoystick(e, base, stick, data) {
+            const rect = base.getBoundingClientRect();
+            let dx = e.clientX - (rect.left + rect.width / 2);
+            let dy = e.clientY - (rect.top + rect.height / 2);
+            const maxDist = rect.width / 2 - 6;
+            const dist = Math.hypot(dx, dy);
+            if (dist > maxDist) { dx = (dx / dist) * maxDist; dy = (dy / dist) * maxDist; }
+            stick.style.transform = `translate(${dx - 50}%, ${dy - 50}%)`;
+            data.vx = dx / maxDist; data.vy = dy / maxDist;
+        }
+
+        document.addEventListener('dblclick', e => e.preventDefault(), { passive: false });
+        resizeCanvas();
+        updateMainUI();
+        showScreen(startScreen);
+    </script>
+</body>
+</html>
