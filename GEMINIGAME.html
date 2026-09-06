@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>手機 3D 殭屍生存 - 狙擊版</title>
+    <title>手機 3D 殭屍生存 - 擬真狙擊版</title>
     <style>
         body {
             margin: 0;
@@ -21,18 +21,20 @@
             font-weight: bold;
             text-shadow: 2px 2px 4px #000;
             pointer-events: none;
+            z-index: 10;
         }
-        /* 虛擬搖桿與按鈕樣式 */
+        /* 左側虛擬搖桿 */
         #joystick-base {
             position: absolute;
             bottom: 40px;
             left: 40px;
             width: 120px;
             height: 120px;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             touch-action: none;
+            z-index: 10;
         }
         #joystick-stick {
             position: absolute;
@@ -40,10 +42,11 @@
             left: 35px;
             width: 50px;
             height: 50px;
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.5);
             border-radius: 50%;
             pointer-events: none;
         }
+        /* 右側功能按鈕 */
         #shoot-btn {
             position: absolute;
             bottom: 40px;
@@ -61,43 +64,88 @@
             justify-content: center;
             user-select: none;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            z-index: 10;
         }
-        #scope-btn {
+        #scope-toggle-btn {
             position: absolute;
             bottom: 135px;
-            right: 55px;
-            width: 60px;
-            height: 60px;
+            right: 40px;
+            width: 70px;
+            height: 70px;
             background: rgba(0, 100, 255, 0.6);
             border-radius: 50%;
             border: 2px solid rgba(255, 255, 255, 0.8);
             color: white;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
             user-select: none;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            z-index: 10;
         }
-        /* 狙擊鏡十字準星與黑邊遮罩 */
-        #crosshair {
+        /* 狙擊鏡外框與遮罩 (預設隱藏) */
+        #sniper-scope {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            display: none;
+            z-index: 5;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
+            background: radial-gradient(circle, rgba(0,0,0,0) 35%, rgba(0,0,0,0.85) 45%, rgba(0,0,0,0.95) 70%);
+        }
+        /* 狙擊鏡內部十字準星 */
+        #scope-crosshair {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 20px;
-            height: 20px;
+            width: 150px;
+            height: 150px;
             pointer-events: none;
             display: none;
+            z-index: 6;
         }
-        #crosshair::before, #crosshair::after {
+        #scope-crosshair::before, #scope-crosshair::after {
             content: '';
             position: absolute;
-            background: red;
+            background: #111;
         }
-        #crosshair::before { top: 9px; left: 0; width: 20px; height: 2px; }
-        #crosshair::after { top: 0; left: 9px; width: 2px; height: 20px; }
+        #scope-crosshair::before { top: 74px; left: 0; width: 150px; height: 2px; }
+        #scope-crosshair::after { top: 0; left: 74px; width: 2px; height: 150px; }
+
+        /* 倍率選擇選單 (開鏡後顯示在右側) */
+        #zoom-menu {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 10;
+        }
+        .zoom-btn {
+            width: 55px;
+            height: 55px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid white;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .zoom-btn.active {
+            background: rgba(255, 165, 0, 0.8);
+            border-color: yellow;
+        }
 
         #game-over {
             position: absolute;
@@ -110,18 +158,29 @@
             text-align: center;
             display: none;
             text-shadow: 2px 2px 8px #000;
-            pointer-events: none;
+            z-index: 20;
         }
     </style>
+    <!-- 引入 Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
     <div id="ui">分數: <span id="score">0</span> | 生命: <span id="health">100</span></div>
+    
     <div id="joystick-base"><div id="joystick-stick"></div></div>
-    <div id="scope-btn">開鏡</div>
+    
+    <div id="scope-toggle-btn">開鏡</div>
     <div id="shoot-btn">射擊</div>
-    <div id="crosshair"></div>
+
+    <!-- 狙擊鏡 UI 元素 -->
+    <div id="sniper-scope"></div>
+    <div id="scope-crosshair"></div>
+    <div id="zoom-menu">
+        <div class="zoom-btn" id="btn-4x" onclick="setZoom(4)">4X</div>
+        <div class="zoom-btn" id="btn-8x" onclick="setZoom(8)">8X</div>
+    </div>
+
     <div id="game-over">遊戲結束<br><span style="font-size: 20px; color: white;">重新整理頁面再試一次</span></div>
 
     <script>
@@ -131,11 +190,17 @@
         let bullets = [];
         let score = 0;
         let isGameOver = false;
-        let isScoped = false; // 狙擊鏡狀態
+        
+        let isScoped = false;
+        let zoomLevel = 4; // 預設 4 倍
 
+        // 觸控變數
         let moveTouchId = null;
         let joystickCenter = { x: 0, y: 0 };
         let joystickVector = { x: 0, y: 0 };
+
+        let lookTouchId = null;
+        let lastTouchX = 0;
 
         init();
         animate();
@@ -200,12 +265,19 @@
             joystickCenter.x = rect.left + rect.width / 2;
             joystickCenter.y = rect.top + rect.height / 2;
 
-            // 搖桿觸控
+            // 螢幕觸控分流 (左邊 = 搖桿/走位，右邊 = 滑動/轉視角)
             window.addEventListener('touchstart', (e) => {
                 for (let touch of e.changedTouches) {
-                    if (touch.clientX < window.innerWidth / 2 && moveTouchId === null) {
-                        moveTouchId = touch.identifier;
-                        updateJoystick(touch);
+                    if (touch.clientX < window.innerWidth / 2) {
+                        if (moveTouchId === null) {
+                            moveTouchId = touch.identifier;
+                            updateJoystick(touch);
+                        }
+                    } else {
+                        if (lookTouchId === null) {
+                            lookTouchId = touch.identifier;
+                            lastTouchX = touch.clientX;
+                        }
                     }
                 }
             }, { passive: false });
@@ -214,6 +286,12 @@
                 for (let touch of e.touches) {
                     if (touch.identifier === moveTouchId) {
                         updateJoystick(touch);
+                    } else if (touch.identifier === lookTouchId) {
+                        let deltaX = touch.clientX - lastTouchX;
+                        // 依據倍率調整靈敏度，倍率越高轉動越細緻
+                        let sensitivity = isScoped ? (0.005 / (zoomLevel / 2)) : 0.008;
+                        player.rotY -= deltaX * sensitivity;
+                        lastTouchX = touch.clientX;
                     }
                 }
             }, { passive: false });
@@ -225,11 +303,14 @@
                         joystickVector = { x: 0, y: 0 };
                         stick.style.transform = `translate(0px, 0px)`;
                     }
+                    if (touch.identifier === lookTouchId) {
+                        lookTouchId = null;
+                    }
                 }
             }, { passive: false });
 
-            // 狙擊鏡開關按鈕
-            document.getElementById('scope-btn').addEventListener('touchstart', (e) => {
+            // 開鏡按鈕
+            document.getElementById('scope-toggle-btn').addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 toggleScope();
             });
@@ -243,17 +324,39 @@
 
         function toggleScope() {
             isScoped = !isScoped;
-            const scopeBtn = document.getElementById('scope-btn');
-            const crosshair = document.getElementById('crosshair');
+            const scopeBtn = document.getElementById('scope-toggle-btn');
+            const scopeOverlay = document.getElementById('sniper-scope');
+            const scopeCrosshair = document.getElementById('scope-crosshair');
+            const zoomMenu = document.getElementById('zoom-menu');
 
             if (isScoped) {
-                camera.fov = 25; // 望遠放大
-                scopeBtn.style.background = 'rgba(0, 200, 0, 0.8)';
-                crosshair.style.display = 'block';
+                scopeBtn.innerText = "收鏡";
+                scopeBtn.style.background = 'rgba(200, 0, 0, 0.8)';
+                scopeOverlay.style.display = 'block';
+                scopeCrosshair.style.display = 'block';
+                zoomMenu.style.display = 'flex';
+                setZoom(zoomLevel);
             } else {
-                camera.fov = 75; // 恢復正常視野
+                scopeBtn.innerText = "開鏡";
                 scopeBtn.style.background = 'rgba(0, 100, 255, 0.6)';
-                crosshair.style.display = 'none';
+                scopeOverlay.style.display = 'none';
+                scopeCrosshair.style.display = 'none';
+                zoomMenu.style.display = 'none';
+                camera.fov = 75;
+                camera.updateProjectionMatrix();
+            }
+        }
+
+        function setZoom(level) {
+            zoomLevel = level;
+            if (zoomLevel === 4) {
+                camera.fov = 25; // 4倍視野
+                document.getElementById('btn-4x').classList.add('active');
+                document.getElementById('btn-8x').classList.remove('active');
+            } else {
+                camera.fov = 12; // 8倍特寫視野
+                document.getElementById('btn-8x').classList.add('active');
+                document.getElementById('btn-4x').classList.remove('active');
             }
             camera.updateProjectionMatrix();
         }
@@ -284,7 +387,7 @@
             const angle = Math.random() * Math.PI * 2;
             const radius = 35;
             zombie.position.set(player.x + Math.cos(angle) * radius, 1, player.z + Math.sin(angle) * radius);
-            zombie.health = isScoped ? 1 : 2; // 開鏡狙擊傷害較高，兩槍內必死
+            zombie.health = isScoped ? 1 : 2;
 
             scene.add(zombie);
             zombies.push(zombie);
@@ -299,8 +402,7 @@
 
             bullet.position.set(player.x, 1.6, player.z);
             
-            // 速度加倍，開鏡時子彈飛更快更直
-            const bulletSpeed = isScoped ? 2.0 : 0.8;
+            const bulletSpeed = isScoped ? 2.5 : 0.8;
             bullet.velocity = new THREE.Vector3(
                 -Math.sin(player.rotY) * bulletSpeed,
                 0,
@@ -321,13 +423,14 @@
             if (isGameOver) return;
             requestAnimationFrame(animate);
 
-            // 修正前後反轉：將原本的減號改為加號，讓搖桿往前推時角色往前走
+            // 左側搖桿控制前後左右移動
             const speed = 0.12;
             if (joystickVector.x !== 0 || joystickVector.y !== 0) {
-                player.rotY -= joystickVector.x * 0.04;
-                
                 player.x += Math.sin(player.rotY) * joystickVector.y * speed;
                 player.z += Math.cos(player.rotY) * joystickVector.y * speed;
+                
+                // 順便讓搖桿左右也能稍微調整微幅方向
+                player.rotY -= joystickVector.x * 0.02;
             }
 
             player.x = Math.max(-48, Math.min(48, player.x));
@@ -336,7 +439,7 @@
             camera.position.set(player.x, 1.6, player.z);
             camera.rotation.y = player.rotY;
 
-            // 子彈移動與碰撞
+            // 子彈與殭屍邏輯
             for (let i = bullets.length - 1; i >= 0; i--) {
                 let b = bullets[i];
                 b.position.add(b.velocity);
@@ -359,7 +462,6 @@
                 }
             }
 
-            // 殭屍追逐
             for (let i = zombies.length - 1; i >= 0; i--) {
                 let z = zombies[i];
                 z.lookAt(player.x, z.position.y, player.z);
