@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>手機 3D 殭屍生存</title>
+    <title>手機 3D 殭屍生存 - 狙擊版</title>
     <style>
         body {
             margin: 0;
@@ -46,15 +46,15 @@
         }
         #shoot-btn {
             position: absolute;
-            bottom: 50px;
+            bottom: 40px;
             right: 40px;
-            width: 90px;
-            height: 90px;
+            width: 80px;
+            height: 80px;
             background: rgba(255, 0, 0, 0.6);
             border-radius: 50%;
             border: 3px solid rgba(255, 255, 255, 0.8);
             color: white;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             display: flex;
             align-items: center;
@@ -62,6 +62,43 @@
             user-select: none;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
+        #scope-btn {
+            position: absolute;
+            bottom: 135px;
+            right: 55px;
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 100, 255, 0.6);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        /* 狙擊鏡十字準星與黑邊遮罩 */
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+            display: none;
+        }
+        #crosshair::before, #crosshair::after {
+            content: '';
+            position: absolute;
+            background: red;
+        }
+        #crosshair::before { top: 9px; left: 0; width: 20px; height: 2px; }
+        #crosshair::after { top: 0; left: 9px; width: 2px; height: 20px; }
+
         #game-over {
             position: absolute;
             top: 50%;
@@ -82,7 +119,9 @@
 
     <div id="ui">分數: <span id="score">0</span> | 生命: <span id="health">100</span></div>
     <div id="joystick-base"><div id="joystick-stick"></div></div>
+    <div id="scope-btn">開鏡</div>
     <div id="shoot-btn">射擊</div>
+    <div id="crosshair"></div>
     <div id="game-over">遊戲結束<br><span style="font-size: 20px; color: white;">重新整理頁面再試一次</span></div>
 
     <script>
@@ -92,8 +131,8 @@
         let bullets = [];
         let score = 0;
         let isGameOver = false;
+        let isScoped = false; // 狙擊鏡狀態
 
-        // 觸控控制變數
         let moveTouchId = null;
         let joystickCenter = { x: 0, y: 0 };
         let joystickVector = { x: 0, y: 0 };
@@ -102,7 +141,6 @@
         animate();
 
         function init() {
-            // 1. 場景與相機設定
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x0a0a1a);
             scene.fog = new THREE.FogExp2(0x0a0a1a, 0.035);
@@ -113,7 +151,7 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
-            // 2. 燈光
+            // 燈光與地板
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
             scene.add(ambientLight);
 
@@ -121,21 +159,16 @@
             dirLight.position.set(20, 40, 20);
             scene.add(dirLight);
 
-            // 3. 地板
             const floorGeo = new THREE.PlaneGeometry(100, 100);
             const floorMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8 });
             const floor = new THREE.Mesh(floorGeo, floorMat);
             floor.rotation.x = -Math.PI / 2;
             scene.add(floor);
 
-            // 建立四周圍牆界線
             createWalls();
-
-            // 4. 事件監聽 (手機觸控與視窗縮放)
             setupControls();
             window.addEventListener('resize', onWindowResize);
 
-            // 每秒生成一隻殭屍
             setInterval(spawnZombie, 1500);
         }
 
@@ -167,7 +200,7 @@
             joystickCenter.x = rect.left + rect.width / 2;
             joystickCenter.y = rect.top + rect.height / 2;
 
-            // 虛擬搖桿觸控
+            // 搖桿觸控
             window.addEventListener('touchstart', (e) => {
                 for (let touch of e.changedTouches) {
                     if (touch.clientX < window.innerWidth / 2 && moveTouchId === null) {
@@ -195,11 +228,34 @@
                 }
             }, { passive: false });
 
+            // 狙擊鏡開關按鈕
+            document.getElementById('scope-btn').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                toggleScope();
+            });
+
             // 射擊按鈕
             document.getElementById('shoot-btn').addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 shootBullet();
             });
+        }
+
+        function toggleScope() {
+            isScoped = !isScoped;
+            const scopeBtn = document.getElementById('scope-btn');
+            const crosshair = document.getElementById('crosshair');
+
+            if (isScoped) {
+                camera.fov = 25; // 望遠放大
+                scopeBtn.style.background = 'rgba(0, 200, 0, 0.8)';
+                crosshair.style.display = 'block';
+            } else {
+                camera.fov = 75; // 恢復正常視野
+                scopeBtn.style.background = 'rgba(0, 100, 255, 0.6)';
+                crosshair.style.display = 'none';
+            }
+            camera.updateProjectionMatrix();
         }
 
         function updateJoystick(touch) {
@@ -225,11 +281,10 @@
             const zombieMat = new THREE.MeshStandardMaterial({ color: 0x338833 });
             const zombie = new THREE.Mesh(zombieGeo, zombieMat);
 
-            // 隨機在玩家周圍生成
             const angle = Math.random() * Math.PI * 2;
             const radius = 35;
             zombie.position.set(player.x + Math.cos(angle) * radius, 1, player.z + Math.sin(angle) * radius);
-            zombie.health = 2;
+            zombie.health = isScoped ? 1 : 2; // 開鏡狙擊傷害較高，兩槍內必死
 
             scene.add(zombie);
             zombies.push(zombie);
@@ -239,16 +294,17 @@
             if (isGameOver) return;
 
             const bulletGeo = new THREE.SphereGeometry(0.2, 8, 8);
-            const bulletMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+            const bulletMat = new THREE.MeshBasicMaterial({ color: isScoped ? 0x00ffcc : 0xffff00 });
             const bullet = new THREE.Mesh(bulletGeo, bulletMat);
 
-            bullet.position.set(player.x, 1, player.z);
+            bullet.position.set(player.x, 1.6, player.z);
             
-            // 決定子彈飛行方向 (朝向視野正前方)
+            // 速度加倍，開鏡時子彈飛更快更直
+            const bulletSpeed = isScoped ? 2.0 : 0.8;
             bullet.velocity = new THREE.Vector3(
-                -Math.sin(player.rotY) * 0.8,
+                -Math.sin(player.rotY) * bulletSpeed,
                 0,
-                -Math.cos(player.rotY) * 0.8
+                -Math.cos(player.rotY) * bulletSpeed
             );
 
             scene.add(bullet);
@@ -265,31 +321,26 @@
             if (isGameOver) return;
             requestAnimationFrame(animate);
 
-            // 1. 移動玩家 (依據搖桿方向)
+            // 修正前後反轉：將原本的減號改為加號，讓搖桿往前推時角色往前走
             const speed = 0.12;
             if (joystickVector.x !== 0 || joystickVector.y !== 0) {
-                // 簡易相機視角旋轉控制 (向右推搖桿會順便旋轉視角方向)
                 player.rotY -= joystickVector.x * 0.04;
                 
-                // 前進後退
-                player.x -= Math.sin(player.rotY) * joystickVector.y * speed;
-                player.z -= Math.cos(player.rotY) * joystickVector.y * speed;
+                player.x += Math.sin(player.rotY) * joystickVector.y * speed;
+                player.z += Math.cos(player.rotY) * joystickVector.y * speed;
             }
 
-            // 限制玩家活動範圍
             player.x = Math.max(-48, Math.min(48, player.x));
             player.z = Math.max(-48, Math.min(48, player.z));
 
-            // 更新攝影機位置與視角
             camera.position.set(player.x, 1.6, player.z);
             camera.rotation.y = player.rotY;
 
-            // 2. 更新子彈
+            // 子彈移動與碰撞
             for (let i = bullets.length - 1; i >= 0; i--) {
                 let b = bullets[i];
                 b.position.add(b.velocity);
 
-                // 檢查子彈是否打中殭屍
                 for (let j = zombies.length - 1; j >= 0; j--) {
                     let z = zombies[j];
                     if (b.position.distanceTo(z.position) < 1.2) {
@@ -308,15 +359,12 @@
                 }
             }
 
-            // 3. 更新殭屍行為
+            // 殭屍追逐
             for (let i = zombies.length - 1; i >= 0; i--) {
                 let z = zombies[i];
-                
-                // 殭屍面向玩家並追過來
                 z.lookAt(player.x, z.position.y, player.z);
                 z.translateZ(0.04);
 
-                // 檢查是否撞到玩家 (扣血)
                 if (z.position.distanceTo(new THREE.Vector3(player.x, 1, player.z)) < 1.0) {
                     player.health -= 1;
                     document.getElementById('health').innerText = player.health;
