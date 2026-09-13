@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DeepSeek 絲滑聊天</title>
+  <style>
+    /* 全域重置與字體設定 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(145deg, #0b0f17 0%, #1a1f2c 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      color: #e8edf5;
+    }
+
+    /* 主聊天卡片 - 玻璃質感 */
+    .chat-container {
+      width: 100%;
+      max-width: 800px;
+      height: 90vh;
+      max-height: 750px;
+      background: rgba(22, 28, 40, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 36px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: box-shadow 0.4s ease;
+    }
+
+    .chat-container:hover {
+      box-shadow: 0 35px 60px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.1);
+    }
+
+    /* 標題列 */
+    .chat-header {
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(12, 17, 24, 0.5);
+      backdrop-filter: blur(12px);
+    }
+
+    .chat-header h2 {
+      font-weight: 500;
+      font-size: 1.3rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #a0c0ff, #6d8cff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chat-header h2::before {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: #3b82f6;
+      border-radius: 50%;
+      box-shadow: 0 0 12px #3b82f6;
+      animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0% { opacity: 0.6; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 18px #3b82f6; }
+      100% { opacity: 0.6; transform: scale(0.9); }
+    }
+
+    /* API 設定區 */
+    .api-section {
+      padding: 16px 20px;
+      background: rgba(10, 14, 20, 0.5);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .api-section label {
+      font-size: 0.85rem;
+      color: #9aa8c0;
+      letter-spacing: 0.3px;
+      font-weight: 400;
+    }
+
+    .api-input-group {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      min-width: 200px;
+    }
+
+    .api-input-group input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 60px;
+      padding: 10px 18px;
+      font-size: 0.9rem;
+      color: #eef3fc;
+      outline: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+      font-family: inherit;
+      letter-spacing: 0.3px;
+      min-width: 150px;
+    }
+
+    .api-input-group input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .api-input-group input::placeholder {
+      color: #5f6b7e;
+      font-weight: 300;
+    }
+
+    /* 按鈕基礎樣式 - 全部由代碼控制動畫 */
+    .btn {
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 60px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+      color: #e8edf5;
+      letter-spacing: 0.3px;
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      white-space: nowrap;
+    }
+
+    /* 按鈕光暈漣漪效果（偽元素） */
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 150%;
+      height: 150%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, transparent 70%);
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.5);
+      transition: opacity 0.4s ease, transform 0.5s ease;
+      pointer-events: none;
+      border-radius: 50%;
+    }
+
+    .btn:hover::after {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    /* 主要按鈕（發送） */
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      color: white;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #1d4ed8, #2563eb);
+      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.96) translateY(0);
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    }
+
+    /* 次要按鈕（清除） */
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-secondary:active {
+      transform: scale(0.96) translateY(0);
+    }
+
+    /* 聊天訊息區域 */
+    .chat-messages {
+      flex: 1;
+      padding: 20px 22px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scroll-behavior: smooth;
+      background: rgba(8, 12, 18, 0.3);
+    }
+
+    /* 自訂滾動條 */
+    .chat-messages::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .chat-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* 訊息氣泡 */
+    .message {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      max-width: 85%;
+      animation: messageSlideIn 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
+      opacity: 0;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes messageSlideIn {
+      0% { opacity: 0; transform: translateY(12px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .message.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .message.assistant {
+      align-self: flex-start;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 600;
+      flex-shrink: 0;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease;
+    }
+
+    .message:hover .avatar {
+      transform: scale(1.05);
+    }
+
+    .message.user .avatar {
+      background: linear-gradient(145deg, #3b82f6, #2563eb);
+      color: white;
+    }
+
+    .message.assistant .avatar {
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #a0c0ff;
+    }
+
+    .bubble {
+      padding: 12px 18px;
+      border-radius: 22px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      word-break: break-word;
+      white-space: pre-wrap;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease;
+      max-width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .message.user .bubble {
+      background: linear-gradient(135deg, #2563eb, #1e4bb8);
+      color: white;
+      border-bottom-right-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .message.assistant .bubble {
+      background: rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(4px);
+      color: #e2e8f0;
+      border-bottom-left-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* 輸入區 */
+    .chat-input-area {
+      padding: 18px 22px 22px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: rgba(10, 15, 22, 0.6);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .chat-input-area input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 60px;
+      padding: 14px 22px;
+      font-size: 0.95rem;
+      color: #eef3fc;
+      outline: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+      font-family: inherit;
+      letter-spacing: 0.3px;
+    }
+
+    .chat-input-area input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      background: rgba(0, 0, 0, 0.7);
+    }
+
+    .chat-input-area input::placeholder {
+      color: #5f6b7e;
+      font-weight: 300;
+    }
+
+    /* 載入動畫 */
+    .typing-indicator {
+      display: flex;
+      gap: 5px;
+      padding: 8px 16px;
+      background: rgba(30, 41, 59, 0.8);
+      border-radius: 30px;
+      align-items: center;
+      width: fit-content;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      animation: messageSlideIn 0.3s ease;
+    }
+
+    .typing-indicator span {
+      width: 6px;
+      height: 6px;
+      background: #94a3b8;
+      border-radius: 50%;
+      display: inline-block;
+      animation: typingBounce 1.4s infinite ease-in-out both;
+    }
+
+    .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+      0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+      40% { transform: scale(1.2); opacity: 1; background: #60a5fa; }
+    }
+
+    /* 錯誤/系統訊息 */
+    .system-message {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 30px;
+      margin: 4px 0;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* 響應式 */
+    @media (max-width: 550px) {
+      .chat-container {
+        height: 95vh;
+        max-height: none;
+        border-radius: 28px;
+      }
+      .api-section {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .api-input-group {
+        flex-direction: column;
+      }
+      .api-input-group input {
+        width: 100%;
+      }
+      .btn {
+        padding: 10px 16px;
+        font-size: 0.85rem;
+      }
+      .chat-input-area {
+        padding: 14px 16px;
+      }
+      .chat-input-area input {
+        padding: 12px 16px;
+      }
+      .message {
+        max-width: 95%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <!-- 標題 -->
+    <div class="chat-header">
+      <h2>DeepSeek 對話</h2>
+    </div>
+
+    <!-- API 密鑰輸入區 -->
+    <div class="api-section">
+      <label for="apiKeyInput">API 密鑰</label>
+      <div class="api-input-group">
+        <input type="password" id="apiKeyInput" placeholder="sk-..." autocomplete="off" spellcheck="false">
+        <button class="btn btn-secondary" id="saveKeyBtn" aria-label="保存密鑰">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          保存
+        </button>
+      </div>
+    </div>
+
+    <!-- 聊天訊息區域 -->
+    <div class="chat-messages" id="chatMessages">
+      <!-- 預設歡迎訊息 -->
+      <div class="message assistant">
+        <div class="avatar">D</div>
+        <div class="bubble">您好！請先輸入 DeepSeek API 密鑰，然後點擊「保存」。之後我們就可以開始對話了。</div>
+      </div>
+    </div>
+
+    <!-- 底部輸入區 -->
+    <div class="chat-input-area">
+      <input type="text" id="messageInput" placeholder="輸入您的訊息..." autocomplete="off">
+      <button class="btn btn-secondary" id="clearBtn" aria-label="清除對話">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        清除
+      </button>
+      <button class="btn btn-primary" id="sendBtn" aria-label="發送訊息">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        發送
+      </button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ---------- DOM 元素 ----------
+      const apiKeyInput = document.getElementById('apiKeyInput');
+      const saveKeyBtn = document.getElementById('saveKeyBtn');
+      const chatMessages = document.getElementById('chatMessages');
+      const messageInput = document.getElementById('messageInput');
+      const sendBtn = document.getElementById('sendBtn');
+      const clearBtn = document.getElementById('clearBtn');
+
+      // ---------- 狀態 ----------
+      let apiKey = localStorage.getItem('deepseek_api_key') || '';
+      let isWaitingForResponse = false; // 防止重複請求
+      let typingIndicatorElement = null;
+
+      // 初始化：如果 localStorage 有密鑰，填入輸入框
+      if (apiKey) {
+        apiKeyInput.value = apiKey;
+      }
+
+      // ---------- 輔助函數 ----------
+      // 轉義 HTML 以防止 XSS（雖然是 textContent，但保持安全習慣）
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // .op滾動到底部
+      functionacity scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      // 新增系統訊息（例如錯誤提示）
+      function addSystemMessage(text) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'system-message';
+        msgDiv.textContent = text;
+        chatMessages.appendChild(msgDiv);
+        scrollToBottom();
+      }
+
+      // 新增聊天訊息
+      function addMessage(role, content) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${role}`;
+
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = 'avatar';
+        avatarDiv.textContent = role === 'user' ? 'U' : 'D';
+
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'bubble';
+        bubbleDiv.textContent = content;
+
+        messageDiv.appendChild(avatarDiv);
+        messageDiv.appendChild(bubbleDiv);
+        chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+        return messageDiv;
+      }
+
+      // 顯示「正在輸入」動畫
+      function showTypingIndicator() {
+        if (typingIndicatorElement) return;
+        const indicatorDiv = document.createElement('div');
+        indicatorDiv.className = 'message assistant';
+        indicatorDiv.id = 'typingIndicator';
+
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = 'avatar';
+        avatarDiv.textContent = 'D';
+
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'typing-indicator';
+        typingDiv.innerHTML = '<span></span><span></span><span></span>';
+
+        indicatorDiv.appendChild(avatarDiv);
+        indicatorDiv.appendChild(typingDiv);
+        chatMessages.appendChild(indicatorDiv);
+        typingIndicatorElement = indicatorDiv;
+        scrollToBottom();
+      }
+
+      // 隱藏「正在輸入」動畫
+      function hideTypingIndicator() {
+        if (typingIndicatorElement) {
+          typingIndicatorElement.remove();
+          typingIndicatorElement = null;
+        }
+      }
+
+      // 清除所有訊息，只留下歡迎語
+      function resetChat() {
+        chatMessages.innerHTML = '';
+        addMessage('assistant', '您好！請先輸入 DeepSeek API 密鑰，然後點擊「保存」。之後我們就可以開始對話了。');
+      }
+
+      // 驗證 API 密鑰是否已設置
+      function hasApiKey() {
+        return apiKey && apiKey.trim().length > 0;
+      }
+
+      // ---------- 保存 API 密鑰 ----------
+      saveKeyBtn.addEventListener('click', () => {
+        const key = apiKeyInput.value.trim();
+        if (!key) {
+          addSystemMessage('請輸入有效的 API 密鑰');
+          return;
+        }
+        apiKey = key;
+        localStorage.setItem('deepseek_api_key', key);
+        addSystemMessage('✅ API 密鑰已保存');
+        // 輕微震動反饋（可選）
+        if (navigator.vibrate) navigator.vibrate(10);
+      });
+
+      // ---------- 清除對話 ----------
+      clearBtn.addEventListener('click', () => {
+        if (isWaitingForResponse) {
+          addSystemMessage('請等待當前回應完成後再清除');
+          return;
+        }
+        resetChat();
+        // 可選：不清除 API 密鑰，只清除訊息
+        addSystemMessage('對話已清除');
+      });
+
+      // ---------- 發送訊息 ----------
+      async function sendMessage() {
+        const text = messageInput.value.trim();
+        if (!text) return;
+
+        // 檢查 API 密鑰
+        if (!hasApiKey()) {
+          addSystemMessage('⚠️ 請先輸入並保存 API 密鑰');
+          return;
+        }
+
+        // 防止重複發送
+        if (isWaitingForResponse) {
+          addSystemMessage('請等待上一則回應完成');
+          return;
+        }
+
+        // 清空輸入框並禁用發送按鈕
+        messageInput.value = '';
+        isWaitingForResponse = true;
+        sendBtn.disabled = true;
+        sendBtn.style = '0.6';
+        sendBtn.style.cursor = 'not-allowed';
+
+        // 添加用戶訊息
+        addMessage('user', text);
+
+        // 顯示輸入中動畫
+        showTypingIndicator();
+
+        try {
+          // 準備請求數據
+          const requestBody = {
+            model: 'deepseek-chat',
+            messages: [
+              { role: 'user', content: text }
+            ],
+            stream: false // 為簡單起見，不使用流式
+          };
+
+          const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify(requestBody)
+          });
+
+          // 隱藏輸入中動畫
+          hideTypingIndicator();
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const errorMsg = errorData.error?.message || `HTTP ${response.status} 錯誤`;
+            throw new Error(errorMsg);
+          }
+
+          const data = await response.json();
+          const reply = data.choices?.[0]?.message?.content;
+
+          if (!reply) {
+            throw new Error('API 回傳格式異常');
+          }
+
+          // 添加助理回應
+          addMessage('assistant', reply);
+
+        } catch (error) {
+          console.error('API 請求失敗:', error);
+          hideTypingIndicator();
+          addSystemMessage(`❌ 錯誤: ${error.message || '請求失敗，請檢查網絡或 API 密鑰'}`);
+          // 如果密鑰無效，可選提示
+          if (error.message && (error.message.includes('401') || error.message.includes('Unauthorized'))) {
+            addSystemMessage('請檢查 API 密鑰是否正確');
+          }
+        } finally {
+          // 恢復發送按鈕
+          isWaitingForResponse = false;
+          sendBtn.disabled = false;
+          sendBtn.style.opacity = '1';
+          sendBtn.style.cursor = 'pointer';
+          messageInput.focus();
+        }
+      }
+
+      // 綁定發送按鈕點擊
+      sendBtn.addEventListener('click', sendMessage);
+
+      // 綁定輸入框 Enter 鍵（發送）
+      messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      // 自動聚焦輸入框
+      messageInput.focus();
+
+      // 頁面加載時，如果已經有 API 密鑰，顯示提示
+      if (hasApiKey()) {
+        // 可以考慮顯示一個小提示，但為了不打擾，略過
+      } else {
+        // 可選：提醒輸入密鑰
+      }
+
+      // 處理按鈕禁用時的鼠標樣式
+      const style = document.createElement('style');
+      style.textContent = `
+        .btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none !important;
+          box-shadow: none !important;
+        }
+        .btn:disabled::after {
+          display: none;
+        }
+      `;
+      document.head.appendChild(style);
+
+    })();
+  </script>
+</body>
+</html>
