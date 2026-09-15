@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>DeepSeek · 紫耀會話（iOS 質感）</title>
+<title>DeepSeek · 紫耀会話（iOS 質感）</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github-dark.min.css">
@@ -14,7 +14,7 @@
   html, body { height: 100%; overflow: hidden; }
   body { background: #05000d; display: flex; justify-content: center; align-items: center; padding: 16px; margin: 0; position: relative; }
 
-  /* 蘋果彈簧曲線 */
+  /* Apple 彈簧曲線 */
   :root {
     --apple-spring: cubic-bezier(0.32, 0.72, 0, 1);
     --apple-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
@@ -168,9 +168,10 @@
   .send-btn.pulsing { animation: btnPulse 0.6s var(--apple-spring); }
   @keyframes btnPulse { 0% { transform: scale(1); } 50% { transform: scale(1.15); box-shadow: 0 0 40px rgba(176, 38, 255, 0.8); } 100% { transform: scale(1); } }
 
-  /* ================= 幽靈氣泡（用於發送動畫，位於 app-container 內，避免位置漂移） ================= */
+  /* ================= 幽靈氣泡（用於發送動畫） ================= */
+  /* 掛載到 body，使用 fixed 定位，避免 app-container 的 backdrop-filter 產生包含塊干擾 */
   .ghost-bubble {
-    position: absolute; z-index: 9999; pointer-events: none;
+    position: fixed; z-index: 9999; pointer-events: none;
     padding: 14px 22px; border-radius: 22px;
     font-size: 0.98rem; font-weight: 500; color: white;
     background: linear-gradient(135deg, #7b2fbe, #b026ff);
@@ -178,11 +179,23 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     max-width: 70%; opacity: 0; transform-origin: center center;
     transition: all 0.55s cubic-bezier(0.25, 0.1, 0.25, 1);
+    left: 0; top: 0;
   }
 
   /* Toast 样式 */
   .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(40px); background: rgba(74, 0, 128, 0.98); backdrop-filter: blur(16px); padding: 12px 28px; border-radius: 100px; color: #e0c8ff; font-size: 0.9rem; border: 1px solid rgba(176, 38, 255, 0.7); opacity: 0; transition: all 0.5s var(--apple-spring); pointer-events: none; z-index: 10000; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* 打字指示器（獨立包裝，避免錯位） */
+  .typing-wrapper { display: flex; align-items: flex-start; margin-top: 4px; }
+  .typing-indicator { display: flex; align-items: center; gap: 8px; padding: 12px 22px; background: linear-gradient(135deg, rgba(74, 0, 128, 0.95), rgba(42, 0, 80, 0.95)); border-radius: 40px; width: fit-content; border: 1px solid rgba(176, 38, 255, 0.6); animation: typingBreath 2s ease-in-out infinite; backdrop-filter: blur(12px); }
+  .typing-indicator span { width: 10px; height: 10px; background: radial-gradient(circle at 30% 30%, #e0aaff, #7b2fbe); border-radius: 50%; display: inline-block; animation: typingBounce 1.6s infinite var(--apple-spring); box-shadow: 0 0 15px rgba(224, 170, 255, 0.9); }
+  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; } .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0) scale(1); opacity: 0.5; } 30% { transform: translateY(-12px) scale(1.3); opacity: 1; } }
+  @keyframes typingBreath { 0%, 100% { border-color: rgba(176, 38, 255, 0.6); } 50% { border-color: rgba(224, 170, 255, 1); box-shadow: 0 0 40px rgba(176, 38, 255, 0.6); } }
+
+  /* 訊息落地動畫 */
+  @keyframes bubbleLand { 0% { transform: scale(0.85); opacity: 0; } 60% { transform: scale(1.03); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
 
   @media (max-width: 520px) {
     .app-container { height: 94vh; border-radius: 32px; }
@@ -417,11 +430,11 @@
     return messageDiv;
   }
 
-  // ================= 打字指示器 =================
+  // ================= 打字指示器（修復版：獨立包裝，避免錯位） =================
   function showTypingIndicator() {
     const typingDiv = document.createElement('div');
     typingDiv.classList.add('message', 'bot'); typingDiv.id = 'typingIndicator';
-    typingDiv.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+    typingDiv.innerHTML = '<div class="typing-wrapper"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
     chatMessages.appendChild(typingDiv);
     requestAnimationFrame(() => chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' }));
   }
@@ -473,26 +486,26 @@
     }
   }
 
-  // ================= 🌟 核心：發送訊息（iOS 質感細胞分裂動畫） =================
+  // ================= 🌟 核心：發送訊息（修復版 iOS 質感細胞分裂動畫） =================
   async function sendMessage() {
     if (isWaitingForResponse || !currentConversation) return;
     const text = messageInput.value.trim();
     if (!text) { showToast('请输入消息内容'); return; }
     
-    // 1. 獲取所有相關座標（全部基於 appContainer，杜絕 Bug）
-    const containerRect = appContainer.getBoundingClientRect();
+    // 1. 獲取所有相關座標（全部基於視口，杜絕 Bug）
     const btnRect = sendBtn.getBoundingClientRect();
     const inputRect = messageInput.getBoundingClientRect();
     const msgRect = chatMessages.getBoundingClientRect();
 
-    const btnX = btnRect.left + btnRect.width / 2 - containerRect.left;
-    const btnY = btnRect.top + btnRect.height / 2 - containerRect.top;
-    const inputX = inputRect.left + inputRect.width / 2 - containerRect.left;
-    const inputY = inputRect.top + inputRect.height / 2 - containerRect.top;
-    const targetX = msgRect.right - 100 - containerRect.left;
-    const targetY = msgRect.bottom - 80 - containerRect.top;
+    const btnX = btnRect.left + btnRect.width / 2;
+    const btnY = btnRect.top + btnRect.height / 2;
+    const inputX = inputRect.left + inputRect.width / 2;
+    const inputY = inputRect.top + inputRect.height / 2;
+    // 目標位置設為聊天區域底部偏右
+    const targetX = msgRect.right - 100;
+    const targetY = msgRect.bottom - 80;
 
-    // 2. 創建幽靈氣泡（絕對定位在 appContainer 內）
+    // 2. 創建幽靈氣泡（絕對定位在 body 上，避免 backdrop-filter 干擾）
     const ghost = document.createElement('div');
     ghost.className = 'ghost-bubble';
     ghost.textContent = text;
@@ -500,7 +513,7 @@
     ghost.style.top = inputY + 'px';
     ghost.style.transform = 'translate(-50%, -50%) scale(1)';
     ghost.style.opacity = '1';
-    appContainer.appendChild(ghost);
+    document.body.appendChild(ghost);
 
     // 3. 清空輸入框並禁用
     messageInput.value = '';
@@ -531,7 +544,7 @@
       splitBubble.style.top = btnY + 'px';
       splitBubble.style.transform = 'translate(-50%, -50%) scale(0.1)';
       splitBubble.style.opacity = '0';
-      appContainer.appendChild(splitBubble);
+      document.body.appendChild(splitBubble);
 
       // 6. 階段三：氣泡飛向聊天區域（帶有 Apple 彈簧感）
       setTimeout(() => {
@@ -605,22 +618,6 @@
 
   // ================= 初始化 =================
   renderConversationList();
-
-  // 添加 bubbleLand 的 CSS Keyframe
-  const styleSheet = document.createElement("style");
-  styleSheet.textContent = `
-    @keyframes bubbleLand {
-      0% { transform: scale(0.85); opacity: 0; }
-      60% { transform: scale(1.03); opacity: 1; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    .typing-indicator { display: flex; align-items: center; gap: 8px; padding: 12px 22px; background: linear-gradient(135deg, rgba(74, 0, 128, 0.95), rgba(42, 0, 80, 0.95)); border-radius: 40px; width: fit-content; margin-top: 4px; border: 1px solid rgba(176, 38, 255, 0.6); animation: typingBreath 2s ease-in-out infinite; backdrop-filter: blur(12px); }
-    .typing-indicator span { width: 10px; height: 10px; background: radial-gradient(circle at 30% 30%, #e0aaff, #7b2fbe); border-radius: 50%; display: inline-block; animation: typingBounce 1.6s infinite var(--apple-spring); box-shadow: 0 0 15px rgba(224, 170, 255, 0.9); }
-    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; } .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0) scale(1); opacity: 0.5; } 30% { transform: translateY(-12px) scale(1.3); opacity: 1; } }
-    @keyframes typingBreath { 0%, 100% { border-color: rgba(176, 38, 255, 0.6); } 50% { border-color: rgba(224, 170, 255, 1); box-shadow: 0 0 40px rgba(176, 38, 255, 0.6); } }
-  `;
-  document.head.appendChild(styleSheet);
 })();
 </script>
 </body>
