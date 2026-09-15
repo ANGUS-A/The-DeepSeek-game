@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>DeepSeek</title>
+<title>DeepSeek 聊天 · 紫耀進化</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github-dark.min.css">
@@ -16,19 +16,33 @@
     font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
   }
 
+  :root {
+    --purple-deep: #1a0533;
+    --purple-dark: #2a0a4a;
+    --purple-mid: #4a1a7a;
+    --purple-bright: #7b2fbe;
+    --purple-glow: #c77dff;
+    --purple-neon: #e0aaff;
+    --purple-soft: #b892ff;
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
   body {
-    background: #05060a;
+    background: #0d0118;
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 16px;
     margin: 0;
-    overflow: hidden;
     position: relative;
   }
 
-  /* ===== 極光背景 ===== */
+  /* ===== 多層紫色極光背景 ===== */
   .aurora-bg {
     position: fixed;
     inset: 0;
@@ -37,144 +51,200 @@
     pointer-events: none;
   }
 
-  .aurora-bg::before,
-  .aurora-bg::after {
-    content: '';
+  .aurora-layer {
     position: absolute;
-    width: 200%;
-    height: 200%;
-    top: -50%;
-    left: -50%;
+    inset: -50%;
+    filter: blur(60px);
+    opacity: 0.7;
+  }
+
+  .aurora-1 {
     background:
-      radial-gradient(circle at 20% 30%, rgba(0, 120, 255, 0.22) 0%, transparent 40%),
-      radial-gradient(circle at 80% 70%, rgba(150, 0, 255, 0.15) 0%, transparent 40%),
-      radial-gradient(circle at 50% 50%, rgba(0, 220, 255, 0.12) 0%, transparent 50%);
-    animation: auroraMove1 20s ease-in-out infinite alternate;
-    filter: blur(40px);
+      radial-gradient(circle at 20% 30%, rgba(123, 47, 190, 0.55) 0%, transparent 45%),
+      radial-gradient(circle at 80% 70%, rgba(199, 125, 255, 0.35) 0%, transparent 45%);
+    animation: aurora1 22s ease-in-out infinite alternate;
   }
 
-  .aurora-bg::after {
+  .aurora-2 {
     background:
-      radial-gradient(circle at 70% 20%, rgba(0, 180, 255, 0.18) 0%, transparent 45%),
-      radial-gradient(circle at 30% 80%, rgba(80, 0, 200, 0.15) 0%, transparent 45%);
-    animation: auroraMove2 25s ease-in-out infinite alternate;
+      radial-gradient(circle at 70% 20%, rgba(74, 26, 122, 0.6) 0%, transparent 50%),
+      radial-gradient(circle at 30% 80%, rgba(224, 170, 255, 0.3) 0%, transparent 50%);
+    animation: aurora2 28s ease-in-out infinite alternate;
   }
 
-  @keyframes auroraMove1 {
+  .aurora-3 {
+    background:
+      radial-gradient(circle at 50% 50%, rgba(123, 47, 190, 0.4) 0%, transparent 60%),
+      radial-gradient(circle at 15% 85%, rgba(224, 170, 255, 0.25) 0%, transparent 50%);
+    animation: aurora3 25s ease-in-out infinite alternate;
+  }
+
+  .aurora-4 {
+    background:
+      radial-gradient(circle at 85% 40%, rgba(199, 125, 255, 0.3) 0%, transparent 45%),
+      radial-gradient(circle at 25% 55%, rgba(168, 85, 247, 0.35) 0%, transparent 50%);
+    animation: aurora4 32s ease-in-out infinite alternate;
+  }
+
+  @keyframes aurora1 {
     0% { transform: translate(0, 0) rotate(0deg) scale(1); }
-    100% { transform: translate(8%, -6%) rotate(8deg) scale(1.1); }
+    100% { transform: translate(10%, -8%) rotate(15deg) scale(1.15); }
+  }
+  @keyframes aurora2 {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1.1); }
+    100% { transform: translate(-10%, 8%) rotate(-12deg) scale(1); }
+  }
+  @keyframes aurora3 {
+    0% { transform: translate(-5%, 5%) rotate(-5deg); }
+    100% { transform: translate(8%, -6%) rotate(8deg); }
+  }
+  @keyframes aurora4 {
+    0% { transform: translate(5%, 5%) rotate(8deg) scale(1); }
+    100% { transform: translate(-8%, -5%) rotate(-10deg) scale(1.1); }
   }
 
-  @keyframes auroraMove2 {
-    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
-    100% { transform: translate(-8%, 6%) rotate(-8deg) scale(1.15); }
-  }
-
-  /* ===== 粒子層 ===== */
-  .bg-particles {
+  /* ===== 紫色星塵 ===== */
+  .stars-bg {
     position: fixed;
     inset: 0;
-    pointer-events: none;
     z-index: 1;
     overflow: hidden;
+    pointer-events: none;
   }
 
-  .bg-particles span {
+  .star {
     position: absolute;
-    width: 3px;
-    height: 3px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(120, 200, 255, 0.95), transparent 70%);
-    animation: floatUp linear infinite;
+    background: radial-gradient(circle, #e0aaff, rgba(199, 125, 255, 0.4) 50%, transparent 70%);
+    box-shadow: 0 0 10px rgba(199, 125, 255, 0.8), 0 0 20px rgba(123, 47, 190, 0.5);
+    animation: starFloat linear infinite, starTwinkle ease-in-out infinite alternate;
     opacity: 0;
-    box-shadow: 0 0 8px rgba(0, 180, 255, 0.8);
   }
 
-  @keyframes floatUp {
-    0% { transform: translateY(0) translateX(0) scale(0.3); opacity: 0; }
+  @keyframes starFloat {
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
     10% { opacity: 1; }
-    50% { transform: translateY(-50vh) translateX(30px) scale(1.3); opacity: 0.7; }
-    90% { opacity: 0.2; }
-    100% { transform: translateY(-110vh) translateX(-20px) scale(0.3); opacity: 0; }
+    90% { opacity: 0.4; }
+    100% { transform: translateY(-110vh) translateX(50px); opacity: 0; }
+  }
+
+  @keyframes starTwinkle {
+    0% { filter: brightness(0.7); }
+    100% { filter: brightness(1.5); }
+  }
+
+  /* ===== 滑鼠光軌 ===== */
+  .mouse-trail {
+    position: fixed;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(224, 170, 255, 0.9), rgba(123, 47, 190, 0.5) 50%, transparent);
+    pointer-events: none;
+    z-index: 100;
+    box-shadow: 0 0 20px rgba(199, 125, 255, 0.8);
+    animation: trailFade 1s ease-out forwards;
+    transform: translate(-50%, -50%);
+  }
+
+  @keyframes trailFade {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
   }
 
   /* ===== 主卡片 ===== */
   .chat-container {
     position: relative;
-    z-index: 3;
+    z-index: 5;
     width: 100%;
     max-width: 780px;
     height: 90vh;
     max-height: 820px;
-    background: rgba(15, 20, 35, 0.72);
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border: 1px solid rgba(100, 180, 255, 0.22);
+    background: linear-gradient(135deg, rgba(26, 5, 51, 0.85), rgba(42, 10, 74, 0.75));
+    backdrop-filter: blur(32px) saturate(200%);
+    -webkit-backdrop-filter: blur(32px) saturate(200%);
+    border: 1px solid rgba(199, 125, 255, 0.35);
     border-radius: 44px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.6s ease, border-color 0.6s ease;
+    transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.8s ease, border-color 0.8s ease;
     animation:
-      cardEntrance 1.2s cubic-bezier(0.2, 0.9, 0.3, 1) both,
-      cardFloat 7s ease-in-out infinite alternate,
-      cardGlow 4s ease-in-out infinite alternate;
+      cardEntrance 1.4s cubic-bezier(0.2, 0.9, 0.3, 1) both,
+      cardFloat 8s ease-in-out infinite alternate,
+      cardGlow 5s ease-in-out infinite alternate;
     transform-style: preserve-3d;
+    isolation: isolate;
+  }
+
+  /* 內部紫色光環 */
+  .chat-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 44px;
+    background: radial-gradient(ellipse at 50% -20%, rgba(199, 125, 255, 0.18), transparent 60%);
+    pointer-events: none;
+    z-index: 1;
   }
 
   @keyframes cardEntrance {
     0% {
       opacity: 0;
-      transform: translateY(60px) scale(0.88) rotateX(12deg);
-      filter: blur(12px);
+      transform: translateY(60px) scale(0.85) rotateX(15deg);
+      filter: blur(15px) hue-rotate(45deg);
     }
     100% {
       opacity: 1;
       transform: translateY(0) scale(1) rotateX(0);
-      filter: blur(0);
+      filter: blur(0) hue-rotate(0);
     }
   }
 
   @keyframes cardFloat {
     0% { transform: translateY(0px) rotateZ(0deg); }
-    100% { transform: translateY(-8px) rotateZ(0.4deg); }
+    100% { transform: translateY(-10px) rotateZ(0.5deg); }
   }
 
   @keyframes cardGlow {
     0% {
-      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8),
-                  0 0 0 1px rgba(80, 160, 255, 0.1) inset,
-                  0 0 30px rgba(0, 180, 255, 0.1);
-      border-color: rgba(100, 180, 255, 0.2);
+      box-shadow: 
+        0 30px 80px -20px rgba(123, 47, 190, 0.6),
+        0 0 0 1px rgba(199, 125, 255, 0.2) inset,
+        0 0 60px rgba(123, 47, 190, 0.4),
+        0 0 100px rgba(199, 125, 255, 0.15);
+      border-color: rgba(199, 125, 255, 0.35);
     }
     100% {
-      box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.9),
-                  0 0 0 1px rgba(80, 200, 255, 0.3) inset,
-                  0 0 70px rgba(0, 200, 255, 0.3);
-      border-color: rgba(0, 200, 255, 0.5);
+      box-shadow: 
+        0 40px 100px -20px rgba(123, 47, 190, 0.9),
+        0 0 0 1px rgba(224, 170, 255, 0.4) inset,
+        0 0 100px rgba(123, 47, 190, 0.7),
+        0 0 160px rgba(199, 125, 255, 0.3);
+      border-color: rgba(224, 170, 255, 0.6);
     }
   }
 
-  /* 頂部科技掃描線 */
+  /* 頂部紫色掃描光線 */
   .chat-container::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #4da6ff, #00e0ff, #4da6ff, transparent);
-    background-size: 200% 100%;
-    animation: topScan 3s linear infinite;
-    z-index: 10;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #7b2fbe, #e0aaff, #c77dff, #7b2fbe, transparent);
+    background-size: 300% 100%;
+    animation: topScan 4s linear infinite;
+    z-index: 15;
     border-radius: 44px 44px 0 0;
     filter: blur(0.5px);
-    box-shadow: 0 0 12px rgba(0, 200, 255, 0.8);
+    box-shadow: 0 0 20px rgba(199, 125, 255, 1), 0 0 40px rgba(123, 47, 190, 0.8);
   }
 
   @keyframes topScan {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% { background-position: 300% 0; }
+    100% { background-position: -300% 0; }
   }
 
   /* ===== 頭部 ===== */
@@ -184,17 +254,18 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 12px;
-    background: rgba(8, 14, 26, 0.65);
-    border-bottom: 1px solid rgba(70, 150, 255, 0.15);
-    backdrop-filter: blur(14px);
+    background: linear-gradient(135deg, rgba(26, 5, 51, 0.7), rgba(42, 10, 74, 0.5));
+    border-bottom: 1px solid rgba(199, 125, 255, 0.2);
+    backdrop-filter: blur(16px);
     position: relative;
     overflow: hidden;
-    animation: headerSlide 0.9s 0.2s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+    animation: headerSlide 1s 0.2s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+    z-index: 2;
   }
 
   @keyframes headerSlide {
-    0% { opacity: 0; transform: translateY(-40px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% { opacity: 0; transform: translateY(-50px); filter: blur(10px); }
+    100% { opacity: 1; transform: translateY(0); filter: blur(0); }
   }
 
   .chat-header::after {
@@ -204,8 +275,8 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(80, 180, 255, 0.12), transparent);
-    animation: headerShine 5s ease-in-out infinite;
+    background: linear-gradient(90deg, transparent, rgba(199, 125, 255, 0.18), transparent);
+    animation: headerShine 6s ease-in-out infinite;
     pointer-events: none;
   }
 
@@ -214,18 +285,19 @@
     50% { left: 100%; }
   }
 
+  /* API 輸入框 */
   .api-input-wrapper {
     flex: 1;
     min-width: 160px;
     display: flex;
     align-items: center;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(13, 1, 24, 0.6);
     border-radius: 100px;
     padding: 2px 2px 2px 20px;
-    border: 1px solid rgba(120, 180, 255, 0.25);
+    border: 1px solid rgba(199, 125, 255, 0.3);
     transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
     position: relative;
-    animation: fadeSlideUp 0.9s 0.3s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+    animation: fadeSlideUp 1s 0.3s cubic-bezier(0.2, 0.9, 0.3, 1) both;
   }
 
   @keyframes fadeSlideUp {
@@ -238,13 +310,13 @@
     position: absolute;
     inset: -2px;
     border-radius: 100px;
-    background: linear-gradient(90deg, transparent, rgba(0, 220, 255, 0.5), transparent);
+    background: linear-gradient(90deg, transparent, rgba(224, 170, 255, 0.7), transparent);
     background-size: 200% 100%;
     opacity: 0;
     transition: opacity 0.5s ease;
     pointer-events: none;
     z-index: -1;
-    filter: blur(2px);
+    filter: blur(3px);
   }
 
   .api-input-wrapper:focus-within::before {
@@ -258,10 +330,13 @@
   }
 
   .api-input-wrapper:focus-within {
-    border-color: #4da6ff;
-    box-shadow: 0 0 0 4px rgba(77, 166, 255, 0.15), 0 0 40px rgba(0, 140, 255, 0.35);
-    background: rgba(10, 25, 50, 0.9);
-    transform: scale(1.018);
+    border-color: #c77dff;
+    box-shadow: 
+      0 0 0 4px rgba(199, 125, 255, 0.18), 
+      0 0 50px rgba(123, 47, 190, 0.6),
+      inset 0 0 20px rgba(199, 125, 255, 0.1);
+    background: rgba(26, 5, 51, 0.9);
+    transform: scale(1.02);
   }
 
   .api-input-wrapper input {
@@ -269,20 +344,21 @@
     background: transparent;
     border: none;
     outline: none;
-    color: #eef5ff;
+    color: #f0e5ff;
     font-size: 0.95rem;
     padding: 12px 0;
     min-width: 0;
     transition: color 0.5s ease;
+    letter-spacing: 0.3px;
   }
 
   .api-input-wrapper input::placeholder {
-    color: rgba(170, 210, 255, 0.4);
+    color: rgba(199, 125, 255, 0.5);
     transition: all 0.5s ease;
   }
 
   .api-input-wrapper input:focus::placeholder {
-    color: rgba(170, 210, 255, 0.15);
+    color: rgba(199, 125, 255, 0.2);
     transform: translateX(6px);
   }
 
@@ -301,37 +377,57 @@
     user-select: none;
   }
 
+  /* 保存按鈕 — 紫色金屬漸層 */
   .save-btn {
-    background: linear-gradient(135deg, #1b6aff, #00b4ff);
+    background: linear-gradient(135deg, #4a1a7a, #7b2fbe, #c77dff);
+    background-size: 200% 200%;
     border-radius: 100px;
     padding: 10px 20px;
     font-size: 0.85rem;
-    box-shadow: 0 6px 18px rgba(0, 120, 255, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      0 6px 20px rgba(123, 47, 190, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(224, 170, 255, 0.4);
     font-weight: 600;
     transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
     white-space: nowrap;
     position: relative;
     overflow: hidden;
-    animation: fadeSlideUp 0.9s 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) both,
-               btnBreath 3.5s ease-in-out infinite;
+    animation: 
+      fadeSlideUp 1s 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) both,
+      btnBreath 4s ease-in-out infinite,
+      btnGradient 6s ease infinite;
     z-index: 1;
+    letter-spacing: 0.3px;
+  }
+
+  @keyframes btnGradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
 
   @keyframes btnBreath {
     0%, 100% {
-      box-shadow: 0 6px 18px rgba(0, 120, 255, 0.4);
+      box-shadow: 
+        0 6px 20px rgba(123, 47, 190, 0.6),
+        0 0 20px rgba(199, 125, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
     50% {
-      box-shadow: 0 10px 30px rgba(0, 150, 255, 0.7), 0 0 25px rgba(0, 200, 255, 0.4);
+      box-shadow: 
+        0 10px 35px rgba(123, 47, 190, 0.9),
+        0 0 40px rgba(199, 125, 255, 0.6),
+        0 0 80px rgba(224, 170, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
     }
   }
 
   .save-btn::before {
     content: '';
     position: absolute;
-    inset: -2px;
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.55), transparent 70%);
+    inset: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), transparent 70%);
     opacity: 0;
     transition: opacity 0.5s ease;
     border-radius: 100px;
@@ -340,19 +436,21 @@
   .save-btn::after {
     content: '';
     position: absolute;
-    width: 50%;
+    width: 60%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
     top: 0;
     left: -80%;
     transform: skewX(-20deg);
-    transition: left 0.9s cubic-bezier(0.2, 0.9, 0.3, 1);
+    transition: left 1s cubic-bezier(0.2, 0.9, 0.3, 1);
   }
 
   .save-btn:hover {
-    transform: translateY(-4px) scale(1.06);
-    box-shadow: 0 20px 40px rgba(0, 150, 255, 0.7);
-    background: linear-gradient(135deg, #3a85ff, #2ec4ff);
+    transform: translateY(-4px) scale(1.07);
+    box-shadow: 
+      0 20px 45px rgba(123, 47, 190, 0.9),
+      0 0 60px rgba(199, 125, 255, 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
   }
 
   .save-btn:hover::before { opacity: 1; }
@@ -365,13 +463,19 @@
   }
 
   .save-btn.saved {
-    animation: savePulse 0.8s cubic-bezier(0.2, 0.9, 0.3, 1);
+    animation: savePulse 0.9s cubic-bezier(0.2, 0.9, 0.3, 1);
   }
 
   @keyframes savePulse {
-    0% { transform: scale(1); box-shadow: 0 6px 18px rgba(0, 120, 255, 0.4); }
-    50% { transform: scale(1.15); box-shadow: 0 0 0 15px rgba(0, 220, 255, 0.4), 0 0 40px rgba(0, 200, 255, 0.8); }
-    100% { transform: scale(1); box-shadow: 0 6px 18px rgba(0, 120, 255, 0.4); }
+    0% { transform: scale(1); }
+    50% { 
+      transform: scale(1.18); 
+      box-shadow: 
+        0 0 0 20px rgba(199, 125, 255, 0.3), 
+        0 0 60px rgba(224, 170, 255, 1),
+        0 0 100px rgba(199, 125, 255, 0.8);
+    }
+    100% { transform: scale(1); }
   }
 
   /* ===== 消息區域 ===== */
@@ -383,10 +487,13 @@
     flex-direction: column;
     gap: 18px;
     scroll-behavior: smooth;
-    background: radial-gradient(ellipse at 30% 10%, rgba(30, 70, 120, 0.25), transparent 70%);
+    background: 
+      radial-gradient(ellipse at 30% 10%, rgba(74, 26, 122, 0.35), transparent 60%),
+      radial-gradient(ellipse at 70% 90%, rgba(123, 47, 190, 0.2), transparent 60%);
     transition: background 1s ease;
-    animation: fadeIn 1.2s 0.4s both;
+    animation: fadeIn 1.4s 0.4s both;
     position: relative;
+    z-index: 2;
   }
 
   @keyframes fadeIn {
@@ -394,15 +501,17 @@
     to { opacity: 1; }
   }
 
-  .chat-messages::-webkit-scrollbar { width: 6px; }
-  .chat-messages::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 20px; }
+  .chat-messages::-webkit-scrollbar { width: 8px; }
+  .chat-messages::-webkit-scrollbar-track { background: rgba(123, 47, 190, 0.05); border-radius: 20px; }
   .chat-messages::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(100, 180, 255, 0.5), rgba(0, 150, 255, 0.7));
+    background: linear-gradient(180deg, rgba(123, 47, 190, 0.7), rgba(199, 125, 255, 0.9));
     border-radius: 20px;
     transition: all 0.4s ease;
+    box-shadow: 0 0 10px rgba(199, 125, 255, 0.5);
   }
   .chat-messages::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, rgba(100, 200, 255, 0.9), rgba(0, 180, 255, 1));
+    background: linear-gradient(180deg, rgba(199, 125, 255, 1), rgba(224, 170, 255, 1));
+    box-shadow: 0 0 20px rgba(224, 170, 255, 0.9);
   }
 
   /* ===== 訊息氣泡 ===== */
@@ -411,23 +520,26 @@
     display: flex;
     flex-direction: column;
     opacity: 0;
-    animation: messageAppear 0.8s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+    animation: messageAppear 1s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
     position: relative;
   }
 
   @keyframes messageAppear {
     0% {
       opacity: 0;
-      transform: translateY(30px) scale(0.85) rotateZ(3deg);
-      filter: blur(10px);
+      transform: translateY(40px) scale(0.8) rotateZ(4deg);
+      filter: blur(12px);
     }
-    55% {
+    40% {
       opacity: 1;
-      transform: translateY(-6px) scale(1.03) rotateZ(-1deg);
+      transform: translateY(-10px) scale(1.05) rotateZ(-1.5deg);
       filter: blur(0);
     }
-    75% {
-      transform: translateY(3px) scale(0.99) rotateZ(0.5deg);
+    60% {
+      transform: translateY(5px) scale(0.98) rotateZ(1deg);
+    }
+    80% {
+      transform: translateY(-2px) scale(1.01) rotateZ(-0.3deg);
     }
     100% {
       opacity: 1;
@@ -445,33 +557,28 @@
     align-items: flex-start;
   }
 
-  /* 訊息左側漣漪線 */
+  /* 訊息光暈擴散 */
   .message::before {
     content: '';
     position: absolute;
-    left: -12px;
-    top: 20%;
-    width: 2px;
-    height: 60%;
-    border-radius: 2px;
-    background: linear-gradient(180deg, transparent, rgba(0, 200, 255, 0.6), transparent);
-    animation: sideLine 2.5s ease-in-out infinite;
+    inset: -20px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(199, 125, 255, 0.15), transparent 60%);
     opacity: 0;
-    transition: opacity 0.5s ease;
-  }
-
-  .message.user::before {
-    left: auto;
-    right: -12px;
+    transition: opacity 0.6s ease;
+    pointer-events: none;
+    z-index: -1;
+    filter: blur(20px);
   }
 
   .message:hover::before {
     opacity: 1;
+    animation: auraPulse 2s ease-in-out infinite;
   }
 
-  @keyframes sideLine {
-    0%, 100% { transform: scaleY(0.5); opacity: 0.3; }
-    50% { transform: scaleY(1.2); opacity: 1; }
+  @keyframes auraPulse {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.2); opacity: 1; }
   }
 
   /* 氣泡本體 */
@@ -482,8 +589,8 @@
     line-height: 1.65;
     word-break: break-word;
     transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     position: relative;
     overflow: hidden;
     animation: bubbleBreath 5s ease-in-out infinite;
@@ -491,54 +598,60 @@
     user-select: none;
   }
 
-  /* 點擊時閃爍提示 */
   .bubble:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
     transition: all 0.1s ease;
   }
 
   @keyframes bubbleBreath {
     0%, 100% {
-      box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.6), 0 0 0 0 rgba(0, 200, 255, 0);
+      box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.7), 0 0 0 0 rgba(199, 125, 255, 0);
     }
     50% {
-      box-shadow: 0 18px 38px -8px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 200, 255, 0.15);
+      box-shadow: 
+        0 18px 40px -8px rgba(0, 0, 0, 0.8), 
+        0 0 40px rgba(123, 47, 190, 0.3);
     }
   }
 
-  /* 複製成功時的脈衝 */
   .bubble.copied {
-    animation: copyPulse 0.7s cubic-bezier(0.2, 0.9, 0.3, 1);
+    animation: copyPulse 0.9s cubic-bezier(0.2, 0.9, 0.3, 1);
   }
 
   @keyframes copyPulse {
     0% { transform: scale(1); }
-    30% { transform: scale(1.06); box-shadow: 0 0 0 8px rgba(0, 220, 255, 0.4), 0 0 40px rgba(0, 220, 255, 0.8); }
-    100% { transform: scale(1); box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.6); }
+    30% { 
+      transform: scale(1.08); 
+      box-shadow: 
+        0 0 0 12px rgba(199, 125, 255, 0.5), 
+        0 0 60px rgba(224, 170, 255, 1),
+        0 0 100px rgba(199, 125, 255, 0.7);
+    }
+    100% { transform: scale(1); }
   }
 
   /* 複製漣漪 */
   .copy-ripple {
     position: absolute;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(0, 220, 255, 0.6), transparent 70%);
+    background: radial-gradient(circle, rgba(224, 170, 255, 0.8), rgba(123, 47, 190, 0.4) 50%, transparent 70%);
     transform: scale(0);
-    animation: copyRippleExpand 0.9s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+    animation: copyRippleExpand 1.2s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
     pointer-events: none;
     z-index: 5;
   }
 
   @keyframes copyRippleExpand {
-    to { transform: scale(5); opacity: 0; }
+    to { transform: scale(6); opacity: 0; }
   }
 
-  /* 氣泡光暈跟隨滑鼠 */
+  /* 光暈跟隨滑鼠 */
   .bubble::before {
     content: '';
     position: absolute;
     inset: 0;
     border-radius: 28px;
-    background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.15), transparent 60%);
+    background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(224, 170, 255, 0.25), transparent 60%);
     opacity: 0;
     transition: opacity 0.4s ease;
     pointer-events: none;
@@ -556,9 +669,9 @@
     left: -150%;
     width: 80%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+    background: linear-gradient(90deg, transparent, rgba(224, 170, 255, 0.25), transparent);
     transform: skewX(-25deg);
-    transition: left 1s cubic-bezier(0.2, 0.9, 0.3, 1);
+    transition: left 1.2s cubic-bezier(0.2, 0.9, 0.3, 1);
     pointer-events: none;
   }
 
@@ -566,14 +679,17 @@
     left: 150%;
   }
 
-  /* 用戶氣泡 */
+  /* 用戶氣泡 — 紫色金屬 */
   .message.user .bubble {
-    background: linear-gradient(135deg, #0066ff, #0099ff, #00b4ff);
+    background: linear-gradient(135deg, #4a1a7a, #7b2fbe, #a855f7);
     background-size: 200% 200%;
-    animation: userGradient 4s ease-in-out infinite, bubbleBreath 4s ease-in-out infinite;
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    box-shadow: 0 14px 28px -8px rgba(0, 120, 255, 0.6), 0 0 20px rgba(0, 150, 255, 0.2);
+    animation: userGradient 5s ease-in-out infinite, bubbleBreath 5s ease-in-out infinite;
+    color: #ffffff;
+    border: 1px solid rgba(224, 170, 255, 0.45);
+    box-shadow: 
+      0 14px 32px -8px rgba(123, 47, 190, 0.7), 
+      0 0 30px rgba(199, 125, 255, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
   }
 
   @keyframes userGradient {
@@ -582,43 +698,51 @@
   }
 
   .message.user .bubble:hover {
-    transform: translateY(-3px) scale(1.015);
-    box-shadow: 0 20px 40px -8px rgba(0, 150, 255, 0.8), 0 0 40px rgba(0, 180, 255, 0.4);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+      0 24px 50px -8px rgba(123, 47, 190, 1), 
+      0 0 60px rgba(199, 125, 255, 0.6);
   }
 
-  /* 機器人氣泡 */
+  /* 機器人氣泡 — 深紫玻璃 */
   .message.bot .bubble {
-    background: rgba(28, 40, 60, 0.88);
-    color: #e6f0ff;
-    border: 1px solid rgba(80, 160, 255, 0.28);
-    box-shadow: 0 14px 28px -8px rgba(0, 0, 0, 0.7);
+    background: rgba(42, 10, 74, 0.88);
+    color: #f0e5ff;
+    border: 1px solid rgba(199, 125, 255, 0.35);
+    box-shadow: 
+      0 14px 32px -8px rgba(0, 0, 0, 0.8),
+      inset 0 1px 0 rgba(224, 170, 255, 0.15);
     animation: botBorderPulse 4s ease-in-out infinite;
   }
 
   @keyframes botBorderPulse {
     0%, 100% {
-      border-color: rgba(80, 160, 255, 0.28);
+      border-color: rgba(199, 125, 255, 0.35);
     }
     50% {
-      border-color: rgba(0, 200, 255, 0.65);
-      box-shadow: 0 14px 28px -8px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 180, 255, 0.25);
+      border-color: rgba(224, 170, 255, 0.8);
+      box-shadow: 
+        0 14px 32px -8px rgba(0, 0, 0, 0.8), 
+        0 0 45px rgba(123, 47, 190, 0.5);
     }
   }
 
   .message.bot .bubble:hover {
-    background: rgba(35, 50, 75, 0.95);
-    transform: translateY(-3px) scale(1.015);
+    background: rgba(52, 15, 90, 0.95);
+    transform: translateY(-4px) scale(1.02);
+    border-color: rgba(224, 170, 255, 1);
   }
 
   /* 時間戳 */
   .message .time {
     font-size: 0.7rem;
-    color: rgba(180, 210, 255, 0.5);
+    color: rgba(199, 125, 255, 0.6);
     margin-top: 8px;
     margin-left: 10px;
     margin-right: 10px;
     transition: all 0.5s ease;
-    animation: timeFadeIn 0.9s 0.3s both;
+    animation: timeFadeIn 1s 0.3s both;
+    letter-spacing: 0.3px;
   }
 
   @keyframes timeFadeIn {
@@ -627,8 +751,9 @@
   }
 
   .message:hover .time {
-    color: rgba(180, 220, 255, 0.95);
-    transform: translateX(3px);
+    color: rgba(224, 170, 255, 1);
+    transform: translateX(4px);
+    text-shadow: 0 0 10px rgba(224, 170, 255, 0.6);
   }
 
   /* 光標閃爍 */
@@ -636,12 +761,12 @@
     display: inline-block;
     width: 8px;
     height: 1.1em;
-    background: linear-gradient(180deg, #4da6ff, #00e0ff);
+    background: linear-gradient(180deg, #c77dff, #e0aaff);
     vertical-align: middle;
     margin-left: 2px;
     border-radius: 2px;
     animation: cursorBlink 0.9s steps(2) infinite;
-    box-shadow: 0 0 8px rgba(0, 200, 255, 0.8);
+    box-shadow: 0 0 10px rgba(224, 170, 255, 1);
   }
 
   @keyframes cursorBlink {
@@ -652,18 +777,30 @@
   /* ===== Markdown 樣式 ===== */
   .bubble p { margin: 0 0 8px 0; }
   .bubble p:last-child { margin-bottom: 0; }
-  .bubble strong { color: #7ec8ff; font-weight: 700; }
-  .bubble em { color: #a8d8ff; font-style: italic; }
+  .bubble strong { 
+    color: #e0aaff; 
+    font-weight: 700; 
+    text-shadow: 0 0 12px rgba(224, 170, 255, 0.5);
+  }
+  .bubble em { color: #c77dff; font-style: italic; }
   .bubble h1, .bubble h2, .bubble h3 {
     margin: 12px 0 8px;
-    color: #b8e0ff;
     font-weight: 600;
     transition: all 0.5s ease;
+    background: linear-gradient(90deg, #c77dff, #e0aaff, #c77dff);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: titleGradient 4s linear infinite;
+  }
+  @keyframes titleGradient {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
   }
   .bubble h1:hover, .bubble h2:hover, .bubble h3:hover {
     transform: translateX(6px);
-    color: #d0eeff;
-    text-shadow: 0 0 15px rgba(100, 200, 255, 0.5);
+    filter: drop-shadow(0 0 15px rgba(224, 170, 255, 0.8));
   }
   .bubble h1 { font-size: 1.15rem; }
   .bubble h2 { font-size: 1.05rem; }
@@ -671,27 +808,32 @@
 
   .bubble ul, .bubble ol { margin: 8px 0; padding-left: 24px; }
   .bubble li { margin: 5px 0; transition: all 0.4s ease; }
-  .bubble li:hover { transform: translateX(5px); color: #bfe2ff; }
+  .bubble li:hover { 
+    transform: translateX(6px); 
+    color: #e0aaff;
+    text-shadow: 0 0 10px rgba(224, 170, 255, 0.4);
+  }
 
   .bubble code:not(pre code) {
-    background: rgba(0, 100, 200, 0.28);
+    background: rgba(123, 47, 190, 0.4);
     padding: 2px 8px;
     border-radius: 10px;
     font-family: 'Consolas', 'Monaco', monospace;
     font-size: 0.88em;
-    color: #9fd5ff;
+    color: #e0aaff;
     transition: all 0.5s ease;
     display: inline-block;
+    border: 1px solid rgba(199, 125, 255, 0.3);
   }
   .bubble code:not(pre code):hover {
-    background: rgba(0, 150, 255, 0.5);
-    transform: scale(1.08) rotate(-2deg);
-    box-shadow: 0 0 15px rgba(0, 180, 255, 0.5);
+    background: rgba(199, 125, 255, 0.5);
+    transform: scale(1.1) rotate(-2deg);
+    box-shadow: 0 0 20px rgba(224, 170, 255, 0.7);
   }
 
   .bubble pre {
-    background: rgba(0, 0, 0, 0.6) !important;
-    border: 1px solid rgba(80, 160, 255, 0.3);
+    background: rgba(13, 1, 24, 0.75) !important;
+    border: 1px solid rgba(199, 125, 255, 0.4);
     border-radius: 18px;
     padding: 14px 16px;
     overflow-x: auto;
@@ -701,30 +843,35 @@
     position: relative;
   }
   .bubble pre:hover {
-    border-color: rgba(0, 200, 255, 0.7);
-    box-shadow: 0 0 40px rgba(0, 180, 255, 0.3), 0 0 0 1px rgba(0, 200, 255, 0.3) inset;
+    border-color: rgba(224, 170, 255, 0.9);
+    box-shadow: 
+      0 0 50px rgba(123, 47, 190, 0.6), 
+      0 0 0 1px rgba(224, 170, 255, 0.5) inset;
     transform: translateY(-3px);
   }
   .bubble pre code {
     background: transparent !important;
     padding: 0;
     font-family: 'Consolas', 'Monaco', monospace;
-    color: #e6f0ff;
+    color: #f0e5ff;
   }
 
   .bubble blockquote {
-    border-left: 4px solid #4da6ff;
+    border-left: 4px solid #c77dff;
     padding-left: 14px;
     margin: 10px 0;
-    color: #a8c8e8;
+    color: #d0b8ff;
     font-style: italic;
     transition: all 0.5s ease;
+    background: linear-gradient(90deg, rgba(199, 125, 255, 0.1), transparent);
+    border-radius: 4px;
   }
   .bubble blockquote:hover {
-    border-left-color: #7ec8ff;
+    border-left-color: #e0aaff;
     padding-left: 22px;
-    color: #d0e8ff;
-    text-shadow: 0 0 10px rgba(100, 200, 255, 0.3);
+    color: #f0e5ff;
+    text-shadow: 0 0 15px rgba(224, 170, 255, 0.5);
+    background: linear-gradient(90deg, rgba(199, 125, 255, 0.25), transparent);
   }
 
   .bubble table {
@@ -734,49 +881,54 @@
     font-size: 0.9rem;
     border-radius: 14px;
     overflow: hidden;
-    border: 1px solid rgba(80, 160, 255, 0.3);
+    border: 1px solid rgba(199, 125, 255, 0.4);
     transition: all 0.5s ease;
   }
   .bubble table:hover {
-    border-color: rgba(0, 200, 255, 0.6);
-    box-shadow: 0 0 30px rgba(0, 150, 255, 0.2);
+    border-color: rgba(224, 170, 255, 0.8);
+    box-shadow: 0 0 40px rgba(123, 47, 190, 0.5);
   }
   .bubble th, .bubble td {
     border: none;
-    border-bottom: 1px solid rgba(80, 160, 255, 0.2);
-    border-right: 1px solid rgba(80, 160, 255, 0.2);
+    border-bottom: 1px solid rgba(199, 125, 255, 0.2);
+    border-right: 1px solid rgba(199, 125, 255, 0.2);
     padding: 8px 12px;
     transition: background 0.4s ease;
   }
   .bubble th:last-child, .bubble td:last-child { border-right: none; }
   .bubble tr:last-child td { border-bottom: none; }
-  .bubble th { background: rgba(0, 100, 200, 0.3); color: #bfe2ff; font-weight: 600; }
-  .bubble tr:hover td { background: rgba(0, 140, 240, 0.15); }
+  .bubble th { 
+    background: rgba(123, 47, 190, 0.4); 
+    color: #e0aaff; 
+    font-weight: 600; 
+  }
+  .bubble tr:hover td { background: rgba(199, 125, 255, 0.15); }
 
   .bubble a {
-    color: #4da6ff;
+    color: #c77dff;
     text-decoration: none;
-    border-bottom: 1.5px dashed rgba(77, 166, 255, 0.6);
+    border-bottom: 1.5px dashed rgba(199, 125, 255, 0.6);
     transition: all 0.5s ease;
     position: relative;
   }
   .bubble a:hover {
-    color: #7ec8ff;
+    color: #e0aaff;
     border-bottom-style: solid;
-    text-shadow: 0 0 18px rgba(100, 200, 255, 0.8);
+    text-shadow: 0 0 20px rgba(224, 170, 255, 0.9);
   }
 
-  /* ===== 跟進建議區（永遠顯示，AI 回覆後填入） ===== */
+  /* ===== 跟進建議區 ===== */
   .followup-section {
     padding: 12px 22px 8px 22px;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    background: rgba(8, 14, 26, 0.5);
-    border-top: 1px solid rgba(70, 150, 255, 0.15);
-    animation: followupSlideIn 0.7s cubic-bezier(0.2, 0.9, 0.3, 1) both;
-    min-height: 0;
+    background: linear-gradient(180deg, transparent, rgba(26, 5, 51, 0.5));
+    border-top: 1px solid rgba(199, 125, 255, 0.2);
+    animation: followupSlideIn 0.8s cubic-bezier(0.2, 0.9, 0.3, 1) both;
     transition: all 0.5s ease;
+    position: relative;
+    z-index: 2;
   }
 
   @keyframes followupSlideIn {
@@ -797,24 +949,24 @@
     align-items: center;
     gap: 8px;
     font-size: 0.78rem;
-    color: rgba(140, 190, 255, 0.7);
+    color: rgba(199, 125, 255, 0.8);
     letter-spacing: 0.5px;
     font-weight: 500;
     padding-left: 4px;
   }
 
   .followup-title .dot {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
-    background: #00e0ff;
-    box-shadow: 0 0 10px rgba(0, 220, 255, 0.9);
+    background: radial-gradient(circle, #e0aaff, #7b2fbe);
+    box-shadow: 0 0 12px rgba(224, 170, 255, 1), 0 0 24px rgba(123, 47, 190, 0.7);
     animation: dotPulse 1.8s ease-in-out infinite;
   }
 
   @keyframes dotPulse {
     0%, 100% { transform: scale(1); opacity: 0.7; }
-    50% { transform: scale(1.6); opacity: 1; box-shadow: 0 0 18px rgba(0, 220, 255, 1); }
+    50% { transform: scale(1.8); opacity: 1; box-shadow: 0 0 25px rgba(224, 170, 255, 1); }
   }
 
   .followup-list {
@@ -824,36 +976,38 @@
   }
 
   .followup-chip {
-    background: rgba(30, 50, 80, 0.7);
-    border: 1px solid rgba(80, 180, 255, 0.3);
+    background: linear-gradient(135deg, rgba(74, 26, 122, 0.7), rgba(42, 10, 74, 0.7));
+    border: 1px solid rgba(199, 125, 255, 0.4);
     border-radius: 100px;
     padding: 8px 16px;
     font-size: 0.85rem;
-    color: #bfe2ff;
+    color: #e0c8ff;
     cursor: pointer;
-    transition: all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
+    transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
     position: relative;
     overflow: hidden;
-    animation: chipAppear 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) both;
-    backdrop-filter: blur(10px);
+    animation: chipAppear 0.6s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+    backdrop-filter: blur(12px);
     white-space: nowrap;
     max-width: 100%;
     text-overflow: ellipsis;
+    font-weight: 500;
+    transform-style: preserve-3d;
   }
 
   @keyframes chipAppear {
     0% {
       opacity: 0;
-      transform: translateY(15px) scale(0.7);
-      filter: blur(4px);
+      transform: translateY(25px) scale(0.5) rotateX(90deg);
+      filter: blur(8px);
     }
     60% {
       opacity: 1;
-      transform: translateY(-4px) scale(1.08);
+      transform: translateY(-6px) scale(1.1) rotateX(-10deg);
     }
     100% {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: translateY(0) scale(1) rotateX(0);
       filter: blur(0);
     }
   }
@@ -862,7 +1016,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, transparent, rgba(0, 200, 255, 0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(224, 170, 255, 0.4), transparent);
     background-size: 200% 100%;
     opacity: 0;
     transition: opacity 0.5s ease;
@@ -875,24 +1029,27 @@
   }
 
   .followup-chip:hover {
-    background: rgba(0, 120, 220, 0.5);
-    border-color: rgba(0, 220, 255, 0.9);
+    background: linear-gradient(135deg, rgba(123, 47, 190, 0.8), rgba(74, 26, 122, 0.9));
+    border-color: rgba(224, 170, 255, 1);
     color: #ffffff;
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 12px 25px -6px rgba(0, 180, 255, 0.5), 0 0 25px rgba(0, 200, 255, 0.3);
+    transform: translateY(-5px) scale(1.08) rotateX(8deg);
+    box-shadow: 
+      0 18px 35px -6px rgba(123, 47, 190, 0.9), 
+      0 0 35px rgba(199, 125, 255, 0.6),
+      0 0 60px rgba(224, 170, 255, 0.3);
+    text-shadow: 0 0 10px rgba(224, 170, 255, 0.7);
   }
 
   .followup-chip:hover::before { opacity: 1; }
 
   .followup-chip:active {
-    transform: translateY(0) scale(0.94);
+    transform: translateY(0) scale(0.94) rotateX(0);
     transition: all 0.1s ease;
   }
 
-  /* 空狀態提示 */
   .followup-empty {
     font-size: 0.78rem;
-    color: rgba(140, 190, 255, 0.4);
+    color: rgba(199, 125, 255, 0.4);
     padding: 8px 4px;
     font-style: italic;
     letter-spacing: 0.3px;
@@ -904,7 +1061,7 @@
     align-items: center;
     gap: 8px;
     font-size: 0.78rem;
-    color: rgba(140, 190, 255, 0.7);
+    color: rgba(199, 125, 255, 0.8);
     padding-left: 8px;
     cursor: pointer;
     user-select: none;
@@ -912,41 +1069,41 @@
     margin-left: auto;
   }
 
-  .auto-followup:hover { color: rgba(180, 220, 255, 1); }
+  .auto-followup:hover { color: rgba(224, 170, 255, 1); }
 
   .toggle-switch {
-    width: 36px;
-    height: 20px;
-    background: rgba(0, 0, 0, 0.5);
+    width: 38px;
+    height: 22px;
+    background: rgba(13, 1, 24, 0.6);
     border-radius: 100px;
     position: relative;
     transition: all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
-    border: 1px solid rgba(80, 160, 255, 0.3);
+    border: 1px solid rgba(199, 125, 255, 0.4);
   }
 
   .toggle-switch::after {
     content: '';
     position: absolute;
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #6a9fff, #4da6ff);
+    background: linear-gradient(135deg, #7b2fbe, #c77dff);
     top: 2px;
     left: 2px;
     transition: all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
-    box-shadow: 0 0 10px rgba(0, 150, 255, 0.6);
+    box-shadow: 0 0 12px rgba(199, 125, 255, 0.8);
   }
 
   .auto-followup.on .toggle-switch {
-    background: rgba(0, 150, 255, 0.3);
-    border-color: #00d0ff;
-    box-shadow: 0 0 15px rgba(0, 200, 255, 0.5);
+    background: rgba(123, 47, 190, 0.4);
+    border-color: #c77dff;
+    box-shadow: 0 0 20px rgba(199, 125, 255, 0.7);
   }
 
   .auto-followup.on .toggle-switch::after {
     left: 18px;
-    background: linear-gradient(135deg, #00e0ff, #7ec8ff);
-    box-shadow: 0 0 18px rgba(0, 220, 255, 0.9);
+    background: linear-gradient(135deg, #e0aaff, #c77dff);
+    box-shadow: 0 0 20px rgba(224, 170, 255, 1);
   }
 
   /* ===== 底部輸入 ===== */
@@ -955,12 +1112,13 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    background: rgba(8, 14, 26, 0.65);
-    backdrop-filter: blur(14px);
-    border-top: 1px solid rgba(70, 150, 255, 0.15);
+    background: linear-gradient(135deg, rgba(26, 5, 51, 0.7), rgba(42, 10, 74, 0.5));
+    backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(199, 125, 255, 0.2);
     transition: all 0.6s ease;
-    animation: footerSlide 0.9s 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+    animation: footerSlide 1s 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) both;
     position: relative;
+    z-index: 2;
   }
 
   @keyframes footerSlide {
@@ -970,40 +1128,44 @@
 
   .chat-footer input {
     flex: 1;
-    background: rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(120, 180, 255, 0.25);
+    background: rgba(13, 1, 24, 0.6);
+    border: 1px solid rgba(199, 125, 255, 0.3);
     border-radius: 100px;
     padding: 16px 24px;
-    color: white;
+    color: #f0e5ff;
     font-size: 0.95rem;
     outline: none;
     transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(10px);
     position: relative;
+    letter-spacing: 0.3px;
   }
 
   .chat-footer input:focus {
-    border-color: #4da6ff;
-    box-shadow: 0 0 0 4px rgba(77, 166, 255, 0.15), 0 0 45px rgba(0, 150, 255, 0.3);
-    background: rgba(10, 25, 50, 0.9);
-    transform: scale(1.01);
+    border-color: #c77dff;
+    box-shadow: 
+      0 0 0 4px rgba(199, 125, 255, 0.18), 
+      0 0 60px rgba(123, 47, 190, 0.5),
+      inset 0 0 25px rgba(199, 125, 255, 0.1);
+    background: rgba(26, 5, 51, 0.9);
+    transform: scale(1.012);
     padding-left: 28px;
   }
 
   .chat-footer input::placeholder {
-    color: rgba(170, 210, 255, 0.4);
+    color: rgba(199, 125, 255, 0.5);
     transition: all 0.5s ease;
   }
 
   .chat-footer input:focus::placeholder {
-    color: rgba(170, 210, 255, 0.15);
+    color: rgba(199, 125, 255, 0.2);
     transform: translateX(8px);
   }
 
-  /* ===== 發送按鈕 ===== */
+  /* ===== 發送按鈕 — 紫色能量球 ===== */
   .send-btn {
-    background: linear-gradient(145deg, #0b6eff, #00a2ff, #00d0ff);
-    background-size: 200% 200%;
+    background: linear-gradient(145deg, #4a1a7a, #7b2fbe, #c77dff, #7b2fbe);
+    background-size: 300% 300%;
     width: 58px;
     height: 58px;
     border-radius: 50%;
@@ -1012,11 +1174,16 @@
     justify-content: center;
     font-size: 1.8rem;
     transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(224, 170, 255, 0.5);
     flex-shrink: 0;
     color: white;
     position: relative;
-    animation: sendBreath 3.5s ease-in-out infinite, sendGradient 5s ease infinite;
+    animation: 
+      sendBreath 4s ease-in-out infinite, 
+      sendGradient 6s ease infinite;
+    box-shadow: 
+      0 10px 30px rgba(123, 47, 190, 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
 
   @keyframes sendGradient {
@@ -1026,12 +1193,20 @@
 
   @keyframes sendBreath {
     0%, 100% {
-      box-shadow: 0 8px 25px rgba(0, 120, 255, 0.5), 0 0 0 0 rgba(0, 180, 255, 0.5);
+      box-shadow: 
+        0 10px 30px rgba(123, 47, 190, 0.7), 
+        0 0 0 0 rgba(199, 125, 255, 0.5),
+        0 0 40px rgba(123, 47, 190, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
       transform: scale(1);
     }
     50% {
-      box-shadow: 0 12px 35px rgba(0, 150, 255, 0.8), 0 0 0 12px rgba(0, 180, 255, 0.08);
-      transform: scale(1.04);
+      box-shadow: 
+        0 16px 45px rgba(123, 47, 190, 1), 
+        0 0 0 15px rgba(199, 125, 255, 0.1),
+        0 0 80px rgba(199, 125, 255, 0.7),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      transform: scale(1.05);
     }
   }
 
@@ -1049,11 +1224,11 @@
   .send-btn::after {
     content: '';
     position: absolute;
-    inset: -8px;
+    inset: -10px;
     border-radius: 50%;
     border: 2px solid transparent;
-    border-top-color: rgba(0, 220, 255, 0.8);
-    border-right-color: rgba(0, 220, 255, 0.4);
+    border-top-color: rgba(224, 170, 255, 0.9);
+    border-right-color: rgba(199, 125, 255, 0.5);
     opacity: 0;
     transition: opacity 0.5s ease;
     animation: spinRing 2.5s linear infinite;
@@ -1070,72 +1245,80 @@
     transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
     animation: arrowFloat 2s ease-in-out infinite;
     z-index: 2;
+    filter: drop-shadow(0 0 5px rgba(224, 170, 255, 0.8));
   }
 
   @keyframes arrowFloat {
     0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(3px); }
+    50% { transform: translateX(4px); }
   }
 
   .send-btn:hover {
-    transform: scale(1.15) translateY(-4px);
-    box-shadow: 0 22px 45px rgba(0, 150, 255, 0.8), 0 0 0 15px rgba(0, 170, 255, 0.1), 0 0 60px rgba(0, 200, 255, 0.4);
+    transform: scale(1.18) translateY(-5px);
+    box-shadow: 
+      0 25px 55px rgba(123, 47, 190, 1), 
+      0 0 0 18px rgba(199, 125, 255, 0.12), 
+      0 0 100px rgba(224, 170, 255, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
     animation-play-state: paused, running;
   }
 
   .send-btn:hover::before { opacity: 1; }
   .send-btn:hover::after { opacity: 1; }
-  .send-btn:hover span { transform: translateX(5px) scale(1.15); }
+  .send-btn:hover span { transform: translateX(6px) scale(1.2); }
 
   .send-btn:active {
-    transform: scale(0.9) translateY(3px);
+    transform: scale(0.88) translateY(4px);
     transition: all 0.1s ease;
   }
 
   .send-btn.flash {
-    animation: sendFlash 0.7s cubic-bezier(0.2, 0.9, 0.3, 1);
+    animation: sendFlash 0.8s cubic-bezier(0.2, 0.9, 0.3, 1);
   }
 
   @keyframes sendFlash {
     0% {
-      transform: scale(1.3);
-      box-shadow: 0 0 0 0 rgba(0, 220, 255, 0.9), 0 0 70px rgba(0, 200, 255, 1);
-      background: linear-gradient(145deg, #00d4ff, #b0e0ff);
+      transform: scale(1.35);
+      box-shadow: 
+        0 0 0 0 rgba(224, 170, 255, 1), 
+        0 0 100px rgba(224, 170, 255, 1);
+      background: linear-gradient(145deg, #c77dff, #e0aaff);
     }
     100% {
       transform: scale(1);
-      box-shadow: 0 8px 25px rgba(0, 120, 255, 0.5);
-      background: linear-gradient(145deg, #0b6eff, #00a2ff, #00d0ff);
+      box-shadow: 0 10px 30px rgba(123, 47, 190, 0.7);
+      background: linear-gradient(145deg, #4a1a7a, #7b2fbe, #c77dff);
     }
   }
 
   .burst-particle {
     position: absolute;
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    background: radial-gradient(circle, #00e0ff, transparent);
+    background: radial-gradient(circle, #e0aaff, transparent);
     pointer-events: none;
-    animation: burst 0.8s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+    animation: burst 1s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+    box-shadow: 0 0 15px rgba(224, 170, 255, 0.9);
   }
 
   @keyframes burst {
     0% { transform: translate(0, 0) scale(1); opacity: 1; }
-    100% { transform: translate(var(--tx), var(--ty)) scale(0.3); opacity: 0; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; }
   }
 
   .ripple {
     position: absolute;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(0, 220, 255, 0.7), transparent 70%);
+    background: radial-gradient(circle, rgba(224, 170, 255, 0.8), transparent 70%);
     transform: scale(0);
-    animation: rippleExpand 0.9s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+    animation: rippleExpand 1s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
     pointer-events: none;
     z-index: 10;
   }
 
   @keyframes rippleExpand {
-    to { transform: scale(4); opacity: 0; }
+    to { transform: scale(5); opacity: 0; }
   }
 
   .send-btn:disabled, .save-btn:disabled {
@@ -1153,35 +1336,40 @@
     align-items: center;
     gap: 8px;
     padding: 12px 22px;
-    background: rgba(35, 55, 85, 0.9);
+    background: linear-gradient(135deg, rgba(74, 26, 122, 0.9), rgba(42, 10, 74, 0.9));
     border-radius: 40px;
     width: fit-content;
     margin-top: 4px;
-    border: 1px solid rgba(80, 160, 255, 0.4);
+    border: 1px solid rgba(199, 125, 255, 0.5);
     transition: all 0.5s ease;
     animation: typingBreath 2s ease-in-out infinite;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 10px 30px -6px rgba(0, 0, 0, 0.8);
   }
 
   @keyframes typingBreath {
     0%, 100% {
-      border-color: rgba(80, 160, 255, 0.4);
-      box-shadow: 0 8px 25px -6px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 150, 255, 0.2);
+      border-color: rgba(199, 125, 255, 0.5);
+      box-shadow: 
+        0 10px 30px -6px rgba(0, 0, 0, 0.8), 
+        0 0 30px rgba(123, 47, 190, 0.4);
     }
     50% {
-      border-color: rgba(0, 220, 255, 0.8);
-      box-shadow: 0 8px 25px -6px rgba(0, 0, 0, 0.7), 0 0 45px rgba(0, 200, 255, 0.5);
+      border-color: rgba(224, 170, 255, 0.9);
+      box-shadow: 
+        0 10px 30px -6px rgba(0, 0, 0, 0.8), 
+        0 0 60px rgba(199, 125, 255, 0.7);
     }
   }
 
   .typing-indicator span {
     width: 10px;
     height: 10px;
-    background: linear-gradient(135deg, #7abaff, #00d0ff);
+    background: radial-gradient(circle at 30% 30%, #e0aaff, #7b2fbe);
     border-radius: 50%;
     display: inline-block;
     animation: typingBounce 1.6s infinite cubic-bezier(0.2, 0.9, 0.3, 1);
-    box-shadow: 0 0 12px rgba(0, 200, 255, 0.6);
+    box-shadow: 0 0 15px rgba(224, 170, 255, 0.8);
   }
 
   .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
@@ -1191,12 +1379,12 @@
     0%, 60%, 100% {
       transform: translateY(0) scale(1);
       opacity: 0.5;
-      box-shadow: 0 0 8px rgba(0, 180, 255, 0.3);
+      box-shadow: 0 0 10px rgba(199, 125, 255, 0.4);
     }
     30% {
-      transform: translateY(-12px) scale(1.35);
+      transform: translateY(-14px) scale(1.5);
       opacity: 1;
-      box-shadow: 0 0 25px rgba(0, 220, 255, 1);
+      box-shadow: 0 0 30px rgba(224, 170, 255, 1);
     }
   }
 
@@ -1206,19 +1394,22 @@
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%) translateY(40px) scale(0.85);
-    background: rgba(20, 35, 60, 0.96);
+    background: linear-gradient(135deg, rgba(74, 26, 122, 0.98), rgba(42, 10, 74, 0.98));
     backdrop-filter: blur(16px);
     padding: 12px 28px;
     border-radius: 100px;
-    color: #bfe2ff;
+    color: #e0c8ff;
     font-size: 0.9rem;
-    border: 1px solid rgba(0, 180, 255, 0.5);
-    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 150, 255, 0.3);
+    border: 1px solid rgba(199, 125, 255, 0.6);
+    box-shadow: 
+      0 15px 45px rgba(0, 0, 0, 0.7), 
+      0 0 40px rgba(123, 47, 190, 0.6);
     opacity: 0;
     transition: all 0.7s cubic-bezier(0.2, 0.9, 0.3, 1);
     pointer-events: none;
     z-index: 1000;
     white-space: nowrap;
+    font-weight: 500;
   }
 
   .toast.show {
@@ -1226,29 +1417,45 @@
     transform: translateX(-50%) translateY(0) scale(1);
   }
 
-  /* 複製專用 Toast */
   .copy-toast {
     position: fixed;
     top: 40px;
     left: 50%;
     transform: translateX(-50%) translateY(-30px) scale(0.8);
-    background: linear-gradient(135deg, rgba(0, 150, 255, 0.95), rgba(0, 200, 255, 0.95));
+    background: linear-gradient(135deg, rgba(123, 47, 190, 0.98), rgba(199, 125, 255, 0.98));
     backdrop-filter: blur(16px);
-    padding: 10px 24px;
+    padding: 12px 28px;
     border-radius: 100px;
     color: #ffffff;
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     font-weight: 600;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 15px 40px rgba(0, 150, 255, 0.7), 0 0 30px rgba(0, 200, 255, 0.5);
+    border: 1px solid rgba(224, 170, 255, 0.6);
+    box-shadow: 
+      0 20px 50px rgba(123, 47, 190, 0.9), 
+      0 0 50px rgba(199, 125, 255, 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
     opacity: 0;
-    transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
+    transition: all 0.7s cubic-bezier(0.2, 0.9, 0.3, 1);
     pointer-events: none;
     z-index: 2000;
     white-space: nowrap;
     display: flex;
     align-items: center;
     gap: 8px;
+    animation: copyToastGlow 2s ease-in-out infinite;
+  }
+
+  @keyframes copyToastGlow {
+    0%, 100% {
+      box-shadow: 
+        0 20px 50px rgba(123, 47, 190, 0.9), 
+        0 0 50px rgba(199, 125, 255, 0.7);
+    }
+    50% {
+      box-shadow: 
+        0 20px 50px rgba(123, 47, 190, 1), 
+        0 0 80px rgba(224, 170, 255, 1);
+    }
   }
 
   .copy-toast.show {
@@ -1278,8 +1485,16 @@
 </head>
 <body>
 
-<div class="aurora-bg"></div>
-<div class="bg-particles" id="bgParticles"></div>
+<!-- 極光多層背景 -->
+<div class="aurora-bg">
+  <div class="aurora-layer aurora-1"></div>
+  <div class="aurora-layer aurora-2"></div>
+  <div class="aurora-layer aurora-3"></div>
+  <div class="aurora-layer aurora-4"></div>
+</div>
+
+<!-- 紫色星塵 -->
+<div class="stars-bg" id="starsBg"></div>
 
 <div class="chat-container" id="chatContainer">
   <div class="chat-header">
@@ -1291,12 +1506,11 @@
 
   <div class="chat-messages" id="chatMessages">
     <div class="message bot">
-      <div class="bubble">你好！我是 DeepSeek 助手。请先输入 API 密钥，然后就可以开始对话了 ✨<br><br><span style="color: rgba(180, 220, 255, 0.7); font-size: 0.85em;">💡 提示：点击任意气泡即可复制内容</span></div>
+      <div class="bubble">你好！我是 DeepSeek 助手 ✨<br><br>请先输入 API 密钥，然后就可以开始对话了。<br><br><span style="color: rgba(224, 170, 255, 0.7); font-size: 0.85em;">💡 点击任意气泡即可复制内容</span></div>
       <div class="time">刚刚</div>
     </div>
   </div>
 
-  <!-- 跟進建議區（永遠顯示） -->
   <div class="followup-section" id="followupSection">
     <div class="followup-title">
       <span class="dot"></span>
@@ -1318,7 +1532,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="copy-toast" id="copyToast">📋 已複製</div>
+<div class="copy-toast" id="copyToast">✨ 已複製到剪貼板</div>
 
 <script>
 (function() {
@@ -1329,7 +1543,7 @@
   const sendBtn = document.getElementById('sendBtn');
   const toastEl = document.getElementById('toast');
   const copyToastEl = document.getElementById('copyToast');
-  const bgParticles = document.getElementById('bgParticles');
+  const starsBg = document.getElementById('starsBg');
   const chatContainer = document.getElementById('chatContainer');
   const followupList = document.getElementById('followupList');
   const autoFollowupToggle = document.getElementById('autoFollowup');
@@ -1346,7 +1560,7 @@
     const rect = chatContainer.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
-    chatContainer.style.transform = `perspective(1500px) rotateY(${x * 2.5}deg) rotateX(${-y * 2.5}deg) translateY(-4px)`;
+    chatContainer.style.transform = `perspective(1500px) rotateY(${x * 3}deg) rotateX(${-y * 3}deg) translateY(-4px)`;
   });
 
   chatContainer.addEventListener('mouseleave', () => {
@@ -1365,22 +1579,40 @@
     }
   });
 
-  // ===== 背景粒子 =====
-  function createParticles() {
-    for (let i = 0; i < 40; i++) {
-      const span = document.createElement('span');
-      span.style.left = Math.random() * 100 + '%';
-      span.style.bottom = '-20px';
-      const size = Math.random() * 5 + 2;
-      span.style.width = size + 'px';
-      span.style.height = size + 'px';
-      span.style.animationDuration = (Math.random() * 18 + 14) + 's';
-      span.style.animationDelay = (Math.random() * 20) + 's';
-      span.style.opacity = Math.random() * 0.7 + 0.2;
-      bgParticles.appendChild(span);
+  // ===== 滑鼠光軌 =====
+  let lastTrailTime = 0;
+  document.addEventListener('mousemove', (e) => {
+    const now = Date.now();
+    if (now - lastTrailTime < 40) return;
+    lastTrailTime = now;
+
+    const trail = document.createElement('div');
+    trail.className = 'mouse-trail';
+    trail.style.left = e.clientX + 'px';
+    trail.style.top = e.clientY + 'px';
+    const size = 8 + Math.random() * 8;
+    trail.style.width = size + 'px';
+    trail.style.height = size + 'px';
+    document.body.appendChild(trail);
+    setTimeout(() => trail.remove(), 1000);
+  });
+
+  // ===== 星塵背景 =====
+  function createStars() {
+    for (let i = 0; i < 60; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.bottom = '-20px';
+      const size = Math.random() * 4 + 1.5;
+      star.style.width = size + 'px';
+      star.style.height = size + 'px';
+      star.style.animationDuration = (Math.random() * 20 + 15) + 's, ' + (Math.random() * 2 + 1.5) + 's';
+      star.style.animationDelay = (Math.random() * 20) + 's, ' + (Math.random() * 2) + 's';
+      starsBg.appendChild(star);
     }
   }
-  createParticles();
+  createStars();
 
   // ===== Toast =====
   function showToast(text, duration = 2000) {
@@ -1392,30 +1624,25 @@
     }, duration);
   }
 
-  // ===== 複製 Toast =====
   function showCopyToast() {
     copyToastEl.classList.add('show');
     clearTimeout(window.copyToastTimer);
     window.copyToastTimer = setTimeout(() => {
       copyToastEl.classList.remove('show');
-    }, 1500);
+    }, 1800);
   }
 
-  // ===== 複製氣泡內容 =====
+  // ===== 複製氣泡 =====
   function copyBubbleContent(bubble, e) {
-    // 取得純文字內容
     let text = bubble.innerText || bubble.textContent || '';
     text = text.trim();
-
     if (!text) return;
 
-    // 使用 Clipboard API
     const copyToClipboard = async () => {
       try {
         await navigator.clipboard.writeText(text);
         return true;
       } catch (err) {
-        // 降級方案
         const textarea = document.createElement('textarea');
         textarea.value = text;
         textarea.style.position = 'fixed';
@@ -1435,11 +1662,9 @@
 
     copyToClipboard().then((success) => {
       if (success) {
-        // 氣泡脈衝動畫
         bubble.classList.add('copied');
-        setTimeout(() => bubble.classList.remove('copied'), 700);
+        setTimeout(() => bubble.classList.remove('copied'), 900);
 
-        // 複製漣漪
         if (e) {
           const rect = bubble.getBoundingClientRect();
           const ripple = document.createElement('span');
@@ -1449,7 +1674,7 @@
           ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
           ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
           bubble.appendChild(ripple);
-          setTimeout(() => ripple.remove(), 900);
+          setTimeout(() => ripple.remove(), 1200);
         }
 
         showCopyToast();
@@ -1467,10 +1692,10 @@
     localStorage.setItem('deepseek_api_key', key);
     showToast('✅ API 密钥已保存', 1600);
     saveApiBtn.classList.add('saved');
-    setTimeout(() => saveApiBtn.classList.remove('saved'), 800);
+    setTimeout(() => saveApiBtn.classList.remove('saved'), 900);
   }
 
-  // ===== 漣漪 + 爆炸粒子 =====
+  // ===== 漣漪 + 爆炸 =====
   function createRipple(e) {
     const btn = e.currentTarget;
     const rect = btn.getBoundingClientRect();
@@ -1481,20 +1706,20 @@
     ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
     ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
     btn.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 900);
+    setTimeout(() => ripple.remove(), 1000);
 
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 12; i++) {
       const p = document.createElement('span');
       p.classList.add('burst-particle');
-      const angle = (Math.PI * 2 * i) / 8;
-      const dist = 40 + Math.random() * 30;
+      const angle = (Math.PI * 2 * i) / 12;
+      const dist = 50 + Math.random() * 40;
       p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
       p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
       p.style.left = '50%';
       p.style.top = '50%';
       p.style.animationDelay = (i * 0.02) + 's';
       btn.appendChild(p);
-      setTimeout(() => p.remove(), 900);
+      setTimeout(() => p.remove(), 1000);
     }
   }
 
@@ -1520,7 +1745,6 @@
       bubbleDiv.textContent = content;
     }
 
-    // 點擊複製
     bubbleDiv.addEventListener('click', (e) => {
       e.stopPropagation();
       copyBubbleContent(bubbleDiv, e);
@@ -1602,25 +1826,23 @@
       const chip = document.createElement('button');
       chip.classList.add('followup-chip');
       chip.textContent = text;
-      chip.style.animationDelay = (i * 0.1) + 's';
+      chip.style.animationDelay = (i * 0.12) + 's';
       chip.addEventListener('click', (e) => {
         e.stopPropagation();
         messageInput.value = text;
         messageInput.focus();
-        chip.style.transform = 'scale(0.9)';
-        setTimeout(() => chip.style.transform = '', 150);
+        chip.style.transform = 'scale(0.9) rotateX(20deg)';
+        setTimeout(() => chip.style.transform = '', 200);
       });
       followupList.appendChild(chip);
     });
 
-    // 重新觸發動畫
     const section = document.getElementById('followupSection');
     section.style.animation = 'none';
     void section.offsetWidth;
     section.style.animation = '';
   }
 
-  // ===== 重置跟進建議 =====
   function resetFollowups() {
     followupList.innerHTML = '<span class="followup-empty">AI 回覆後將顯示跟進建議...</span>';
   }
@@ -1695,7 +1917,7 @@
     if (!text) { showToast('请输入消息内容', 1200); return; }
 
     sendBtn.classList.add('flash');
-    setTimeout(() => sendBtn.classList.remove('flash'), 700);
+    setTimeout(() => sendBtn.classList.remove('flash'), 800);
 
     messageInput.value = '';
     addMessage('user', text);
@@ -1717,13 +1939,9 @@
       removeTypingIndicator();
       if (reply) {
         addMessage('bot', reply);
-
-        // 生成並顯示跟進建議（保證執行）
         const suggestions = generateFollowups(text, reply);
-        console.log('生成跟進建議:', suggestions);
         showFollowups(suggestions);
 
-        // 自動追問
         if (autoFollowupEnabled && suggestions.length > 0) {
           setTimeout(() => {
             if (!isWaitingForResponse) {
@@ -1768,7 +1986,6 @@
     }
   });
 
-  // 自動追問開關
   autoFollowupToggle.addEventListener('click', (e) => {
     e.stopPropagation();
     autoFollowupEnabled = !autoFollowupEnabled;
