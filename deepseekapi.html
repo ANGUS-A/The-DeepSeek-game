@@ -1,1035 +1,1240 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>DeepSeek 聊天 · 丝滑圆润 · 动感满溢</title>
-  <!-- Markdown 渲染库 -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github-dark.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/common.min.js"></script>
-  <style>
-    /* ========== 全局重置 ========== */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DeepSeek 聊天 · 跟進進化版</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/common.min.js"></script>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  }
 
-    :root {
-      --primary: #0b6eff;
-      --primary-light: #00a2ff;
-      --glow: rgba(0, 180, 255, 0.6);
-      --bg1: #0b0f1a;
-      --bg2: #1a1f2f;
-    }
+  body {
+    background: #05060a;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    margin: 0;
+    overflow: hidden;
+    position: relative;
+  }
 
-    body {
-      background: linear-gradient(145deg, var(--bg1) 0%, var(--bg2) 100%);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
-      margin: 0;
-      overflow: hidden;
-      position: relative;
-      animation: bgFlow 18s ease-in-out infinite alternate;
-    }
+  /* ===== 極光背景 ===== */
+  .aurora-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
 
-    /* 背景流動漸層 */
-    @keyframes bgFlow {
-      0% { background: linear-gradient(145deg, #0b0f1a 0%, #1a1f2f 100%); }
-      50% { background: linear-gradient(145deg, #0e1626 0%, #1c2842 100%); }
-      100% { background: linear-gradient(145deg, #101a30 0%, #1e2c48 100%); }
-    }
+  .aurora-bg::before,
+  .aurora-bg::after {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background: 
+      radial-gradient(circle at 20% 30%, rgba(0, 120, 255, 0.22) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(150, 0, 255, 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(0, 220, 255, 0.12) 0%, transparent 50%);
+    animation: auroraMove1 20s ease-in-out infinite alternate;
+    filter: blur(40px);
+  }
 
-    /* 背景漂浮光點層 */
-    .bg-particles {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
+  .aurora-bg::after {
+    background: 
+      radial-gradient(circle at 70% 20%, rgba(0, 180, 255, 0.18) 0%, transparent 45%),
+      radial-gradient(circle at 30% 80%, rgba(80, 0, 200, 0.15) 0%, transparent 45%);
+    animation: auroraMove2 25s ease-in-out infinite alternate;
+  }
 
-    .bg-particles span {
-      position: absolute;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(80, 180, 255, 0.7), transparent 70%);
-      animation: floatUp linear infinite;
+  @keyframes auroraMove1 {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    100% { transform: translate(8%, -6%) rotate(8deg) scale(1.1); }
+  }
+
+  @keyframes auroraMove2 {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    100% { transform: translate(-8%, 6%) rotate(-8deg) scale(1.15); }
+  }
+
+  /* ===== 粒子層 ===== */
+  .bg-particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .bg-particles span {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(120, 200, 255, 0.95), transparent 70%);
+    animation: floatUp linear infinite;
+    opacity: 0;
+    box-shadow: 0 0 8px rgba(0, 180, 255, 0.8);
+  }
+
+  @keyframes floatUp {
+    0% { transform: translateY(0) translateX(0) scale(0.3); opacity: 0; }
+    10% { opacity: 1; }
+    50% { transform: translateY(-50vh) translateX(30px) scale(1.3); opacity: 0.7; }
+    90% { opacity: 0.2; }
+    100% { transform: translateY(-110vh) translateX(-20px) scale(0.3); opacity: 0; }
+  }
+
+  /* 粒子連線層 */
+  .particle-lines {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .particle-lines svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ===== 主卡片 ===== */
+  .chat-container {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    max-width: 780px;
+    height: 90vh;
+    max-height: 820px;
+    background: rgba(15, 20, 35, 0.72);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(100, 180, 255, 0.22);
+    border-radius: 44px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.6s ease, border-color 0.6s ease;
+    animation: 
+      cardEntrance 1.2s cubic-bezier(0.2, 0.9, 0.3, 1) both,
+      cardFloat 7s ease-in-out infinite alternate,
+      cardGlow 4s ease-in-out infinite alternate;
+    transform-style: preserve-3d;
+  }
+
+  @keyframes cardEntrance {
+    0% {
       opacity: 0;
+      transform: translateY(60px) scale(0.88) rotateX(12deg);
+      filter: blur(12px);
     }
-
-    @keyframes floatUp {
-      0% {
-        transform: translateY(0) translateX(0) scale(0.5);
-        opacity: 0;
-      }
-      10% {
-        opacity: 0.9;
-      }
-      50% {
-        transform: translateY(-50vh) translateX(30px) scale(1.2);
-        opacity: 0.5;
-      }
-      90% {
-        opacity: 0.1;
-      }
-      100% {
-        transform: translateY(-110vh) translateX(-20px) scale(0.3);
-        opacity: 0;
-      }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1) rotateX(0);
+      filter: blur(0);
     }
+  }
 
-    /* ========== 聊天卡片 ========== */
-    .chat-container {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      max-width: 780px;
-      height: 90vh;
-      max-height: 820px;
-      background: rgba(20, 25, 40, 0.72);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      border: 1px solid rgba(100, 180, 255, 0.2);
-      border-radius: 42px;
-      box-shadow: 0 30px 50px -15px rgba(0, 0, 0, 0.6), 
+  @keyframes cardFloat {
+    0% { transform: translateY(0px) rotateZ(0deg); }
+    100% { transform: translateY(-8px) rotateZ(0.4deg); }
+  }
+
+  @keyframes cardGlow {
+    0% {
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8), 
                   0 0 0 1px rgba(80, 160, 255, 0.1) inset,
-                  0 0 40px rgba(0, 180, 255, 0.08);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      transition: all 0.7s cubic-bezier(0.2, 0.9, 0.3, 1);
-      animation: 
-        cardFloat 6s ease-in-out infinite alternate,
-        cardGlow 4s ease-in-out infinite alternate,
-        cardEntrance 1s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+                  0 0 30px rgba(0, 180, 255, 0.1);
+      border-color: rgba(100, 180, 255, 0.2);
     }
-
-    @keyframes cardEntrance {
-      0% {
-        opacity: 0;
-        transform: translateY(40px) scale(0.92) rotateX(8deg);
-        filter: blur(8px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1) rotateX(0);
-        filter: blur(0);
-      }
+    100% {
+      box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.9), 
+                  0 0 0 1px rgba(80, 200, 255, 0.3) inset,
+                  0 0 70px rgba(0, 200, 255, 0.3);
+      border-color: rgba(0, 200, 255, 0.5);
     }
+  }
 
-    @keyframes cardFloat {
-      0% { transform: translateY(0px); }
-      100% { transform: translateY(-6px); }
+  /* 頂部科技掃描線 */
+  .chat-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #4da6ff, #00e0ff, #4da6ff, transparent);
+    background-size: 200% 100%;
+    animation: topScan 3s linear infinite;
+    z-index: 10;
+    border-radius: 44px 44px 0 0;
+    filter: blur(0.5px);
+    box-shadow: 0 0 12px rgba(0, 200, 255, 0.8);
+  }
+
+  @keyframes topScan {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ===== 頭部 ===== */
+  .chat-header {
+    padding: 18px 22px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    background: rgba(8, 14, 26, 0.65);
+    border-bottom: 1px solid rgba(70, 150, 255, 0.15);
+    backdrop-filter: blur(14px);
+    position: relative;
+    overflow: hidden;
+    animation: headerSlide 0.9s 0.2s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  }
+
+  @keyframes headerSlide {
+    0% { opacity: 0; transform: translateY(-40px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  .chat-header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(80, 180, 255, 0.12), transparent);
+    animation: headerShine 5s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes headerShine {
+    0%, 100% { left: -100%; }
+    50% { left: 100%; }
+  }
+
+  /* API 輸入框 */
+  .api-input-wrapper {
+    flex: 1;
+    min-width: 160px;
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 100px;
+    padding: 2px 2px 2px 20px;
+    border: 1px solid rgba(120, 180, 255, 0.25);
+    transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
+    position: relative;
+    animation: fadeSlideUp 0.9s 0.3s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  }
+
+  @keyframes fadeSlideUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  .api-input-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 100px;
+    background: linear-gradient(90deg, transparent, rgba(0, 220, 255, 0.5), transparent);
+    background-size: 200% 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: -1;
+    filter: blur(2px);
+  }
+
+  .api-input-wrapper:focus-within::before {
+    opacity: 1;
+    animation: borderFlow 2.5s linear infinite;
+  }
+
+  @keyframes borderFlow {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .api-input-wrapper:focus-within {
+    border-color: #4da6ff;
+    box-shadow: 0 0 0 4px rgba(77, 166, 255, 0.15), 0 0 40px rgba(0, 140, 255, 0.35);
+    background: rgba(10, 25, 50, 0.9);
+    transform: scale(1.018);
+  }
+
+  .api-input-wrapper input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #eef5ff;
+    font-size: 0.95rem;
+    padding: 12px 0;
+    min-width: 0;
+    transition: color 0.5s ease;
+  }
+
+  .api-input-wrapper input::placeholder {
+    color: rgba(170, 210, 255, 0.4);
+    transition: all 0.5s ease;
+  }
+
+  .api-input-wrapper input:focus::placeholder {
+    color: rgba(170, 210, 255, 0.15);
+    transform: translateX(6px);
+  }
+
+  /* ===== 按鈕 ===== */
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  /* 保存按鈕 */
+  .save-btn {
+    background: linear-gradient(135deg, #1b6aff, #00b4ff);
+    border-radius: 100px;
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    box-shadow: 0 6px 18px rgba(0, 120, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    font-weight: 600;
+    transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+    animation: fadeSlideUp 0.9s 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) both,
+               btnBreath 3.5s ease-in-out infinite;
+    z-index: 1;
+  }
+
+  @keyframes btnBreath {
+    0%, 100% {
+      box-shadow: 0 6px 18px rgba(0, 120, 255, 0.4);
     }
-
-    @keyframes cardGlow {
-      0% {
-        box-shadow: 0 30px 50px -15px rgba(0, 0, 0, 0.6), 
-                    0 0 0 1px rgba(80, 160, 255, 0.1) inset,
-                    0 0 30px rgba(0, 180, 255, 0.08);
-      }
-      100% {
-        box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.7), 
-                    0 0 0 1px rgba(80, 180, 255, 0.25) inset,
-                    0 0 55px rgba(0, 200, 255, 0.22);
-      }
+    50% {
+      box-shadow: 0 10px 30px rgba(0, 150, 255, 0.7), 0 0 25px rgba(0, 200, 255, 0.4);
     }
+  }
 
-    .chat-container:focus-within {
-      border-color: rgba(0, 200, 255, 0.55);
-      animation-play-state: paused, paused, running;
-      box-shadow: 0 40px 70px -12px rgba(0, 150, 255, 0.35), 
-                  0 0 0 1px rgba(0, 220, 255, 0.35) inset,
-                  0 0 70px rgba(0, 200, 255, 0.25);
-    }
+  .save-btn::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.55), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    border-radius: 100px;
+  }
 
-    /* ========== 頭部 ========== */
-    .chat-header {
-      padding: 18px 22px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 12px;
-      background: rgba(10, 18, 30, 0.6);
-      border-bottom: 1px solid rgba(70, 150, 255, 0.15);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      transition: background 0.6s ease;
-      animation: headerSlide 0.8s cubic-bezier(0.2, 0.9, 0.3, 1) both;
-      position: relative;
-      overflow: hidden;
-    }
+  .save-btn::after {
+    content: '';
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+    top: 0;
+    left: -80%;
+    transform: skewX(-20deg);
+    transition: left 0.9s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
 
-    @keyframes headerSlide {
-      0% {
-        opacity: 0;
-        transform: translateY(-30px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+  .save-btn:hover {
+    transform: translateY(-4px) scale(1.06);
+    box-shadow: 0 20px 40px rgba(0, 150, 255, 0.7);
+    background: linear-gradient(135deg, #3a85ff, #2ec4ff);
+  }
 
-    /* 頭部流光掃過 */
-    .chat-header::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(80, 180, 255, 0.08), transparent);
-      animation: headerShine 6s ease-in-out infinite;
-      pointer-events: none;
-    }
+  .save-btn:hover::before { opacity: 1; }
+  .save-btn:hover::after { left: 140%; }
 
-    @keyframes headerShine {
-      0%, 100% { left: -100%; }
-      50% { left: 100%; }
-    }
+  .save-btn:active {
+    transform: translateY(2px) scale(0.92);
+    transition: all 0.1s ease;
+    animation-play-state: paused;
+  }
 
-    .chat-header:hover {
-      background: rgba(12, 22, 38, 0.75);
-    }
+  /* 保存成功脈衝 */
+  .save-btn.saved {
+    animation: savePulse 0.8s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
 
-    /* API 輸入框 */
-    .api-input-wrapper {
-      flex: 1;
-      min-width: 180px;
-      display: flex;
-      align-items: center;
-      background: rgba(0, 0, 0, 0.35);
-      border-radius: 100px;
-      padding: 2px 2px 2px 20px;
-      border: 1px solid rgba(120, 180, 255, 0.25);
-      transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
-      position: relative;
-      animation: fadeSlideUp 0.8s 0.1s cubic-bezier(0.2, 0.9, 0.3, 1) both;
-    }
+  @keyframes savePulse {
+    0% { transform: scale(1); box-shadow: 0 6px 18px rgba(0, 120, 255, 0.4); }
+    50% { transform: scale(1.15); box-shadow: 0 0 0 15px rgba(0, 220, 255, 0.4), 0 0 40px rgba(0, 200, 255, 0.8); }
+    100% { transform: scale(1); box-shadow: 0 6px 18px rgba(0, 120, 255, 0.4); }
+  }
 
-    @keyframes fadeSlideUp {
-      0% { opacity: 0; transform: translateY(15px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
+  /* ===== 消息區域 ===== */
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 22px 16px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    scroll-behavior: smooth;
+    background: radial-gradient(ellipse at 30% 10%, rgba(30, 70, 120, 0.25), transparent 70%);
+    transition: background 1s ease;
+    animation: fadeIn 1.2s 0.4s both;
+    position: relative;
+  }
 
-    .api-input-wrapper::before {
-      content: '';
-      position: absolute;
-      inset: -1px;
-      border-radius: 100px;
-      background: linear-gradient(90deg, transparent, rgba(0, 180, 255, 0.3), transparent);
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .chat-messages::-webkit-scrollbar { width: 6px; }
+  .chat-messages::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 20px; }
+  .chat-messages::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(100, 180, 255, 0.5), rgba(0, 150, 255, 0.7));
+    border-radius: 20px;
+    transition: all 0.4s ease;
+  }
+  .chat-messages::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(100, 200, 255, 0.9), rgba(0, 180, 255, 1));
+  }
+
+  /* ===== 訊息氣泡 ===== */
+  .message {
+    max-width: 85%;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    animation: messageAppear 0.8s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+    position: relative;
+  }
+
+  @keyframes messageAppear {
+    0% {
       opacity: 0;
-      transition: opacity 0.5s ease;
-      pointer-events: none;
+      transform: translateY(30px) scale(0.85) rotateZ(3deg);
+      filter: blur(10px);
     }
-
-    .api-input-wrapper:focus-within::before {
+    55% {
       opacity: 1;
-      animation: borderFlow 2s linear infinite;
+      transform: translateY(-6px) scale(1.03) rotateZ(-1deg);
+      filter: blur(0);
     }
-
-    @keyframes borderFlow {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
+    75% {
+      transform: translateY(3px) scale(0.99) rotateZ(0.5deg);
     }
-
-    .api-input-wrapper:focus-within {
-      border-color: #4da6ff;
-      box-shadow: 0 0 0 4px rgba(77, 166, 255, 0.12), 0 0 30px rgba(0, 140, 255, 0.2);
-      background: rgba(10, 25, 45, 0.85);
-      transform: scale(1.015);
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1) rotateZ(0);
     }
+  }
 
-    .api-input-wrapper input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: #eef5ff;
-      font-size: 0.95rem;
-      padding: 12px 0;
-      letter-spacing: 0.3px;
-      min-width: 0;
-      transition: color 0.5s ease;
+  .message.user {
+    align-self: flex-end;
+    align-items: flex-end;
+  }
+
+  .message.bot {
+    align-self: flex-start;
+    align-items: flex-start;
+  }
+
+  /* 訊息左側漣漪線 */
+  .message::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 20%;
+    width: 2px;
+    height: 60%;
+    border-radius: 2px;
+    background: linear-gradient(180deg, transparent, rgba(0, 200, 255, 0.6), transparent);
+    animation: sideLine 2.5s ease-in-out infinite;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .message.user::before {
+    left: auto;
+    right: -12px;
+  }
+
+  .message:hover::before {
+    opacity: 1;
+  }
+
+  @keyframes sideLine {
+    0%, 100% { transform: scaleY(0.5); opacity: 0.3; }
+    50% { transform: scaleY(1.2); opacity: 1; }
+  }
+
+  /* 氣泡本體 */
+  .bubble {
+    padding: 14px 22px;
+    border-radius: 28px;
+    font-size: 0.98rem;
+    line-height: 1.65;
+    word-break: break-word;
+    transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    animation: bubbleBreath 5s ease-in-out infinite;
+  }
+
+  @keyframes bubbleBreath {
+    0%, 100% {
+      box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.6), 0 0 0 0 rgba(0, 200, 255, 0);
     }
-
-    .api-input-wrapper input::placeholder {
-      color: rgba(170, 210, 255, 0.45);
-      font-weight: 300;
-      transition: all 0.5s ease;
+    50% {
+      box-shadow: 0 18px 38px -8px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 200, 255, 0.15);
     }
+  }
 
-    .api-input-wrapper input:focus::placeholder {
-      color: rgba(170, 210, 255, 0.25);
-      transform: translateX(4px);
+  /* 氣泡光暈漣漪波紋 */
+  .bubble::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 28px;
+    background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.15), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  .bubble:hover::before {
+    opacity: 1;
+  }
+
+  /* 高光掃過 */
+  .bubble::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 80%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+    transform: skewX(-25deg);
+    transition: left 1s cubic-bezier(0.2, 0.9, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .bubble:hover::after {
+    left: 150%;
+  }
+
+  /* 用戶氣泡 */
+  .message.user .bubble {
+    background: linear-gradient(135deg, #0066ff, #0099ff, #00b4ff);
+    background-size: 200% 200%;
+    animation: userGradient 4s ease-in-out infinite, bubbleBreath 4s ease-in-out infinite;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 14px 28px -8px rgba(0, 120, 255, 0.6), 0 0 20px rgba(0, 150, 255, 0.2);
+  }
+
+  @keyframes userGradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .message.user .bubble:hover {
+    transform: translateY(-3px) scale(1.015);
+    box-shadow: 0 20px 40px -8px rgba(0, 150, 255, 0.8), 0 0 40px rgba(0, 180, 255, 0.4);
+  }
+
+  /* 機器人氣泡 */
+  .message.bot .bubble {
+    background: rgba(28, 40, 60, 0.88);
+    color: #e6f0ff;
+    border: 1px solid rgba(80, 160, 255, 0.28);
+    box-shadow: 0 14px 28px -8px rgba(0, 0, 0, 0.7);
+    animation: botBorderPulse 4s ease-in-out infinite;
+  }
+
+  @keyframes botBorderPulse {
+    0%, 100% {
+      border-color: rgba(80, 160, 255, 0.28);
     }
-
-    /* ========== 按鈕通用 ========== */
-    button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: white;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      letter-spacing: 0.2px;
+    50% {
+      border-color: rgba(0, 200, 255, 0.65);
+      box-shadow: 0 14px 28px -8px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 180, 255, 0.25);
     }
+  }
 
-    /* 保存按鈕 — 多層動畫 */
-    .save-btn {
-      background: linear-gradient(135deg, #1b6aff, #00b4ff);
-      border-radius: 100px;
-      padding: 10px 20px;
-      font-size: 0.85rem;
-      box-shadow: 0 6px 16px rgba(0, 120, 255, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: white;
-      font-weight: 600;
-      transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
-      white-space: nowrap;
-      position: relative;
-      overflow: hidden;
-      animation: fadeSlideUp 0.8s 0.2s cubic-bezier(0.2, 0.9, 0.3, 1) both,
-                 btnBreath 3s ease-in-out infinite;
-    }
+  .message.bot .bubble:hover {
+    background: rgba(35, 50, 75, 0.95);
+    transform: translateY(-3px) scale(1.015);
+  }
 
-    @keyframes btnBreath {
-      0%, 100% {
-        box-shadow: 0 6px 16px rgba(0, 120, 255, 0.35);
-      }
-      50% {
-        box-shadow: 0 8px 24px rgba(0, 150, 255, 0.6), 0 0 20px rgba(0, 180, 255, 0.3);
-      }
-    }
+  /* 時間戳 */
+  .message .time {
+    font-size: 0.7rem;
+    color: rgba(180, 210, 255, 0.5);
+    margin-top: 8px;
+    margin-left: 10px;
+    margin-right: 10px;
+    transition: all 0.5s ease;
+    animation: timeFadeIn 0.9s 0.3s both;
+  }
 
-    .save-btn::before {
-      content: '';
-      position: absolute;
-      inset: -2px;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.5), transparent 70%);
+  @keyframes timeFadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .message:hover .time {
+    color: rgba(180, 220, 255, 0.95);
+    transform: translateX(3px);
+  }
+
+  /* 光標閃爍 */
+  .cursor-blink {
+    display: inline-block;
+    width: 8px;
+    height: 1.1em;
+    background: linear-gradient(180deg, #4da6ff, #00e0ff);
+    vertical-align: middle;
+    margin-left: 2px;
+    border-radius: 2px;
+    animation: cursorBlink 0.9s steps(2) infinite;
+    box-shadow: 0 0 8px rgba(0, 200, 255, 0.8);
+  }
+
+  @keyframes cursorBlink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  /* ===== Markdown 樣式 ===== */
+  .bubble p { margin: 0 0 8px 0; }
+  .bubble p:last-child { margin-bottom: 0; }
+  .bubble strong { color: #7ec8ff; font-weight: 700; }
+  .bubble em { color: #a8d8ff; font-style: italic; }
+  .bubble h1, .bubble h2, .bubble h3 {
+    margin: 12px 0 8px;
+    color: #b8e0ff;
+    font-weight: 600;
+    transition: all 0.5s ease;
+  }
+  .bubble h1:hover, .bubble h2:hover, .bubble h3:hover {
+    transform: translateX(6px);
+    color: #d0eeff;
+    text-shadow: 0 0 15px rgba(100, 200, 255, 0.5);
+  }
+  .bubble h1 { font-size: 1.15rem; }
+  .bubble h2 { font-size: 1.05rem; }
+  .bubble h3 { font-size: 1rem; }
+
+  .bubble ul, .bubble ol { margin: 8px 0; padding-left: 24px; }
+  .bubble li {
+    margin: 5px 0;
+    transition: all 0.4s ease;
+  }
+  .bubble li:hover {
+    transform: translateX(5px);
+    color: #bfe2ff;
+  }
+
+  .bubble code:not(pre code) {
+    background: rgba(0, 100, 200, 0.28);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.88em;
+    color: #9fd5ff;
+    transition: all 0.5s ease;
+    display: inline-block;
+  }
+  .bubble code:not(pre code):hover {
+    background: rgba(0, 150, 255, 0.5);
+    transform: scale(1.08) rotate(-2deg);
+    box-shadow: 0 0 15px rgba(0, 180, 255, 0.5);
+  }
+
+  .bubble pre {
+    background: rgba(0, 0, 0, 0.6) !important;
+    border: 1px solid rgba(80, 160, 255, 0.3);
+    border-radius: 18px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    margin: 12px 0;
+    font-size: 0.85rem;
+    transition: all 0.6s ease;
+    position: relative;
+  }
+  .bubble pre:hover {
+    border-color: rgba(0, 200, 255, 0.7);
+    box-shadow: 0 0 40px rgba(0, 180, 255, 0.3), 0 0 0 1px rgba(0, 200, 255, 0.3) inset;
+    transform: translateY(-3px);
+  }
+  .bubble pre code {
+    background: transparent !important;
+    padding: 0;
+    font-family: 'Consolas', 'Monaco', monospace;
+    color: #e6f0ff;
+  }
+
+  .bubble blockquote {
+    border-left: 4px solid #4da6ff;
+    padding-left: 14px;
+    margin: 10px 0;
+    color: #a8c8e8;
+    font-style: italic;
+    transition: all 0.5s ease;
+  }
+  .bubble blockquote:hover {
+    border-left-color: #7ec8ff;
+    padding-left: 22px;
+    color: #d0e8ff;
+    text-shadow: 0 0 10px rgba(100, 200, 255, 0.3);
+  }
+
+  .bubble table {
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 10px 0;
+    font-size: 0.9rem;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(80, 160, 255, 0.3);
+    transition: all 0.5s ease;
+  }
+  .bubble table:hover {
+    border-color: rgba(0, 200, 255, 0.6);
+    box-shadow: 0 0 30px rgba(0, 150, 255, 0.2);
+  }
+  .bubble th, .bubble td {
+    border: none;
+    border-bottom: 1px solid rgba(80, 160, 255, 0.2);
+    border-right: 1px solid rgba(80, 160, 255, 0.2);
+    padding: 8px 12px;
+    transition: background 0.4s ease;
+  }
+  .bubble th:last-child, .bubble td:last-child { border-right: none; }
+  .bubble tr:last-child td { border-bottom: none; }
+  .bubble th { background: rgba(0, 100, 200, 0.3); color: #bfe2ff; font-weight: 600; }
+  .bubble tr:hover td { background: rgba(0, 140, 240, 0.15); }
+
+  .bubble a {
+    color: #4da6ff;
+    text-decoration: none;
+    border-bottom: 1.5px dashed rgba(77, 166, 255, 0.6);
+    transition: all 0.5s ease;
+    position: relative;
+  }
+  .bubble a:hover {
+    color: #7ec8ff;
+    border-bottom-style: solid;
+    text-shadow: 0 0 18px rgba(100, 200, 255, 0.8);
+  }
+
+  /* ===== 跟進建議區 ===== */
+  .followup-section {
+    padding: 0 22px 8px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    animation: followupSlideIn 0.7s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  }
+
+  @keyframes followupSlideIn {
+    0% {
       opacity: 0;
-      transition: opacity 0.5s ease;
-      border-radius: 100px;
+      transform: translateY(20px) scale(0.95);
+      filter: blur(6px);
     }
-
-    .save-btn::after {
-      content: '';
-      position: absolute;
-      width: 40%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
-      top: 0;
-      left: -60%;
-      transform: skewX(-20deg);
-      transition: left 0.8s cubic-bezier(0.2, 0.9, 0.3, 1);
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
     }
+  }
 
-    .save-btn:hover {
-      transform: translateY(-3px) scale(1.04);
-      box-shadow: 0 18px 30px rgba(0, 150, 255, 0.6);
-      background: linear-gradient(135deg, #2f7aff, #1ebaff);
-      letter-spacing: 0.5px;
+  .followup-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: rgba(140, 190, 255, 0.7);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding-left: 8px;
+  }
+
+  .followup-title .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #00e0ff;
+    box-shadow: 0 0 10px rgba(0, 220, 255, 0.9);
+    animation: dotPulse 1.8s ease-in-out infinite;
+  }
+
+  @keyframes dotPulse {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.6); opacity: 1; box-shadow: 0 0 18px rgba(0, 220, 255, 1); }
+  }
+
+  .followup-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .followup-chip {
+    background: rgba(30, 50, 80, 0.7);
+    border: 1px solid rgba(80, 180, 255, 0.3);
+    border-radius: 100px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    color: #bfe2ff;
+    cursor: pointer;
+    transition: all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    animation: chipAppear 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+    backdrop-filter: blur(10px);
+    white-space: nowrap;
+    max-width: 100%;
+    text-overflow: ellipsis;
+  }
+
+  @keyframes chipAppear {
+    0% {
+      opacity: 0;
+      transform: translateX(-20px) scale(0.8);
+      filter: blur(4px);
     }
+    100% {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+      filter: blur(0);
+    }
+  }
 
-    .save-btn:hover::before {
+  .followup-chip::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(0, 200, 255, 0.25), transparent);
+    background-size: 200% 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    animation: chipShine 3s linear infinite;
+  }
+
+  @keyframes chipShine {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .followup-chip:hover {
+    background: rgba(0, 120, 220, 0.5);
+    border-color: rgba(0, 220, 255, 0.9);
+    color: #ffffff;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 25px -6px rgba(0, 180, 255, 0.5), 0 0 25px rgba(0, 200, 255, 0.3);
+  }
+
+  .followup-chip:hover::before {
+    opacity: 1;
+  }
+
+  .followup-chip:active {
+    transform: translateY(0) scale(0.96);
+    transition: all 0.1s ease;
+  }
+
+  /* 自動追問開關 */
+  .auto-followup {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: rgba(140, 190, 255, 0.7);
+    padding-left: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.4s ease;
+  }
+
+  .auto-followup:hover {
+    color: rgba(180, 220, 255, 1);
+  }
+
+  .toggle-switch {
+    width: 36px;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 100px;
+    position: relative;
+    transition: all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
+    border: 1px solid rgba(80, 160, 255, 0.3);
+  }
+
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6a9fff, #4da6ff);
+    top: 2px;
+    left: 2px;
+    transition: all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
+    box-shadow: 0 0 10px rgba(0, 150, 255, 0.6);
+  }
+
+  .auto-followup.on .toggle-switch {
+    background: rgba(0, 150, 255, 0.3);
+    border-color: #00d0ff;
+    box-shadow: 0 0 15px rgba(0, 200, 255, 0.5);
+  }
+
+  .auto-followup.on .toggle-switch::after {
+    left: 18px;
+    background: linear-gradient(135deg, #00e0ff, #7ec8ff);
+    box-shadow: 0 0 18px rgba(0, 220, 255, 0.9);
+  }
+
+  /* ===== 底部輸入 ===== */
+  .chat-footer {
+    padding: 16px 22px 20px 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(8, 14, 26, 0.65);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(70, 150, 255, 0.15);
+    transition: all 0.6s ease;
+    animation: footerSlide 0.9s 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+    position: relative;
+  }
+
+  @keyframes footerSlide {
+    0% { opacity: 0; transform: translateY(40px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  .chat-footer input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(120, 180, 255, 0.25);
+    border-radius: 100px;
+    padding: 16px 24px;
+    color: white;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
+    backdrop-filter: blur(8px);
+    position: relative;
+    background-image: linear-gradient(90deg, transparent, transparent);
+  }
+
+  .chat-footer input:focus {
+    border-color: #4da6ff;
+    box-shadow: 0 0 0 4px rgba(77, 166, 255, 0.15), 0 0 45px rgba(0, 150, 255, 0.3);
+    background: rgba(10, 25, 50, 0.9);
+    transform: scale(1.01);
+    padding-left: 28px;
+  }
+
+  .chat-footer input::placeholder {
+    color: rgba(170, 210, 255, 0.4);
+    transition: all 0.5s ease;
+  }
+
+  .chat-footer input:focus::placeholder {
+    color: rgba(170, 210, 255, 0.15);
+    transform: translateX(8px);
+  }
+
+  /* ===== 發送按鈕 ===== */
+  .send-btn {
+    background: linear-gradient(145deg, #0b6eff, #00a2ff, #00d0ff);
+    background-size: 200% 200%;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    flex-shrink: 0;
+    color: white;
+    position: relative;
+    animation: sendBreath 3.5s ease-in-out infinite, sendGradient 5s ease infinite;
+  }
+
+  @keyframes sendGradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  @keyframes sendBreath {
+    0%, 100% {
+      box-shadow: 0 8px 25px rgba(0, 120, 255, 0.5), 0 0 0 0 rgba(0, 180, 255, 0.5);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 12px 35px rgba(0, 150, 255, 0.8), 0 0 0 12px rgba(0, 180, 255, 0.08);
+      transform: scale(1.04);
+    }
+  }
+
+  .send-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.7), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    pointer-events: none;
+  }
+
+  .send-btn::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: rgba(0, 220, 255, 0.8);
+    border-right-color: rgba(0, 220, 255, 0.4);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    animation: spinRing 2.5s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes spinRing {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .send-btn span {
+    display: inline-block;
+    transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
+    animation: arrowFloat 2s ease-in-out infinite;
+    z-index: 2;
+  }
+
+  @keyframes arrowFloat {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(3px); }
+  }
+
+  .send-btn:hover {
+    transform: scale(1.15) translateY(-4px);
+    box-shadow: 0 22px 45px rgba(0, 150, 255, 0.8), 0 0 0 15px rgba(0, 170, 255, 0.1), 0 0 60px rgba(0, 200, 255, 0.4);
+    animation-play-state: paused, running;
+  }
+
+  .send-btn:hover::before { opacity: 1; }
+  .send-btn:hover::after { opacity: 1; }
+  .send-btn:hover span { transform: translateX(5px) scale(1.15); }
+
+  .send-btn:active {
+    transform: scale(0.9) translateY(3px);
+    transition: all 0.1s ease;
+  }
+
+  .send-btn.flash {
+    animation: sendFlash 0.7s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+
+  @keyframes sendFlash {
+    0% {
+      transform: scale(1.3);
+      box-shadow: 0 0 0 0 rgba(0, 220, 255, 0.9), 0 0 70px rgba(0, 200, 255, 1);
+      background: linear-gradient(145deg, #00d4ff, #b0e0ff);
+    }
+    100% {
+      transform: scale(1);
+      box-shadow: 0 8px 25px rgba(0, 120, 255, 0.5);
+      background: linear-gradient(145deg, #0b6eff, #00a2ff, #00d0ff);
+    }
+  }
+
+  /* 爆炸粒子 */
+  .burst-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #00e0ff, transparent);
+    pointer-events: none;
+    animation: burst 0.8s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+  }
+
+  @keyframes burst {
+    0% {
+      transform: translate(0, 0) scale(1);
       opacity: 1;
     }
-
-    .save-btn:hover::after {
-      left: 130%;
-    }
-
-    .save-btn:active {
-      transform: translateY(0px) scale(0.94);
-      box-shadow: 0 4px 10px rgba(0, 120, 255, 0.5);
-      transition: all 0.12s ease;
-      animation-play-state: paused;
-    }
-
-    /* ========== 消息區域 ========== */
-    .chat-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px 22px 16px 22px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      scroll-behavior: smooth;
-      background: radial-gradient(ellipse at 30% 10%, rgba(30, 70, 120, 0.2), transparent 70%);
-      transition: background 0.8s ease;
-      animation: fadeIn 1s 0.3s both;
-    }
-
-    @keyframes fadeIn {
-      0% { opacity: 0; }
-      100% { opacity: 1; }
-    }
-
-    .chat-messages:hover {
-      background: radial-gradient(ellipse at 30% 10%, rgba(30, 80, 140, 0.28), transparent 70%);
-    }
-
-    /* 滾動條 */
-    .chat-messages::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .chat-messages::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 20px;
-    }
-
-    .chat-messages::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, rgba(100, 180, 255, 0.4), rgba(0, 150, 255, 0.6));
-      border-radius: 20px;
-      transition: all 0.4s ease;
-    }
-
-    .chat-messages::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(180deg, rgba(100, 200, 255, 0.8), rgba(0, 180, 255, 1));
-      transform: scaleX(1.4);
-    }
-
-    /* ========== 消息氣泡 — 圓潤 + 多層進場 ========== */
-    .message {
-      max-width: 85%;
-      display: flex;
-      flex-direction: column;
+    100% {
+      transform: translate(var(--tx), var(--ty)) scale(0.3);
       opacity: 0;
-      animation: messageAppear 0.7s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
     }
+  }
 
-    @keyframes messageAppear {
-      0% {
-        opacity: 0;
-        transform: translateY(20px) scale(0.9) rotateZ(2deg);
-        filter: blur(6px);
-      }
-      55% {
-        opacity: 1;
-        transform: translateY(-4px) scale(1.02) rotateZ(-0.5deg);
-        filter: blur(0);
-      }
-      75% {
-        transform: translateY(2px) scale(0.995) rotateZ(0.3deg);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1) rotateZ(0);
-      }
-    }
+  /* 漣漪 */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 220, 255, 0.7), transparent 70%);
+    transform: scale(0);
+    animation: rippleExpand 0.9s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+    pointer-events: none;
+    z-index: 10;
+  }
 
-    .message.user {
-      align-self: flex-end;
-      align-items: flex-end;
-    }
+  @keyframes rippleExpand {
+    to { transform: scale(4); opacity: 0; }
+  }
 
-    .message.bot {
-      align-self: flex-start;
-      align-items: flex-start;
-    }
+  .send-btn:disabled, .save-btn:disabled {
+    opacity: 0.45;
+    transform: scale(0.96);
+    pointer-events: none;
+    filter: grayscale(0.5);
+    box-shadow: none;
+    animation-play-state: paused, paused;
+  }
 
-    /* 氣泡本體 — 全圓角，多層動畫 */
-    .bubble {
-      padding: 14px 22px;
-      border-radius: 28px;
-      font-size: 0.98rem;
-      line-height: 1.65;
-      word-break: break-word;
-      box-shadow: 0 10px 22px -8px rgba(0, 0, 0, 0.5);
-      transition: all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      letter-spacing: 0.2px;
-      position: relative;
-      overflow: hidden;
-      animation: bubbleBreath 5s ease-in-out infinite;
-    }
+  /* ===== 打字指示器 ===== */
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    background: rgba(35, 55, 85, 0.9);
+    border-radius: 40px;
+    width: fit-content;
+    margin-top: 4px;
+    border: 1px solid rgba(80, 160, 255, 0.4);
+    transition: all 0.5s ease;
+    animation: typingBreath 2s ease-in-out infinite;
+    backdrop-filter: blur(10px);
+  }
 
-    @keyframes bubbleBreath {
-      0%, 100% {
-        box-shadow: 0 10px 22px -8px rgba(0, 0, 0, 0.5);
-      }
-      50% {
-        box-shadow: 0 14px 28px -8px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 120, 255, 0.08);
-      }
+  @keyframes typingBreath {
+    0%, 100% {
+      border-color: rgba(80, 160, 255, 0.4);
+      box-shadow: 0 8px 25px -6px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 150, 255, 0.2);
     }
+    50% {
+      border-color: rgba(0, 220, 255, 0.8);
+      box-shadow: 0 8px 25px -6px rgba(0, 0, 0, 0.7), 0 0 45px rgba(0, 200, 255, 0.5);
+    }
+  }
 
-    /* 氣泡高光掃過 */
-    .bubble::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -120%;
-      width: 60%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
-      transform: skewX(-20deg);
-      transition: left 0.9s cubic-bezier(0.2, 0.9, 0.3, 1);
-      border-radius: 28px;
-      pointer-events: none;
-    }
+  .typing-indicator span {
+    width: 10px;
+    height: 10px;
+    background: linear-gradient(135deg, #7abaff, #00d0ff);
+    border-radius: 50%;
+    display: inline-block;
+    animation: typingBounce 1.6s infinite cubic-bezier(0.2, 0.9, 0.3, 1);
+    box-shadow: 0 0 12px rgba(0, 200, 255, 0.6);
+  }
 
-    .bubble:hover::after {
-      left: 140%;
-    }
+  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
 
-    /* 用戶氣泡 */
-    .message.user .bubble {
-      background: linear-gradient(135deg, #0070ff, #0099ff);
-      color: white;
-      border-radius: 28px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 12px 22px -8px rgba(0, 120, 255, 0.5);
-      animation: userBubblePulse 4s ease-in-out infinite;
+  @keyframes typingBounce {
+    0%, 60%, 100% {
+      transform: translateY(0) scale(1);
+      opacity: 0.5;
+      box-shadow: 0 0 8px rgba(0, 180, 255, 0.3);
     }
-
-    @keyframes userBubblePulse {
-      0%, 100% {
-        box-shadow: 0 12px 22px -8px rgba(0, 120, 255, 0.5);
-      }
-      50% {
-        box-shadow: 0 16px 32px -8px rgba(0, 140, 255, 0.7), 0 0 25px rgba(0, 150, 255, 0.3);
-      }
-    }
-
-    .message.user .bubble:hover {
-      transform: translateY(-2px) scale(1.01);
-    }
-
-    /* 機器人氣泡 */
-    .message.bot .bubble {
-      background: rgba(30, 42, 60, 0.85);
-      color: #e6f0ff;
-      border-radius: 28px;
-      border: 1px solid rgba(80, 160, 255, 0.25);
-      box-shadow: 0 12px 22px -8px rgba(0, 0, 0, 0.6);
-      animation: botBubblePulse 4s ease-in-out infinite;
-    }
-
-    @keyframes botBubblePulse {
-      0%, 100% {
-        border-color: rgba(80, 160, 255, 0.25);
-      }
-      50% {
-        border-color: rgba(80, 180, 255, 0.5);
-        box-shadow: 0 12px 22px -8px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 120, 255, 0.15);
-      }
-    }
-
-    .message.bot .bubble:hover {
-      background: rgba(38, 52, 75, 0.92);
-      transform: translateY(-2px) scale(1.01);
-    }
-
-    .message .time {
-      font-size: 0.7rem;
-      color: rgba(180, 210, 255, 0.5);
-      margin-top: 8px;
-      margin-left: 10px;
-      margin-right: 10px;
-      letter-spacing: 0.3px;
-      transition: all 0.5s ease;
-      animation: timeFadeIn 0.8s 0.3s both;
-    }
-
-    @keyframes timeFadeIn {
-      0% { opacity: 0; transform: translateY(-4px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-
-    .message:hover .time {
-      color: rgba(180, 220, 255, 0.9);
-      transform: translateX(2px);
-    }
-
-    /* ========== Markdown 樣式 ========== */
-    .bubble p { margin: 0 0 8px 0; }
-    .bubble p:last-child { margin-bottom: 0; }
-    .bubble strong { color: #7ec8ff; font-weight: 700; }
-    .bubble em { color: #a8d8ff; font-style: italic; }
-    .bubble h1, .bubble h2, .bubble h3 {
-      margin: 12px 0 8px;
-      color: #b8e0ff;
-      font-weight: 600;
-      letter-spacing: 0.3px;
-      transition: transform 0.4s ease, color 0.4s ease;
-    }
-    .bubble h1:hover, .bubble h2:hover, .bubble h3:hover {
-      transform: translateX(4px);
-      color: #d0eeff;
-    }
-    .bubble h1 { font-size: 1.15rem; }
-    .bubble h2 { font-size: 1.05rem; }
-    .bubble h3 { font-size: 1rem; }
-
-    .bubble ul, .bubble ol {
-      margin: 8px 0;
-      padding-left: 24px;
-    }
-    .bubble li {
-      margin: 5px 0;
-      transition: transform 0.4s ease;
-    }
-    .bubble li:hover {
-      transform: translateX(4px);
-    }
-
-    .bubble code:not(pre code) {
-      background: rgba(0, 100, 200, 0.25);
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-family: 'Consolas', 'Monaco', monospace;
-      font-size: 0.88em;
-      color: #9fd5ff;
-      transition: all 0.5s ease;
-    }
-    .bubble code:not(pre code):hover {
-      background: rgba(0, 130, 230, 0.45);
-      transform: scale(1.05);
-      box-shadow: 0 0 12px rgba(0, 180, 255, 0.3);
-    }
-
-    .bubble pre {
-      background: rgba(0, 0, 0, 0.55) !important;
-      border: 1px solid rgba(80, 160, 255, 0.25);
-      border-radius: 18px;
-      padding: 14px 16px;
-      overflow-x: auto;
-      margin: 12px 0;
-      font-size: 0.85rem;
-      transition: all 0.5s ease;
-    }
-    .bubble pre:hover {
-      border-color: rgba(80, 180, 255, 0.6);
-      box-shadow: 0 0 30px rgba(0, 150, 255, 0.15);
-      transform: translateY(-2px);
-    }
-    .bubble pre code {
-      background: transparent !important;
-      padding: 0;
-      font-family: 'Consolas', 'Monaco', monospace;
-      color: #e6f0ff;
-    }
-
-    .bubble blockquote {
-      border-left: 4px solid #4da6ff;
-      padding-left: 14px;
-      margin: 10px 0;
-      color: #a8c8e8;
-      font-style: italic;
-      border-radius: 4px;
-      transition: all 0.5s ease;
-    }
-    .bubble blockquote:hover {
-      border-left-color: #7ec8ff;
-      padding-left: 20px;
-      color: #c8e0f8;
-    }
-
-    .bubble table {
-      border-collapse: separate;
-      border-spacing: 0;
-      margin: 10px 0;
-      font-size: 0.9rem;
-      border-radius: 14px;
-      overflow: hidden;
-      border: 1px solid rgba(80, 160, 255, 0.3);
-      transition: all 0.5s ease;
-    }
-    .bubble table:hover {
-      border-color: rgba(80, 180, 255, 0.55);
-      box-shadow: 0 0 20px rgba(0, 150, 255, 0.1);
-    }
-    .bubble th, .bubble td {
-      border: none;
-      border-bottom: 1px solid rgba(80, 160, 255, 0.2);
-      border-right: 1px solid rgba(80, 160, 255, 0.2);
-      padding: 8px 12px;
-      transition: background 0.4s ease;
-    }
-    .bubble th:last-child, .bubble td:last-child { border-right: none; }
-    .bubble tr:last-child td { border-bottom: none; }
-    .bubble th {
-      background: rgba(0, 100, 200, 0.25);
-      color: #bfe2ff;
-      font-weight: 600;
-    }
-    .bubble tr:hover td {
-      background: rgba(0, 120, 220, 0.12);
-    }
-
-    .bubble a {
-      color: #4da6ff;
-      text-decoration: none;
-      border-bottom: 1.5px dashed rgba(77, 166, 255, 0.5);
-      transition: all 0.5s ease;
-      padding-bottom: 1px;
-      position: relative;
-    }
-    .bubble a:hover {
-      color: #7ec8ff;
-      border-bottom-style: solid;
-      border-bottom-color: #7ec8ff;
-      text-shadow: 0 0 16px rgba(100, 200, 255, 0.6);
-      letter-spacing: 0.3px;
-    }
-
-    /* ========== 底部輸入區 ========== */
-    .chat-footer {
-      padding: 16px 22px 20px 22px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: rgba(10, 18, 30, 0.6);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-top: 1px solid rgba(70, 150, 255, 0.15);
-      transition: background 0.6s ease;
-      animation: footerSlide 0.8s 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) both;
-      position: relative;
-    }
-
-    @keyframes footerSlide {
-      0% {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .chat-footer:hover {
-      background: rgba(12, 22, 38, 0.75);
-    }
-
-    .chat-footer input {
-      flex: 1;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(120, 180, 255, 0.25);
-      border-radius: 100px;
-      padding: 16px 24px;
-      color: white;
-      font-size: 0.95rem;
-      outline: none;
-      transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
-      letter-spacing: 0.3px;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      position: relative;
-    }
-
-    .chat-footer input:focus {
-      border-color: #4da6ff;
-      box-shadow: 0 0 0 4px rgba(77, 166, 255, 0.12), 0 0 35px rgba(0, 150, 255, 0.2);
-      background: rgba(10, 25, 45, 0.85);
-      transform: scale(1.008);
-      padding-left: 28px;
-    }
-
-    .chat-footer input::placeholder {
-      color: rgba(170, 210, 255, 0.45);
-      font-weight: 300;
-      transition: all 0.5s ease;
-    }
-
-    .chat-footer input:focus::placeholder {
-      color: rgba(170, 210, 255, 0.2);
-      transform: translateX(6px);
-    }
-
-    /* ========== 發送按鈕 — 大量動畫 ========== */
-    .send-btn {
-      background: linear-gradient(145deg, #0b6eff, #00a2ff);
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8rem;
-      box-shadow: 0 8px 22px rgba(0, 120, 255, 0.4), 0 0 0 0 rgba(0, 180, 255, 0.6);
-      transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      flex-shrink: 0;
-      color: white;
-      position: relative;
-      overflow: visible;
-      animation: sendBreath 3.5s ease-in-out infinite;
-    }
-
-    @keyframes sendBreath {
-      0%, 100% {
-        box-shadow: 0 8px 22px rgba(0, 120, 255, 0.4), 0 0 0 0 rgba(0, 180, 255, 0.4);
-        transform: scale(1);
-      }
-      50% {
-        box-shadow: 0 10px 30px rgba(0, 150, 255, 0.6), 0 0 0 8px rgba(0, 180, 255, 0.08);
-        transform: scale(1.03);
-      }
-    }
-
-    /* 內部光暈 */
-    .send-btn::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.6), transparent 70%);
-      opacity: 0;
-      transition: opacity 0.6s ease;
-      pointer-events: none;
-    }
-
-    /* 旋轉光環 */
-    .send-btn::after {
-      content: '';
-      position: absolute;
-      inset: -6px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      border-top-color: rgba(0, 200, 255, 0.7);
-      border-right-color: rgba(0, 200, 255, 0.3);
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      animation: spinRing 2.5s linear infinite;
-      pointer-events: none;
-    }
-
-    @keyframes spinRing {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* 磁吸光標 */
-    .send-btn span {
-      display: inline-block;
-      transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
-      animation: arrowFloat 2s ease-in-out infinite;
-    }
-
-    @keyframes arrowFloat {
-      0%, 100% { transform: translateX(0); }
-      50% { transform: translateX(3px); }
-    }
-
-    .send-btn:hover {
-      transform: scale(1.12) translateY(-3px);
-      box-shadow: 0 18px 38px rgba(0, 150, 255, 0.65), 0 0 0 12px rgba(0, 170, 255, 0.1);
-      animation-play-state: paused;
-    }
-
-    .send-btn:hover::before {
+    30% {
+      transform: translateY(-12px) scale(1.35);
       opacity: 1;
+      box-shadow: 0 0 25px rgba(0, 220, 255, 1);
     }
+  }
 
-    .send-btn:hover::after {
-      opacity: 1;
-    }
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(40px) scale(0.85);
+    background: rgba(20, 35, 60, 0.96);
+    backdrop-filter: blur(16px);
+    padding: 12px 28px;
+    border-radius: 100px;
+    color: #bfe2ff;
+    font-size: 0.9rem;
+    border: 1px solid rgba(0, 180, 255, 0.5);
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 150, 255, 0.3);
+    opacity: 0;
+    transition: all 0.7s cubic-bezier(0.2, 0.9, 0.3, 1);
+    pointer-events: none;
+    z-index: 1000;
+    white-space: nowrap;
+  }
 
-    .send-btn:hover span {
-      transform: translateX(4px) scale(1.1);
-    }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
 
-    .send-btn:active {
-      transform: scale(0.9) translateY(3px);
-      box-shadow: 0 4px 14px rgba(0, 120, 255, 0.6), 0 0 0 4px rgba(0, 170, 255, 0.2);
-      transition: all 0.1s ease;
-    }
+  /* ===== 響應式 ===== */
+  @media (max-width: 520px) {
+    .chat-container { height: 94vh; border-radius: 32px; }
+    .chat-header { padding: 14px 16px; }
+    .message { max-width: 92%; }
+    .bubble { padding: 12px 18px; font-size: 0.92rem; border-radius: 24px; }
+    .chat-footer { padding: 12px 16px 16px; }
+    .chat-footer input { padding: 14px 20px; }
+    .send-btn { width: 52px; height: 52px; font-size: 1.6rem; }
+    .followup-section { padding: 0 16px 6px 16px; }
+    .followup-chip { font-size: 0.78rem; padding: 6px 12px; }
+  }
 
-    /* 發送成功爆閃 */
-    .send-btn.flash {
-      animation: sendFlash 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
-    }
-
-    @keyframes sendFlash {
-      0% {
-        transform: scale(1.2);
-        box-shadow: 0 0 0 0 rgba(0, 220, 255, 0.8), 0 0 50px rgba(0, 200, 255, 0.8);
-        background: linear-gradient(145deg, #00d4ff, #7ae0ff);
-      }
-      100% {
-        transform: scale(1);
-        box-shadow: 0 8px 22px rgba(0, 120, 255, 0.4);
-        background: linear-gradient(145deg, #0b6eff, #00a2ff);
-      }
-    }
-
-    /* 漣漪擴散層 */
-    .ripple {
-      position: absolute;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(0, 200, 255, 0.6), transparent 70%);
-      transform: scale(0);
-      animation: rippleExpand 0.8s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    @keyframes rippleExpand {
-      to {
-        transform: scale(4);
-        opacity: 0;
-      }
-    }
-
-    /* 禁用狀態 */
-    .send-btn:disabled, .save-btn:disabled {
-      opacity: 0.45;
-      transform: scale(0.96);
-      pointer-events: none;
-      filter: grayscale(0.4);
-      box-shadow: none;
-      animation-play-state: paused;
-    }
-
-    /* ========== 打字指示器 ========== */
-    .typing-indicator {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      padding: 12px 22px;
-      background: rgba(40, 60, 90, 0.85);
-      border-radius: 40px;
-      width: fit-content;
-      margin-top: 4px;
-      border: 1px solid rgba(80, 160, 255, 0.35);
-      box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 150, 255, 0.15);
-      transition: all 0.5s ease;
-      animation: typingBreath 2s ease-in-out infinite;
-    }
-
-    @keyframes typingBreath {
-      0%, 100% {
-        border-color: rgba(80, 160, 255, 0.35);
-        box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 150, 255, 0.15);
-      }
-      50% {
-        border-color: rgba(80, 200, 255, 0.65);
-        box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.6), 0 0 32px rgba(0, 180, 255, 0.35);
-      }
-    }
-
-    .typing-indicator span {
-      width: 9px;
-      height: 9px;
-      background: linear-gradient(135deg, #7abaff, #4da6ff);
-      border-radius: 50%;
-      display: inline-block;
-      animation: typingBounce 1.6s infinite cubic-bezier(0.2, 0.9, 0.3, 1);
-      box-shadow: 0 0 10px rgba(0, 180, 255, 0.4);
-    }
-
-    .typing-indicator span:nth-child(2) { animation-delay: 0.18s; }
-    .typing-indicator span:nth-child(3) { animation-delay: 0.36s; }
-
-    @keyframes typingBounce {
-      0%, 60%, 100% {
-        transform: translateY(0) scale(1);
-        opacity: 0.5;
-        box-shadow: 0 0 6px rgba(0, 180, 255, 0.2);
-      }
-      30% {
-        transform: translateY(-10px) scale(1.25);
-        opacity: 1;
-        box-shadow: 0 0 18px rgba(0, 200, 255, 0.8);
-      }
-    }
-
-    /* ========== Toast ========== */
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%) translateY(30px) scale(0.9);
-      background: rgba(20, 35, 60, 0.95);
-      backdrop-filter: blur(14px);
-      padding: 12px 28px;
-      border-radius: 100px;
-      color: #bfe2ff;
-      font-size: 0.9rem;
-      border: 1px solid rgba(0, 180, 255, 0.4);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 150, 255, 0.2);
-      opacity: 0;
-      transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
-      pointer-events: none;
-      z-index: 1000;
-      white-space: nowrap;
-      animation: toastFloat 3s ease-in-out infinite;
-    }
-
-    @keyframes toastFloat {
-      0%, 100% { transform: translateX(-50%) translateY(30px) scale(0.9); }
-      50% { transform: translateX(-50%) translateY(28px) scale(0.9); }
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0) scale(1);
-      animation: none;
-    }
-
-    /* ========== 響應式 ========== */
-    @media (max-width: 520px) {
-      .chat-container {
-        height: 94vh;
-        border-radius: 32px;
-      }
-      .chat-header {
-        padding: 14px 16px;
-      }
-      .message {
-        max-width: 92%;
-      }
-      .bubble {
-        padding: 12px 18px;
-        font-size: 0.92rem;
-        border-radius: 24px;
-      }
-      .chat-footer {
-        padding: 12px 16px 16px;
-      }
-      .chat-footer input {
-        padding: 14px 20px;
-      }
-      .send-btn {
-        width: 52px;
-        height: 52px;
-        font-size: 1.6rem;
-      }
-    }
-
-    /* 輸入框禁用 */
-    .chat-footer input:disabled {
-      opacity: 0.55;
-      background: rgba(0, 0, 0, 0.2);
-      border-color: rgba(120, 180, 255, 0.1);
-      cursor: not-allowed;
-      transform: scale(0.99);
-    }
-  </style>
+  .chat-footer input:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: scale(0.99);
+  }
+</style>
 </head>
 <body>
 
-<!-- 背景漂浮光點層 -->
+<div class="aurora-bg"></div>
 <div class="bg-particles" id="bgParticles"></div>
+<div class="particle-lines"><svg id="linesSvg"></svg></div>
 
 <div class="chat-container" id="chatContainer">
   <div class="chat-header">
@@ -1046,6 +1251,19 @@
     </div>
   </div>
 
+  <!-- 跟進建議區 -->
+  <div class="followup-section" id="followupSection" style="display:none;">
+    <div class="followup-title">
+      <span class="dot"></span>
+      <span>可能想問</span>
+      <div class="auto-followup" id="autoFollowup" style="margin-left:auto;">
+        <span class="toggle-switch"></span>
+        <span>自動追問</span>
+      </div>
+    </div>
+    <div class="followup-list" id="followupList"></div>
+  </div>
+
   <div class="chat-footer">
     <input type="text" id="messageInput" placeholder="输入消息..." autocomplete="off" spellcheck="false">
     <button class="send-btn" id="sendBtn"><span>➤</span></button>
@@ -1055,291 +1273,458 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  (function() {
-    const apiKeyInput = document.getElementById('apiKeyInput');
-    const saveApiBtn = document.getElementById('saveApiBtn');
-    const chatMessages = document.getElementById('chatMessages');
-    const messageInput = document.getElementById('messageInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const toastEl = document.getElementById('toast');
-    const bgParticles = document.getElementById('bgParticles');
+(function() {
+  const apiKeyInput = document.getElementById('apiKeyInput');
+  const saveApiBtn = document.getElementById('saveApiBtn');
+  const chatMessages = document.getElementById('chatMessages');
+  const messageInput = document.getElementById('messageInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const toastEl = document.getElementById('toast');
+  const bgParticles = document.getElementById('bgParticles');
+  const chatContainer = document.getElementById('chatContainer');
+  const followupSection = document.getElementById('followupSection');
+  const followupList = document.getElementById('followupList');
+  const autoFollowupToggle = document.getElementById('autoFollowup');
+  const linesSvg = document.getElementById('linesSvg');
 
-    let apiKey = localStorage.getItem('deepseek_api_key') || '';
-    let isWaitingForResponse = false;
+  let apiKey = localStorage.getItem('deepseek_api_key') || '';
+  let isWaitingForResponse = false;
+  let conversationHistory = [];   // 對話上下文
+  let autoFollowupEnabled = false;
+  let followupChips = [];
 
-    if (apiKey) apiKeyInput.value = apiKey;
+  if (apiKey) apiKeyInput.value = apiKey;
 
-    // ===== 動態生成背景漂浮光點 =====
-    function createParticles() {
-      for (let i = 0; i < 30; i++) {
-        const span = document.createElement('span');
-        span.style.left = Math.random() * 100 + '%';
-        span.style.bottom = '-20px';
-        span.style.width = (Math.random() * 6 + 3) + 'px';
-        span.style.height = span.style.width;
-        span.style.animationDuration = (Math.random() * 15 + 12) + 's';
-        span.style.animationDelay = (Math.random() * 15) + 's';
-        span.style.opacity = Math.random() * 0.6 + 0.2;
-        bgParticles.appendChild(span);
-      }
+  // ===== 卡片 3D 傾斜跟隨滑鼠 =====
+  chatContainer.addEventListener('mousemove', (e) => {
+    const rect = chatContainer.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    chatContainer.style.transform = `perspective(1500px) rotateY(${x * 3}deg) rotateX(${-y * 3}deg) translateY(-4px)`;
+  });
+
+  chatContainer.addEventListener('mouseleave', () => {
+    chatContainer.style.transform = '';
+  });
+
+  // ===== 氣泡光暈跟隨滑鼠 =====
+  document.addEventListener('mousemove', (e) => {
+    const bubble = e.target.closest('.bubble');
+    if (bubble) {
+      const rect = bubble.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      bubble.style.setProperty('--mx', x + '%');
+      bubble.style.setProperty('--my', y + '%');
     }
-    createParticles();
+  });
 
-    // ===== Toast =====
-    function showToast(text, duration = 2000) {
-      toastEl.textContent = text;
-      toastEl.classList.add('show');
-      clearTimeout(window.toastTimer);
-      window.toastTimer = setTimeout(() => {
-        toastEl.classList.remove('show');
-      }, duration);
+  // ===== 動態背景粒子 =====
+  function createParticles() {
+    for (let i = 0; i < 40; i++) {
+      const span = document.createElement('span');
+      span.style.left = Math.random() * 100 + '%';
+      span.style.bottom = '-20px';
+      const size = Math.random() * 5 + 2;
+      span.style.width = size + 'px';
+      span.style.height = size + 'px';
+      span.style.animationDuration = (Math.random() * 18 + 14) + 's';
+      span.style.animationDelay = (Math.random() * 20) + 's';
+      span.style.opacity = Math.random() * 0.7 + 0.2;
+      bgParticles.appendChild(span);
     }
+  }
+  createParticles();
 
-    // ===== 保存密鑰 =====
-    function saveApiKey() {
-      const key = apiKeyInput.value.trim();
-      if (!key) {
-        showToast('密钥不能为空', 1800);
-        return;
-      }
-      apiKey = key;
-      localStorage.setItem('deepseek_api_key', key);
-      showToast('✅ API 密钥已保存', 1600);
-      saveApiBtn.style.transform = 'scale(0.9) rotate(3deg)';
-      setTimeout(() => { saveApiBtn.style.transform = ''; }, 250);
-    }
-
-    // ===== 發送漣漪 =====
-    function createRipple(e) {
-      const btn = e.currentTarget;
-      const rect = btn.getBoundingClientRect();
-      const ripple = document.createElement('span');
-      ripple.classList.add('ripple');
-      const size = Math.max(rect.width, rect.height);
-      ripple.style.width = ripple.style.height = size + 'px';
-      ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
-      ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
-      btn.appendChild(ripple);
-      setTimeout(() => ripple.remove(), 800);
-    }
-
-    // ===== 添加消息 =====
-    function addMessage(role, content) {
-      const messageDiv = document.createElement('div');
-      messageDiv.classList.add('message', role);
-
-      const bubbleDiv = document.createElement('div');
-      bubbleDiv.classList.add('bubble');
-
-      if (role === 'bot') {
-        try {
-          const rawHtml = marked.parse(content);
-          bubbleDiv.innerHTML = DOMPurify.sanitize(rawHtml);
-          bubbleDiv.querySelectorAll('pre code').forEach((block) => {
-            hljs.highlightElement(block);
-          });
-        } catch (e) {
-          bubbleDiv.textContent = content;
+  // ===== 粒子連線 =====
+  function drawLines() {
+    const particles = bgParticles.querySelectorAll('span');
+    const rect = document.body.getBoundingClientRect();
+    linesSvg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+    let html = '';
+    const points = [];
+    particles.forEach((p) => {
+      const r = p.getBoundingClientRect();
+      const x = r.left + r.width / 2;
+      const y = r.top + r.height / 2;
+      points.push({ x, y, opacity: parseFloat(p.style.opacity) || 0.5 });
+    });
+    for (let i = 0; i < points.length; i++) {
+      for (let j = i + 1; j < points.length; j++) {
+        const dx = points[i].x - points[j].x;
+        const dy = points[i].y - points[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 150) {
+          const opacity = (1 - dist / 150) * 0.15;
+          html += `<line x1="${points[i].x}" y1="${points[i].y}" x2="${points[j].x}" y2="${points[j].y}" stroke="rgba(80, 200, 255, ${opacity})" stroke-width="0.6" />`;
         }
-      } else {
+      }
+    }
+    linesSvg.innerHTML = html;
+  }
+
+  let lineTimer = setInterval(drawLines, 120);
+
+  // ===== Toast =====
+  function showToast(text, duration = 2000) {
+    toastEl.textContent = text;
+    toastEl.classList.add('show');
+    clearTimeout(window.toastTimer);
+    window.toastTimer = setTimeout(() => {
+      toastEl.classList.remove('show');
+    }, duration);
+  }
+
+  // ===== 保存密鑰 =====
+  function saveApiKey() {
+    const key = apiKeyInput.value.trim();
+    if (!key) { showToast('密钥不能为空', 1800); return; }
+    apiKey = key;
+    localStorage.setItem('deepseek_api_key', key);
+    showToast('✅ API 密钥已保存', 1600);
+    saveApiBtn.classList.add('saved');
+    setTimeout(() => saveApiBtn.classList.remove('saved'), 800);
+  }
+
+  // ===== 漣漪 + 爆炸粒子 =====
+  function createRipple(e) {
+    const btn = e.currentTarget;
+    const rect = btn.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.classList.add('ripple');
+    const size = Math.max(rect.width, rect.height);
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    btn.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 900);
+
+    // 爆炸粒子
+    for (let i = 0; i < 8; i++) {
+      const p = document.createElement('span');
+      p.classList.add('burst-particle');
+      const angle = (Math.PI * 2 * i) / 8;
+      const dist = 40 + Math.random() * 30;
+      p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+      p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+      p.style.left = '50%';
+      p.style.top = '50%';
+      p.style.animationDelay = (i * 0.02) + 's';
+      btn.appendChild(p);
+      setTimeout(() => p.remove(), 900);
+    }
+  }
+
+  // ===== 添加消息 =====
+  function addMessage(role, content, skipTyping = false) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', role);
+
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.classList.add('bubble');
+
+    if (role === 'bot') {
+      try {
+        const rawHtml = marked.parse(content);
+        bubbleDiv.innerHTML = DOMPurify.sanitize(rawHtml);
+        bubbleDiv.querySelectorAll('pre code').forEach((block) => {
+          hljs.highlightElement(block);
+        });
+      } catch (e) {
         bubbleDiv.textContent = content;
       }
-
-      const timeDiv = document.createElement('div');
-      timeDiv.classList.add('time');
-      const now = new Date();
-      timeDiv.textContent = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-
-      messageDiv.appendChild(bubbleDiv);
-      messageDiv.appendChild(timeDiv);
-      chatMessages.appendChild(messageDiv);
-
-      // 逐字浮現動畫（針對 bot 純文字內容，若為 HTML 則略過）
-      if (role === 'bot' && !bubbleDiv.querySelector('*')) {
-        const text = bubbleDiv.textContent;
-        bubbleDiv.textContent = '';
-        let i = 0;
-        const interval = setInterval(() => {
-          if (i >= text.length) {
-            clearInterval(interval);
-            return;
-          }
-          bubbleDiv.textContent += text[i];
-          i++;
-          chatMessages.scrollTop = chatMessages.scrollHeight;
-        }, 12);
-      }
-
-      requestAnimationFrame(() => {
-        chatMessages.scrollTo({
-          top: chatMessages.scrollHeight,
-          behavior: 'smooth'
-        });
-      });
-
-      return messageDiv;
+    } else {
+      bubbleDiv.textContent = content;
     }
 
-    // ===== 打字指示器 =====
-    function showTypingIndicator() {
-      const typingDiv = document.createElement('div');
-      typingDiv.classList.add('message', 'bot');
-      typingDiv.id = 'typingIndicator';
+    const timeDiv = document.createElement('div');
+    timeDiv.classList.add('time');
+    const now = new Date();
+    timeDiv.textContent = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 
-      const indicatorWrapper = document.createElement('div');
-      indicatorWrapper.classList.add('typing-indicator');
-      indicatorWrapper.innerHTML = '<span></span><span></span><span></span>';
+    messageDiv.appendChild(bubbleDiv);
+    messageDiv.appendChild(timeDiv);
+    chatMessages.appendChild(messageDiv);
 
-      typingDiv.appendChild(indicatorWrapper);
-      chatMessages.appendChild(typingDiv);
-
-      requestAnimationFrame(() => {
-        chatMessages.scrollTo({
-          top: chatMessages.scrollHeight,
-          behavior: 'smooth'
-        });
-      });
-
-      return typingDiv;
-    }
-
-    function removeTypingIndicator() {
-      const indicator = document.getElementById('typingIndicator');
-      if (indicator) indicator.remove();
-    }
-
-    // ===== 調用 API =====
-    async function callDeepSeekAPI(userMessage) {
-      if (!apiKey) {
-        addMessage('bot', '⚠️ 请先输入并保存 DeepSeek API 密钥。');
-        return null;
-      }
-
-      const url = 'https://api.deepseek.com/v1/chat/completions';
-      const requestBody = {
-        model: 'deepseek-chat',
-        messages: [{ role: 'user', content: userMessage }],
-        temperature: 0.7,
-        stream: false
-      };
-
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          },
-          body: JSON.stringify(requestBody)
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
-          throw new Error(errorMsg);
+    // 逐字浮現（僅機器人純文字）
+    if (role === 'bot' && !skipTyping && !bubbleDiv.querySelector('*')) {
+      const text = bubbleDiv.textContent;
+      bubbleDiv.textContent = '';
+      const cursor = document.createElement('span');
+      cursor.classList.add('cursor-blink');
+      bubbleDiv.appendChild(cursor);
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i >= text.length) {
+          clearInterval(interval);
+          cursor.remove();
+          return;
         }
-
-        const data = await response.json();
-        const botReply = data.choices?.[0]?.message?.content;
-        if (!botReply) throw new Error('API 返回内容为空');
-        return botReply;
-
-      } catch (error) {
-        console.error('DeepSeek API 错误:', error);
-        let friendlyMsg = '';
-        if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-          friendlyMsg = '🌐 网络请求失败。可能原因：① 你用 file:// 打开（需改用本机伺服器）② 网络不通 ③ 浏览器扩充阻挡';
-        } else if (error.message.includes('401')) {
-          friendlyMsg = '🔑 API 密钥无效或已过期。';
-        } else if (error.message.includes('402')) {
-          friendlyMsg = '💰 帐户余额不足。';
-        } else if (error.message.includes('429')) {
-          friendlyMsg = '⏳ 请求太频繁，请稍后再试。';
-        } else {
-          friendlyMsg = `❌ 请求失败：${error.message || '未知错误'}`;
-        }
-        return friendlyMsg;
-      }
+        cursor.insertAdjacentText('beforebegin', text[i]);
+        i++;
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }, 15);
     }
 
-    // ===== 發送消息 =====
-    async function sendMessage() {
-      if (isWaitingForResponse) {
-        showToast('请等待当前回复完成', 1200);
-        return;
-      }
+    requestAnimationFrame(() => {
+      chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+    });
 
-      const text = messageInput.value.trim();
-      if (!text) {
-        showToast('请输入消息内容', 1200);
-        return;
-      }
+    return messageDiv;
+  }
 
-      // 爆閃效果
-      sendBtn.classList.add('flash');
-      setTimeout(() => sendBtn.classList.remove('flash'), 600);
+  // ===== 打字指示器 =====
+  function showTypingIndicator() {
+    const typingDiv = document.createElement('div');
+    typingDiv.classList.add('message', 'bot');
+    typingDiv.id = 'typingIndicator';
+    const indicatorWrapper = document.createElement('div');
+    indicatorWrapper.classList.add('typing-indicator');
+    indicatorWrapper.innerHTML = '<span></span><span></span><span></span>';
+    typingDiv.appendChild(indicatorWrapper);
+    chatMessages.appendChild(typingDiv);
+    requestAnimationFrame(() => {
+      chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+    });
+    return typingDiv;
+  }
 
-      messageInput.value = '';
-      addMessage('user', text);
+  function removeTypingIndicator() {
+    const indicator = document.getElementById('typingIndicator');
+    if (indicator) indicator.remove();
+  }
 
-      if (!apiKey) {
-        addMessage('bot', '🔑 尚未设置 API 密钥，请先在顶部输入并保存密钥。');
-        return;
-      }
+  // ===== 生成跟進建議 =====
+  function generateFollowups(userText, botText) {
+    const suggestions = [];
+    const lowerBot = botText.toLowerCase();
 
-      isWaitingForResponse = true;
-      sendBtn.disabled = true;
-      messageInput.disabled = true;
+    // 根據上下文生成 3 個建議
+    if (botText.includes('```') || botText.includes('代码') || botText.includes('code')) {
+      suggestions.push('可以帮我解释一下这段代码吗？');
+      suggestions.push('能给我一个更简单的例子吗？');
+      suggestions.push('这段代码有什么需要注意的地方？');
+    } else if (botText.includes('1+1') || botText.includes('数学') || botText.includes('计算')) {
+      suggestions.push('再给我出一个类似的题目');
+      suggestions.push('为什么是这样计算的？');
+      suggestions.push('还有其他解法吗？');
+    } else if (userText.length < 10) {
+      suggestions.push('可以详细解释一下吗？');
+      suggestions.push('能给我举个例子吗？');
+      suggestions.push('这有什么实际应用？');
+    } else {
+      suggestions.push('继续深入讲讲');
+      suggestions.push('能举个例子吗？');
+      suggestions.push('这和其他概念有什么关系？');
+    }
 
-      const typingIndicator = showTypingIndicator();
+    return suggestions.slice(0, 3);
+  }
 
-      try {
-        const reply = await callDeepSeekAPI(text);
-        removeTypingIndicator();
-        if (reply) {
-          addMessage('bot', reply);
-        } else {
-          addMessage('bot', '⚠️ 未收到有效回复。');
-        }
-      } catch (error) {
-        removeTypingIndicator();
-        addMessage('bot', `⚠️ 发生错误: ${error.message || '未知错误'}`);
-      } finally {
-        isWaitingForResponse = false;
-        sendBtn.disabled = false;
-        messageInput.disabled = false;
+  // ===== 顯示跟進建議 =====
+  function showFollowups(suggestions) {
+    followupList.innerHTML = '';
+    followupChips = suggestions;
+    followupSection.style.display = 'flex';
+
+    suggestions.forEach((text, i) => {
+      const chip = document.createElement('button');
+      chip.classList.add('followup-chip');
+      chip.textContent = text;
+      chip.style.animationDelay = (i * 0.08) + 's';
+      chip.addEventListener('click', (e) => {
+        e.stopPropagation();
+        messageInput.value = text;
         messageInput.focus();
-      }
+        // 輕觸反饋
+        chip.style.transform = 'scale(0.94)';
+        setTimeout(() => chip.style.transform = '', 150);
+      });
+      followupList.appendChild(chip);
+    });
+
+    // 重新觸發動畫
+    followupSection.style.animation = 'none';
+    void followupSection.offsetWidth;
+    followupSection.style.animation = '';
+  }
+
+  // ===== 隱藏跟進建議 =====
+  function hideFollowups() {
+    followupSection.style.display = 'none';
+    followupList.innerHTML = '';
+  }
+
+  // ===== 調用 API =====
+  async function callDeepSeekAPI(userMessage) {
+    if (!apiKey) {
+      addMessage('bot', '⚠️ 请先输入并保存 DeepSeek API 密钥。');
+      return null;
     }
 
-    // ===== 事件綁定 =====
-    saveApiBtn.addEventListener('click', saveApiKey);
-    sendBtn.addEventListener('click', (e) => {
-      createRipple(e);
-      sendMessage();
-    });
+    // 帶上對話歷史（最近 10 條）
+    const messages = conversationHistory.slice(-10).concat([
+      { role: 'user', content: userMessage }
+    ]);
 
-    messageInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendBtn.click();
+    const url = 'https://api.deepseek.com/v1/chat/completions';
+    const requestBody = {
+      model: 'deepseek-chat',
+      messages: messages,
+      temperature: 0.7,
+      stream: false
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
+        throw new Error(errorMsg);
       }
-    });
 
-    apiKeyInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        saveApiKey();
+      const data = await response.json();
+      const botReply = data.choices?.[0]?.message?.content;
+      if (!botReply) throw new Error('API 返回内容为空');
+
+      // 記錄對話歷史
+      conversationHistory.push({ role: 'user', content: userMessage });
+      conversationHistory.push({ role: 'assistant', content: botReply });
+
+      return botReply;
+
+    } catch (error) {
+      console.error('DeepSeek API 错误:', error);
+      let friendlyMsg = '';
+      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+        friendlyMsg = '🌐 网络请求失败。可能原因：① 你用 file:// 打开（需改用本机伺服器）② 网络不通 ③ 浏览器扩充阻挡';
+      } else if (error.message.includes('401')) {
+        friendlyMsg = '🔑 API 密钥无效或已过期。';
+      } else if (error.message.includes('402')) {
+        friendlyMsg = '💰 帐户余额不足。';
+      } else if (error.message.includes('429')) {
+        friendlyMsg = '⏳ 请求太频繁，请稍后再试。';
+      } else {
+        friendlyMsg = `❌ 请求失败：${error.message || '未知错误'}`;
       }
-    });
+      return friendlyMsg;
+    }
+  }
 
-    window.addEventListener('load', () => {
-      if (apiKey) showToast('已加载保存的 API 密钥', 1500);
+  // ===== 發送消息 =====
+  async function sendMessage() {
+    if (isWaitingForResponse) { showToast('请等待当前回复完成', 1200); return; }
+
+    const text = messageInput.value.trim();
+    if (!text) { showToast('请输入消息内容', 1200); return; }
+
+    sendBtn.classList.add('flash');
+    setTimeout(() => sendBtn.classList.remove('flash'), 700);
+
+    hideFollowups();
+    messageInput.value = '';
+    addMessage('user', text);
+
+    if (!apiKey) {
+      addMessage('bot', '🔑 尚未设置 API 密钥，请先在顶部输入并保存密钥。');
+      return;
+    }
+
+    isWaitingForResponse = true;
+    sendBtn.disabled = true;
+    messageInput.disabled = true;
+
+    const typingIndicator = showTypingIndicator();
+
+    try {
+      const reply = await callDeepSeekAPI(text);
+      removeTypingIndicator();
+      if (reply) {
+        addMessage('bot', reply);
+
+        // 生成跟進建議
+        const suggestions = generateFollowups(text, reply);
+        showFollowups(suggestions);
+
+        // 自動追問
+        if (autoFollowupEnabled && suggestions.length > 0) {
+          setTimeout(() => {
+            if (!isWaitingForResponse) {
+              messageInput.value = suggestions[0];
+              sendMessage();
+            }
+          }, 1500);
+        }
+      } else {
+        addMessage('bot', '⚠️ 未收到有效回复。');
+      }
+    } catch (error) {
+      removeTypingIndicator();
+      addMessage('bot', `⚠️ 发生错误: ${error.message || '未知错误'}`);
+    } finally {
+      isWaitingForResponse = false;
+      sendBtn.disabled = false;
+      messageInput.disabled = false;
       messageInput.focus();
-    });
+    }
+  }
 
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  })();
+  // ===== 事件綁定 =====
+  saveApiBtn.addEventListener('click', saveApiKey);
+
+  sendBtn.addEventListener('click', (e) => {
+    createRipple(e);
+    sendMessage();
+  });
+
+  messageInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendBtn.click();
+    }
+  });
+
+  apiKeyInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveApiKey();
+    }
+  });
+
+  // 自動追問開關
+  autoFollowupToggle.addEventListener('click', () => {
+    autoFollowupEnabled = !autoFollowupEnabled;
+    autoFollowupToggle.classList.toggle('on', autoFollowupEnabled);
+    showToast(autoFollowupEnabled ? '🤖 自动追问已开启' : '自动追问已关闭', 1500);
+  });
+
+  // 點擊輸入框時隱藏跟進區
+  messageInput.addEventListener('focus', () => {
+    // 不隱藏，保留建議方便點擊
+  });
+
+  // 點擊消息區隱藏跟進
+  chatMessages.addEventListener('click', (e) => {
+    if (!e.target.closest('.followup-chip')) {
+      // 保留
+    }
+  });
+
+  window.addEventListener('load', () => {
+    if (apiKey) showToast('已加载保存的 API 密钥', 1500);
+    messageInput.focus();
+  });
+
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+})();
 </script>
 </body>
 </html>
