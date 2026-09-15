@@ -3,1922 +3,323 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>DeepSeek · 紫耀會話</title>
+<title>DeepSeek · 紫耀分裂</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github-dark.min.css">
 <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/common.min.js"></script>
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-  }
-
-  :root {
-    --purple-void: #05000d;
-    --purple-deep: #150029;
-    --purple-dark: #2a0050;
-    --purple-mid: #4a0080;
-    --purple-bright: #7b2fbe;
-    --purple-neon: #b026ff;
-    --purple-glow: #c77dff;
-    --purple-light: #e0aaff;
-    --purple-soft: #d8b4fe;
-  }
-
-  html, body {
-    height: 100%;
-    overflow: hidden;
-  }
-
+  /* ================= 基礎重置 ================= */
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+  html, body { height: 100%; overflow: hidden; }
   body {
-    background: var(--purple-void);
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 16px;
-    margin: 0;
-    position: relative;
+    background: #05000d;
+    display: flex; justify-content: center; align-items: center;
+    padding: 16px; margin: 0; position: relative;
   }
 
-  /* ===== 多層極光背景 ===== */
-  .aurora-bg {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    overflow: hidden;
-    pointer-events: none;
-  }
+  /* ================= 背景極光 & 星塵 ================= */
+  .aurora-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+  .aurora-layer { position: absolute; inset: -50%; filter: blur(70px); opacity: 0.85; }
+  .aurora-1 { background: radial-gradient(circle at 20% 30%, rgba(123, 47, 190, 0.7) 0%, transparent 45%), radial-gradient(circle at 80% 70%, rgba(176, 38, 255, 0.5) 0%, transparent 45%); animation: aurora1 22s ease-in-out infinite alternate; }
+  .aurora-2 { background: radial-gradient(circle at 70% 20%, rgba(42, 0, 80, 0.85) 0%, transparent 50%), radial-gradient(circle at 30% 80%, rgba(199, 125, 255, 0.4) 0%, transparent 50%); animation: aurora2 28s ease-in-out infinite alternate; }
+  .aurora-3 { background: radial-gradient(circle at 50% 50%, rgba(74, 0, 128, 0.6) 0%, transparent 60%), radial-gradient(circle at 15% 85%, rgba(176, 38, 255, 0.35) 0%, transparent 50%); animation: aurora3 25s ease-in-out infinite alternate; }
+  .aurora-4 { background: radial-gradient(circle at 85% 40%, rgba(176, 38, 255, 0.4) 0%, transparent 45%), radial-gradient(circle at 25% 55%, rgba(123, 47, 190, 0.5) 0%, transparent 50%); animation: aurora4 32s ease-in-out infinite alternate; }
+  @keyframes aurora1 { 0% { transform: translate(0, 0) rotate(0deg) scale(1); } 100% { transform: translate(10%, -8%) rotate(15deg) scale(1.15); } }
+  @keyframes aurora2 { 0% { transform: translate(0, 0) rotate(0deg) scale(1.1); } 100% { transform: translate(-10%, 8%) rotate(-12deg) scale(1); } }
+  @keyframes aurora3 { 0% { transform: translate(-5%, 5%) rotate(-5deg); } 100% { transform: translate(8%, -6%) rotate(8deg); } }
+  @keyframes aurora4 { 0% { transform: translate(5%, 5%) rotate(8deg) scale(1); } 100% { transform: translate(-8%, -5%) rotate(-10deg) scale(1.1); } }
 
-  .aurora-layer {
-    position: absolute;
-    inset: -50%;
-    filter: blur(70px);
-    opacity: 0.85;
-  }
+  .stars-bg { position: fixed; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
+  .star { position: absolute; border-radius: 50%; background: radial-gradient(circle, #e0aaff, rgba(176, 38, 255, 0.4) 50%, transparent 70%); box-shadow: 0 0 12px rgba(199, 125, 255, 0.9), 0 0 24px rgba(123, 47, 190, 0.6); animation: starFloat linear infinite, starTwinkle ease-in-out infinite alternate; opacity: 0; }
+  @keyframes starFloat { 0% { transform: translateY(0) translateX(0); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 0.4; } 100% { transform: translateY(-110vh) translateX(50px); opacity: 0; } }
+  @keyframes starTwinkle { 0% { filter: brightness(0.7); } 100% { filter: brightness(1.6); } }
 
-  .aurora-1 {
-    background:
-      radial-gradient(circle at 20% 30%, rgba(123, 47, 190, 0.7) 0%, transparent 45%),
-      radial-gradient(circle at 80% 70%, rgba(176, 38, 255, 0.5) 0%, transparent 45%);
-    animation: aurora1 22s ease-in-out infinite alternate;
-  }
-
-  .aurora-2 {
-    background:
-      radial-gradient(circle at 70% 20%, rgba(42, 0, 80, 0.85) 0%, transparent 50%),
-      radial-gradient(circle at 30% 80%, rgba(199, 125, 255, 0.4) 0%, transparent 50%);
-    animation: aurora2 28s ease-in-out infinite alternate;
-  }
-
-  .aurora-3 {
-    background:
-      radial-gradient(circle at 50% 50%, rgba(74, 0, 128, 0.6) 0%, transparent 60%),
-      radial-gradient(circle at 15% 85%, rgba(176, 38, 255, 0.35) 0%, transparent 50%);
-    animation: aurora3 25s ease-in-out infinite alternate;
-  }
-
-  .aurora-4 {
-    background:
-      radial-gradient(circle at 85% 40%, rgba(176, 38, 255, 0.4) 0%, transparent 45%),
-      radial-gradient(circle at 25% 55%, rgba(123, 47, 190, 0.5) 0%, transparent 50%);
-    animation: aurora4 32s ease-in-out infinite alternate;
-  }
-
-  @keyframes aurora1 {
-    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
-    100% { transform: translate(10%, -8%) rotate(15deg) scale(1.15); }
-  }
-  @keyframes aurora2 {
-    0% { transform: translate(0, 0) rotate(0deg) scale(1.1); }
-    100% { transform: translate(-10%, 8%) rotate(-12deg) scale(1); }
-  }
-  @keyframes aurora3 {
-    0% { transform: translate(-5%, 5%) rotate(-5deg); }
-    100% { transform: translate(8%, -6%) rotate(8deg); }
-  }
-  @keyframes aurora4 {
-    0% { transform: translate(5%, 5%) rotate(8deg) scale(1); }
-    100% { transform: translate(-8%, -5%) rotate(-10deg) scale(1.1); }
-  }
-
-  /* ===== 星塵 ===== */
-  .stars-bg {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    overflow: hidden;
-    pointer-events: none;
-  }
-
-  .star {
-    position: absolute;
-    border-radius: 50%;
-    background: radial-gradient(circle, #e0aaff, rgba(176, 38, 255, 0.4) 50%, transparent 70%);
-    box-shadow: 0 0 12px rgba(199, 125, 255, 0.9), 0 0 24px rgba(123, 47, 190, 0.6);
-    animation: starFloat linear infinite, starTwinkle ease-in-out infinite alternate;
-    opacity: 0;
-  }
-
-  @keyframes starFloat {
-    0% { transform: translateY(0) translateX(0); opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 0.4; }
-    100% { transform: translateY(-110vh) translateX(50px); opacity: 0; }
-  }
-
-  @keyframes starTwinkle {
-    0% { filter: brightness(0.7); }
-    100% { filter: brightness(1.6); }
-  }
-
-  /* ===== 滑鼠光軌 ===== */
-  .mouse-trail {
-    position: fixed;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(224, 170, 255, 0.95), rgba(123, 47, 190, 0.5) 50%, transparent);
-    pointer-events: none;
-    z-index: 100;
-    box-shadow: 0 0 25px rgba(199, 125, 255, 0.9);
-    animation: trailFade 1s ease-out forwards;
-    transform: translate(-50%, -50%);
-  }
-
-  @keyframes trailFade {
-    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
-  }
-
-  /* ===== 主容器 ===== */
+  /* ================= 主容器 ================= */
   .app-container {
-    position: relative;
-    z-index: 5;
-    width: 100%;
-    max-width: 780px;
-    height: 90vh;
-    max-height: 820px;
+    position: relative; z-index: 5; width: 100%; max-width: 780px; height: 90vh; max-height: 820px;
     background: linear-gradient(135deg, rgba(21, 0, 41, 0.88), rgba(42, 0, 80, 0.78));
-    backdrop-filter: blur(34px) saturate(200%);
-    -webkit-backdrop-filter: blur(34px) saturate(200%);
-    border: 1px solid rgba(176, 38, 255, 0.4);
-    border-radius: 44px;
-    overflow: hidden;
+    backdrop-filter: blur(34px) saturate(200%); -webkit-backdrop-filter: blur(34px) saturate(200%);
+    border: 1px solid rgba(176, 38, 255, 0.4); border-radius: 44px; overflow: hidden;
     transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.8s ease, border-color 0.8s ease;
-    animation:
-      cardEntrance 1.4s cubic-bezier(0.2, 0.9, 0.3, 1) both,
-      cardFloat 8s ease-in-out infinite alternate,
-      cardGlow 5s ease-in-out infinite alternate;
-    transform-style: preserve-3d;
-    isolation: isolate;
-  }
-
-  .app-container::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 44px;
-    background: radial-gradient(ellipse at 50% -20%, rgba(176, 38, 255, 0.25), transparent 60%);
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  @keyframes cardEntrance {
-    0% {
-      opacity: 0;
-      transform: translateY(60px) scale(0.85) rotateX(15deg);
-      filter: blur(15px) hue-rotate(45deg);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0) scale(1) rotateX(0);
-      filter: blur(0) hue-rotate(0);
-    }
-  }
-
-  @keyframes cardFloat {
-    0% { transform: translateY(0px) rotateZ(0deg); }
-    100% { transform: translateY(-10px) rotateZ(0.5deg); }
-  }
-
-  @keyframes cardGlow {
-    0% {
-      box-shadow:
-        0 30px 80px -20px rgba(74, 0, 128, 0.8),
-        0 0 0 1px rgba(176, 38, 255, 0.25) inset,
-        0 0 60px rgba(123, 47, 190, 0.5),
-        0 0 100px rgba(176, 38, 255, 0.2);
-      border-color: rgba(176, 38, 255, 0.4);
-    }
-    100% {
-      box-shadow:
-        0 40px 100px -20px rgba(74, 0, 128, 1),
-        0 0 0 1px rgba(224, 170, 255, 0.5) inset,
-        0 0 100px rgba(123, 47, 190, 0.8),
-        0 0 160px rgba(176, 38, 255, 0.4);
-      border-color: rgba(224, 170, 255, 0.7);
-    }
-  }
-
-  .app-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, #7b2fbe, #e0aaff, #b026ff, #7b2fbe, transparent);
-    background-size: 300% 100%;
-    animation: topScan 4s linear infinite;
-    z-index: 15;
-    border-radius: 44px 44px 0 0;
-    box-shadow: 0 0 20px rgba(199, 125, 255, 1), 0 0 40px rgba(123, 47, 190, 0.9);
-  }
-
-  @keyframes topScan {
-    0% { background-position: 300% 0; }
-    100% { background-position: -300% 0; }
-  }
-
-  /* ===== 視圖切換 ===== */
-  .view {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.65s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s ease;
-    backface-visibility: hidden;
-  }
-
-  .view-hidden {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateX(-12%) scale(0.96);
-    filter: blur(8px);
-  }
-
-  .view-right-hidden {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateX(100%);
-    filter: blur(8px);
-  }
-
-  /* ===== 會話列表 ===== */
-  .list-header {
-    padding: 20px 22px 16px;
-    background: linear-gradient(135deg, rgba(21, 0, 41, 0.75), rgba(42, 0, 80, 0.55));
-    border-bottom: 1px solid rgba(176, 38, 255, 0.25);
-    backdrop-filter: blur(16px);
-    position: relative;
-    overflow: hidden;
-    animation: headerSlide 0.9s 0.2s cubic-bezier(0.2, 0.9, 0.3, 1) both;
-  }
-
-  @keyframes headerSlide {
-    0% { opacity: 0; transform: translateY(-50px); filter: blur(10px); }
-    100% { opacity: 1; transform: translateY(0); filter: blur(0); }
-  }
-
-  .list-header::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(199, 125, 255, 0.2), transparent);
-    animation: headerShine 6s ease-in-out infinite;
-    pointer-events: none;
-  }
-
-  @keyframes headerShine {
-    0%, 100% { left: -100%; }
-    50% { left: 100%; }
-  }
-
-  .list-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    background: linear-gradient(90deg, #c77dff, #e0aaff, #b026ff, #c77dff);
-    background-size: 300% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: titleGradient 5s linear infinite;
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  @keyframes titleGradient {
-    0% { background-position: 0% center; }
-    100% { background-position: 300% center; }
-  }
-
-  .list-title .title-icon {
-    font-size: 1.6rem;
-    -webkit-text-fill-color: initial;
-    color: #e0aaff;
-    filter: drop-shadow(0 0 12px rgba(224, 170, 255, 0.9));
-    animation: iconSpin 6s ease-in-out infinite;
-  }
-
-  @keyframes iconSpin {
-    0%, 100% { transform: rotate(0deg) scale(1); }
-    50% { transform: rotate(8deg) scale(1.15); }
-  }
-
-  .list-subtitle {
-    font-size: 0.78rem;
-    color: rgba(199, 125, 255, 0.6);
-    margin-top: 4px;
-    letter-spacing: 0.5px;
-  }
-
-  /* ===== 會話列表項 ===== */
-  .conversation-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px 12px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    background: radial-gradient(ellipse at 30% 10%, rgba(74, 0, 128, 0.4), transparent 70%);
-  }
-
-  .conversation-list::-webkit-scrollbar { width: 8px; }
-  .conversation-list::-webkit-scrollbar-track { background: rgba(123, 47, 190, 0.05); border-radius: 20px; }
-  .conversation-list::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(123, 47, 190, 0.7), rgba(199, 125, 255, 0.9));
-    border-radius: 20px;
-    box-shadow: 0 0 10px rgba(199, 125, 255, 0.5);
-  }
-
-  .conv-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 16px;
-    border-radius: 20px;
-    background: linear-gradient(135deg, rgba(42, 0, 80, 0.5), rgba(21, 0, 41, 0.6));
-    border: 1px solid rgba(176, 38, 255, 0.2);
-    cursor: pointer;
-    transition: all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
-    position: relative;
-    overflow: hidden;
-    animation: convAppear 0.7s cubic-bezier(0.2, 0.9, 0.3, 1) both;
-  }
-
-  @keyframes convAppear {
-    0% {
-      opacity: 0;
-      transform: translateX(-30px) scale(0.9);
-      filter: blur(6px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateX(0) scale(1);
-      filter: blur(0);
-    }
-  }
-
-  .conv-item::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, transparent, rgba(224, 170, 255, 0.15), transparent);
-    background-size: 200% 100%;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    animation: chipShine 3s linear infinite;
-    pointer-events: none;
-  }
-
-  .conv-item:hover {
-    background: linear-gradient(135deg, rgba(74, 0, 128, 0.7), rgba(42, 0, 80, 0.8));
-    border-color: rgba(224, 170, 255, 0.6);
-    transform: translateX(6px) scale(1.01);
-    box-shadow:
-      0 12px 30px -6px rgba(74, 0, 128, 0.9),
-      0 0 30px rgba(176, 38, 255, 0.4),
-      inset 0 1px 0 rgba(224, 170, 255, 0.15);
-  }
-
-  .conv-item:hover::before { opacity: 1; }
-
-  .conv-item:active {
-    transform: translateX(4px) scale(0.98);
-    transition: all 0.1s ease;
-  }
-
-  .conv-avatar {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.6rem;
-    flex-shrink: 0;
-    position: relative;
-    border: 2px solid rgba(224, 170, 255, 0.4);
-    box-shadow:
-      0 0 20px rgba(176, 38, 255, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    animation: avatarPulse 3s ease-in-out infinite;
-    transition: all 0.5s ease;
-  }
-
-  @keyframes avatarPulse {
-    0%, 100% { box-shadow: 0 0 20px rgba(176, 38, 255, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2); }
-    50% { box-shadow: 0 0 35px rgba(199, 125, 255, 0.8), 0 0 0 4px rgba(176, 38, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3); }
-  }
-
-  .conv-item:hover .conv-avatar {
-    transform: scale(1.08) rotate(3deg);
-    border-color: rgba(224, 170, 255, 0.9);
-  }
-
-  .avatar-1 { background: linear-gradient(135deg, #7b2fbe, #b026ff); }
-  .avatar-2 { background: linear-gradient(135deg, #4a0080, #7b2fbe); }
-  .avatar-3 { background: linear-gradient(135deg, #b026ff, #e0aaff); }
-  .avatar-4 { background: linear-gradient(135deg, #2a0050, #4a0080); }
-
-  .conv-content {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .conv-name {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #f0e5ff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 4px;
-    letter-spacing: 0.3px;
-  }
-
-  .conv-time {
-    font-size: 0.72rem;
-    color: rgba(199, 125, 255, 0.6);
-    font-weight: 400;
-    transition: color 0.4s ease;
-  }
-
-  .conv-item:hover .conv-time {
-    color: rgba(224, 170, 255, 1);
-  }
-
-  .conv-preview {
-    font-size: 0.82rem;
-    color: rgba(199, 125, 255, 0.65);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: all 0.4s ease;
-  }
-
-  .conv-item:hover .conv-preview {
-    color: rgba(224, 170, 255, 0.95);
-  }
-
-  .conv-badge {
-    background: linear-gradient(135deg, #b026ff, #e0aaff);
-    color: white;
-    font-size: 0.68rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 100px;
-    margin-left: 8px;
-    box-shadow: 0 0 12px rgba(176, 38, 255, 0.8);
-    animation: badgePulse 2s ease-in-out infinite;
-  }
-
-  @keyframes badgePulse {
-    0%, 100% { box-shadow: 0 0 12px rgba(176, 38, 255, 0.8); }
-    50% { box-shadow: 0 0 20px rgba(224, 170, 255, 1), 0 0 0 4px rgba(176, 38, 255, 0.2); }
-  }
-
-  /* ===== 聊天視圖 ===== */
-  .chat-header {
-    padding: 14px 18px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: linear-gradient(135deg, rgba(21, 0, 41, 0.85), rgba(42, 0, 80, 0.65));
-    border-bottom: 1px solid rgba(176, 38, 255, 0.25);
-    backdrop-filter: blur(16px);
-    position: relative;
-    overflow: hidden;
-    z-index: 2;
-  }
-
-  .chat-header::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(199, 125, 255, 0.18), transparent);
-    animation: headerShine 6s ease-in-out infinite;
-    pointer-events: none;
-  }
-
-  .back-btn {
-    background: linear-gradient(135deg, rgba(74, 0, 128, 0.6), rgba(42, 0, 80, 0.6));
-    border: 1px solid rgba(176, 38, 255, 0.4);
-    border-radius: 50%;
-    width: 42px;
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.3rem;
-    color: #e0aaff;
-    cursor: pointer;
-    transition: all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
-    flex-shrink: 0;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 0 15px rgba(176, 38, 255, 0.3);
-  }
-
-  .back-btn::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, rgba(224, 170, 255, 0.4), transparent 70%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-
-  .back-btn:hover {
-    transform: scale(1.12) translateX(-3px);
-    background: linear-gradient(135deg, rgba(123, 47, 190, 0.8), rgba(74, 0, 128, 0.8));
-    border-color: rgba(224, 170, 255, 0.9);
-    box-shadow: 0 0 30px rgba(176, 38, 255, 0.7);
-  }
-
-  .back-btn:hover::before { opacity: 1; }
-
-  .back-btn:active {
-    transform: scale(0.92);
-    transition: all 0.1s ease;
-  }
-
-  .chat-header-info {
-    flex: 1;
-    min-width: 0;
-    animation: fadeSlideUp 0.6s 0.1s cubic-bezier(0.2, 0.9, 0.3, 1) both;
-  }
-
-  @keyframes fadeSlideUp {
-    0% { opacity: 0; transform: translateY(10px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-
-  .chat-header-name {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #f0e5ff;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    letter-spacing: 0.3px;
-  }
-
-  .chat-header-status {
-    font-size: 0.72rem;
-    color: rgba(199, 125, 255, 0.7);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 2px;
-  }
-
-  .status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #e0aaff;
-    box-shadow: 0 0 8px rgba(224, 170, 255, 1);
-    animation: statusPulse 2s ease-in-out infinite;
-  }
-
-  @keyframes statusPulse {
-    0%, 100% { opacity: 0.6; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.4); }
-  }
-
-  /* API 輸入框（放在聊天頁頂部） */
-  .api-input-wrapper {
-    display: flex;
-    align-items: center;
-    background: rgba(5, 0, 13, 0.6);
-    border-radius: 100px;
-    padding: 2px 2px 2px 16px;
-    border: 1px solid rgba(176, 38, 255, 0.35);
-    transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
-    position: relative;
-    margin-top: 10px;
-  }
-
-  .api-input-wrapper:focus-within {
-    border-color: var(--purple-neon);
-    box-shadow:
-      0 0 0 4px rgba(176, 38, 255, 0.18),
-      0 0 50px rgba(123, 47, 190, 0.6),
-      inset 0 0 20px rgba(199, 125, 255, 0.1);
-    background: rgba(21, 0, 41, 0.9);
-  }
-
-  .api-input-wrapper input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: #f0e5ff;
-    font-size: 0.85rem;
-    padding: 10px 0;
-    min-width: 0;
-    letter-spacing: 0.3px;
-  }
-
-  .api-input-wrapper input::placeholder {
-    color: rgba(199, 125, 255, 0.5);
-  }
-
-  .save-btn {
-    background: linear-gradient(135deg, #4a0080, #7b2fbe, #b026ff);
-    background-size: 200% 200%;
-    border-radius: 100px;
-    padding: 8px 16px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: white;
-    border: 1px solid rgba(224, 170, 255, 0.4);
-    cursor: pointer;
-    transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
-    box-shadow: 0 6px 20px rgba(123, 47, 190, 0.6);
-    white-space: nowrap;
-    animation: btnGradient 6s ease infinite;
-    position: relative;
-    overflow: hidden;
-  }
-
-  @keyframes btnGradient {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-  }
-
-  .save-btn:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 12px 30px rgba(123, 47, 190, 0.9), 0 0 40px rgba(176, 38, 255, 0.6);
-  }
-
-  .save-btn:active {
-    transform: scale(0.94);
-  }
-
-  /* ===== 訊息區 ===== */
-  .chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px 18px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    scroll-behavior: smooth;
-    background:
-      radial-gradient(ellipse at 30% 10%, rgba(74, 0, 128, 0.4), transparent 60%),
-      radial-gradient(ellipse at 70% 90%, rgba(123, 47, 190, 0.25), transparent 60%);
-    position: relative;
-    z-index: 2;
-  }
-
-  .chat-messages::-webkit-scrollbar { width: 8px; }
-  .chat-messages::-webkit-scrollbar-track { background: rgba(123, 47, 190, 0.05); border-radius: 20px; }
-  .chat-messages::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(123, 47, 190, 0.7), rgba(199, 125, 255, 0.9));
-    border-radius: 20px;
-    box-shadow: 0 0 10px rgba(199, 125, 255, 0.5);
-  }
-
-  /* ===== 訊息氣泡 ===== */
-  .message {
-    max-width: 85%;
-    display: flex;
-    flex-direction: column;
-    opacity: 0;
-    animation: messageAppear 1.1s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
-    position: relative;
-  }
-
-  /* 用戶訊息從右側飛入 + 波浪 */
-  .message.user {
-    align-self: flex-end;
-    align-items: flex-end;
-    animation: userMessageFly 1.1s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
-  }
-
-  @keyframes userMessageFly {
-    0% {
-      opacity: 0;
-      transform: translate(120px, 20px) scale(0.5) rotateZ(15deg);
-      filter: blur(12px);
-    }
-    40% {
-      opacity: 1;
-      transform: translate(-8px, -8px) scale(1.08) rotateZ(-3deg);
-      filter: blur(0);
-    }
-    60% {
-      transform: translate(4px, 4px) scale(0.98) rotateZ(1deg);
-    }
-    80% {
-      transform: translate(-2px, -2px) scale(1.01) rotateZ(-0.3deg);
-    }
-    100% {
-      opacity: 1;
-      transform: translate(0, 0) scale(1) rotateZ(0);
-    }
-  }
-
-  /* 機器人從左側飛入 + 波浪 */
-  .message.bot {
-    align-self: flex-start;
-    align-items: flex-start;
-    animation: botMessageFly 1.1s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
-  }
-
-  @keyframes botMessageFly {
-    0% {
-      opacity: 0;
-      transform: translate(-120px, 20px) scale(0.5) rotateZ(-15deg);
-      filter: blur(12px);
-    }
-    40% {
-      opacity: 1;
-      transform: translate(8px, -8px) scale(1.08) rotateZ(3deg);
-      filter: blur(0);
-    }
-    60% {
-      transform: translate(-4px, 4px) scale(0.98) rotateZ(-1deg);
-    }
-    80% {
-      transform: translate(2px, -2px) scale(1.01) rotateZ(0.3deg);
-    }
-    100% {
-      opacity: 1;
-      transform: translate(0, 0) scale(1) rotateZ(0);
-    }
-  }
-
-  /* 訊息光暈擴散 */
-  .message::before {
-    content: '';
-    position: absolute;
-    inset: -25px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(176, 38, 255, 0.25), transparent 60%);
-    opacity: 0;
-    transition: opacity 0.6s ease;
-    pointer-events: none;
-    z-index: -1;
-    filter: blur(25px);
-  }
-
-  .message:hover::before {
-    opacity: 1;
-    animation: auraPulse 2s ease-in-out infinite;
-  }
-
-  @keyframes auraPulse {
-    0%, 100% { transform: scale(1); opacity: 0.6; }
-    50% { transform: scale(1.2); opacity: 1; }
-  }
-
-  /* 氣泡本體 */
+    animation: cardEntrance 1.4s cubic-bezier(0.2, 0.9, 0.3, 1) both, cardFloat 8s ease-in-out infinite alternate, cardGlow 5s ease-in-out infinite alternate;
+    transform-style: preserve-3d; isolation: isolate;
+  }
+  .app-container::after { content: ''; position: absolute; inset: 0; border-radius: 44px; background: radial-gradient(ellipse at 50% -20%, rgba(176, 38, 255, 0.25), transparent 60%); pointer-events: none; z-index: 1; }
+  @keyframes cardEntrance { 0% { opacity: 0; transform: translateY(60px) scale(0.85) rotateX(15deg); filter: blur(15px) hue-rotate(45deg); } 100% { opacity: 1; transform: translateY(0) scale(1) rotateX(0); filter: blur(0) hue-rotate(0); } }
+  @keyframes cardFloat { 0% { transform: translateY(0px) rotateZ(0deg); } 100% { transform: translateY(-10px) rotateZ(0.5deg); } }
+  @keyframes cardGlow { 0% { box-shadow: 0 30px 80px -20px rgba(74, 0, 128, 0.8), 0 0 0 1px rgba(176, 38, 255, 0.25) inset, 0 0 60px rgba(123, 47, 190, 0.5); border-color: rgba(176, 38, 255, 0.4); } 100% { box-shadow: 0 40px 100px -20px rgba(74, 0, 128, 1), 0 0 0 1px rgba(224, 170, 255, 0.5) inset, 0 0 100px rgba(123, 47, 190, 0.8); border-color: rgba(224, 170, 255, 0.7); } }
+  .app-container::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #7b2fbe, #e0aaff, #b026ff, #7b2fbe, transparent); background-size: 300% 100%; animation: topScan 4s linear infinite; z-index: 15; border-radius: 44px 44px 0 0; box-shadow: 0 0 20px rgba(199, 125, 255, 1); }
+  @keyframes topScan { 0% { background-position: 300% 0; } 100% { background-position: -300% 0; } }
+
+  /* ================= 視圖切換 ================= */
+  .view { position: absolute; inset: 0; display: flex; flex-direction: column; transition: transform 0.65s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.5s ease; backface-visibility: hidden; }
+  .view-hidden { opacity: 0; pointer-events: none; transform: translateX(-12%) scale(0.96); filter: blur(8px); }
+  .view-right-hidden { opacity: 0; pointer-events: none; transform: translateX(100%); filter: blur(8px); }
+
+  /* ================= 會話列表 ================= */
+  .list-header { padding: 20px 22px 16px; background: linear-gradient(135deg, rgba(21, 0, 41, 0.75), rgba(42, 0, 80, 0.55)); border-bottom: 1px solid rgba(176, 38, 255, 0.25); backdrop-filter: blur(16px); position: relative; overflow: hidden; }
+  .list-title { font-size: 1.5rem; font-weight: 700; background: linear-gradient(90deg, #c77dff, #e0aaff, #b026ff, #c77dff); background-size: 300% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: titleGradient 5s linear infinite; display: flex; align-items: center; gap: 10px; }
+  @keyframes titleGradient { 0% { background-position: 0% center; } 100% { background-position: 300% center; } }
+  .list-title .title-icon { font-size: 1.6rem; -webkit-text-fill-color: initial; color: #e0aaff; filter: drop-shadow(0 0 12px rgba(224, 170, 255, 0.9)); }
+  .list-subtitle { font-size: 0.78rem; color: rgba(199, 125, 255, 0.6); margin-top: 4px; }
+  .conversation-list { flex: 1; overflow-y: auto; padding: 12px 12px 20px; display: flex; flex-direction: column; gap: 8px; background: radial-gradient(ellipse at 30% 10%, rgba(74, 0, 128, 0.4), transparent 70%); }
+  .conversation-list::-webkit-scrollbar { width: 8px; } .conversation-list::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(123, 47, 190, 0.7), rgba(199, 125, 255, 0.9)); border-radius: 20px; }
+  .conv-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 20px; background: linear-gradient(135deg, rgba(42, 0, 80, 0.5), rgba(21, 0, 41, 0.6)); border: 1px solid rgba(176, 38, 255, 0.2); cursor: pointer; transition: all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1); animation: convAppear 0.7s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+  @keyframes convAppear { 0% { opacity: 0; transform: translateX(-30px) scale(0.9); filter: blur(6px); } 100% { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); } }
+  .conv-item:hover { background: linear-gradient(135deg, rgba(74, 0, 128, 0.7), rgba(42, 0, 80, 0.8)); border-color: rgba(224, 170, 255, 0.6); transform: translateX(6px) scale(1.01); box-shadow: 0 12px 30px -6px rgba(74, 0, 128, 0.9), 0 0 30px rgba(176, 38, 255, 0.4); }
+  .conv-avatar { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; border: 2px solid rgba(224, 170, 255, 0.4); box-shadow: 0 0 20px rgba(176, 38, 255, 0.5); animation: avatarPulse 3s ease-in-out infinite; }
+  @keyframes avatarPulse { 0%, 100% { box-shadow: 0 0 20px rgba(176, 38, 255, 0.5); } 50% { box-shadow: 0 0 35px rgba(199, 125, 255, 0.8), 0 0 0 4px rgba(176, 38, 255, 0.15); } }
+  .avatar-1 { background: linear-gradient(135deg, #7b2fbe, #b026ff); } .avatar-2 { background: linear-gradient(135deg, #4a0080, #7b2fbe); } .avatar-3 { background: linear-gradient(135deg, #b026ff, #e0aaff); } .avatar-4 { background: linear-gradient(135deg, #2a0050, #4a0080); }
+  .conv-content { flex: 1; min-width: 0; } .conv-name { font-size: 1rem; font-weight: 600; color: #f0e5ff; display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .conv-time { font-size: 0.72rem; color: rgba(199, 125, 255, 0.6); } .conv-preview { font-size: 0.82rem; color: rgba(199, 125, 255, 0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ================= 聊天視圖 ================= */
+  .chat-header { padding: 14px 18px; display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, rgba(21, 0, 41, 0.85), rgba(42, 0, 80, 0.65)); border-bottom: 1px solid rgba(176, 38, 255, 0.25); backdrop-filter: blur(16px); position: relative; z-index: 2; }
+  .back-btn { background: linear-gradient(135deg, rgba(74, 0, 128, 0.6), rgba(42, 0, 80, 0.6)); border: 1px solid rgba(176, 38, 255, 0.4); border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: #e0aaff; cursor: pointer; transition: all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1); flex-shrink: 0; box-shadow: 0 0 15px rgba(176, 38, 255, 0.3); }
+  .back-btn:hover { transform: scale(1.12) translateX(-3px); background: linear-gradient(135deg, rgba(123, 47, 190, 0.8), rgba(74, 0, 128, 0.8)); border-color: rgba(224, 170, 255, 0.9); box-shadow: 0 0 30px rgba(176, 38, 255, 0.7); }
+  .back-btn:active { transform: scale(0.92); }
+  .chat-header-info { flex: 1; min-width: 0; animation: fadeSlideUp 0.6s 0.1s both; }
+  @keyframes fadeSlideUp { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+  .chat-header-name { font-size: 1.05rem; font-weight: 600; color: #f0e5ff; display: flex; align-items: center; gap: 8px; }
+  .chat-header-status { font-size: 0.72rem; color: rgba(199, 125, 255, 0.7); display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #e0aaff; box-shadow: 0 0 8px rgba(224, 170, 255, 1); animation: statusPulse 2s ease-in-out infinite; }
+  @keyframes statusPulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.4); } }
+  
+  .api-input-wrapper { display: flex; align-items: center; background: rgba(5, 0, 13, 0.6); border-radius: 100px; padding: 2px 2px 2px 16px; border: 1px solid rgba(176, 38, 255, 0.35); transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1); margin-top: 10px; }
+  .api-input-wrapper:focus-within { border-color: var(--purple-neon, #b026ff); box-shadow: 0 0 0 4px rgba(176, 38, 255, 0.18), 0 0 50px rgba(123, 47, 190, 0.6); background: rgba(21, 0, 41, 0.9); }
+  .api-input-wrapper input { flex: 1; background: transparent; border: none; outline: none; color: #f0e5ff; font-size: 0.85rem; padding: 10px 0; min-width: 0; }
+  .api-input-wrapper input::placeholder { color: rgba(199, 125, 255, 0.5); }
+  .save-btn { background: linear-gradient(135deg, #4a0080, #7b2fbe, #b026ff); border-radius: 100px; padding: 8px 16px; font-size: 0.78rem; font-weight: 600; color: white; border: 1px solid rgba(224, 170, 255, 0.4); cursor: pointer; transition: all 0.6s; box-shadow: 0 6px 20px rgba(123, 47, 190, 0.6); }
+  .save-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 12px 30px rgba(123, 47, 190, 0.9); }
+
+  /* ================= 訊息區域 ================= */
+  .chat-messages { flex: 1; overflow-y: auto; padding: 20px 18px 12px; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth; background: radial-gradient(ellipse at 30% 10%, rgba(74, 0, 128, 0.4), transparent 60%), radial-gradient(ellipse at 70% 90%, rgba(123, 47, 190, 0.25), transparent 60%); position: relative; z-index: 2; }
+  .chat-messages::-webkit-scrollbar { width: 8px; } .chat-messages::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(123, 47, 190, 0.7), rgba(199, 125, 255, 0.9)); border-radius: 20px; }
+
+  /* ================= 訊息氣泡（帶小尾巴） ================= */
+  .message { max-width: 85%; display: flex; flex-direction: column; position: relative; }
+  .message.user { align-self: flex-end; align-items: flex-end; }
+  .message.bot { align-self: flex-start; align-items: flex-start; }
+
+  /* 氣泡本體 — 圓潤 + 微信小尾巴 */
   .bubble {
-    padding: 14px 22px;
-    border-radius: 28px;
-    font-size: 0.98rem;
-    line-height: 1.65;
-    word-break: break-word;
-    transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    position: relative;
-    overflow: hidden;
-    animation: bubbleBreath 5s ease-in-out infinite;
-    cursor: pointer;
-    user-select: none;
+    padding: 14px 22px; font-size: 0.98rem; line-height: 1.65; word-break: break-word;
+    backdrop-filter: blur(12px); position: relative; overflow: visible; /* 允許尾巴超出 */
+    cursor: pointer; user-select: none;
   }
 
-  .bubble:active {
-    transform: scale(0.97);
-    transition: all 0.1s ease;
-  }
-
-  @keyframes bubbleBreath {
-    0%, 100% {
-      box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.8), 0 0 0 0 rgba(176, 38, 255, 0);
-    }
-    50% {
-      box-shadow:
-        0 18px 40px -8px rgba(0, 0, 0, 0.9),
-        0 0 50px rgba(176, 38, 255, 0.4);
-    }
-  }
-
-  .bubble.copied {
-    animation: copyPulse 0.9s cubic-bezier(0.2, 0.9, 0.3, 1);
-  }
-
-  @keyframes copyPulse {
-    0% { transform: scale(1); }
-    30% {
-      transform: scale(1.1);
-      box-shadow:
-        0 0 0 15px rgba(224, 170, 255, 0.5),
-        0 0 80px rgba(224, 170, 255, 1),
-        0 0 130px rgba(176, 38, 255, 0.8);
-    }
-    100% { transform: scale(1); }
-  }
-
-  .copy-ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(224, 170, 255, 0.9), rgba(123, 47, 190, 0.5) 50%, transparent 70%);
-    transform: scale(0);
-    animation: copyRippleExpand 1.3s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
-    pointer-events: none;
-    z-index: 5;
-  }
-
-  @keyframes copyRippleExpand {
-    to { transform: scale(7); opacity: 0; }
-  }
-
-  .bubble::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 28px;
-    background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(224, 170, 255, 0.3), transparent 60%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
-  }
-
-  .bubble:hover::before { opacity: 1; }
-
-  .bubble::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -150%;
-    width: 80%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(224, 170, 255, 0.3), transparent);
-    transform: skewX(-25deg);
-    transition: left 1.2s cubic-bezier(0.2, 0.9, 0.3, 1);
-    pointer-events: none;
-  }
-
-  .bubble:hover::after { left: 150%; }
-
-  /* 用戶氣泡 — 更深邃的紫 */
+  /* 用戶氣泡：右下角小尾巴 */
   .message.user .bubble {
-    background: linear-gradient(135deg, #4a0080, #7b2fbe, #b026ff, #7b2fbe);
-    background-size: 250% 250%;
-    animation: userGradient 6s ease-in-out infinite, bubbleBreath 5s ease-in-out infinite;
-    color: #ffffff;
-    border: 1px solid rgba(224, 170, 255, 0.5);
-    box-shadow:
-      0 14px 32px -8px rgba(74, 0, 128, 0.95),
-      0 0 40px rgba(176, 38, 255, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3),
-      inset 0 -2px 6px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #7b2fbe, #b026ff);
+    color: #ffffff; border: 1px solid rgba(224, 170, 255, 0.5);
+    border-radius: 22px 22px 4px 22px; /* 右下角尖角 */
+    box-shadow: 0 14px 32px -8px rgba(74, 0, 128, 0.95), 0 0 40px rgba(176, 38, 255, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    animation: bubbleBreath 5s ease-in-out infinite;
   }
-
-  @keyframes userGradient {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-  }
-
-  .message.user .bubble:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow:
-      0 24px 55px -8px rgba(74, 0, 128, 1),
-      0 0 70px rgba(224, 170, 255, 0.8),
-      inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  }
-
-  /* 機器人氣泡 — 深紫玻璃 */
+  /* 機器人氣泡：左下角小尾巴 */
   .message.bot .bubble {
     background: linear-gradient(135deg, rgba(42, 0, 80, 0.9), rgba(21, 0, 41, 0.9));
-    color: #f0e5ff;
-    border: 1px solid rgba(176, 38, 255, 0.45);
-    box-shadow:
-      0 14px 32px -8px rgba(0, 0, 0, 0.9),
-      inset 0 1px 0 rgba(224, 170, 255, 0.2),
-      inset 0 -2px 6px rgba(0, 0, 0, 0.3);
+    color: #f0e5ff; border: 1px solid rgba(176, 38, 255, 0.45);
+    border-radius: 22px 22px 22px 4px; /* 左下角尖角 */
+    box-shadow: 0 14px 32px -8px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(224, 170, 255, 0.2);
     animation: botBorderPulse 4s ease-in-out infinite;
   }
 
-  @keyframes botBorderPulse {
-    0%, 100% { border-color: rgba(176, 38, 255, 0.45); }
-    50% {
-      border-color: rgba(224, 170, 255, 1);
-      box-shadow:
-        0 14px 32px -8px rgba(0, 0, 0, 0.9),
-        0 0 60px rgba(176, 38, 255, 0.6);
-    }
+  /* 尾巴細節（CSS小技巧：用偽元素做出尖角） */
+  .message.user .bubble::after {
+    content: ''; position: absolute; right: -8px; bottom: 0;
+    width: 20px; height: 20px;
+    background: #b026ff; /* 與氣泡主色對接 */
+    clip-path: polygon(0 0, 100% 100%, 0 100%);
+    border-bottom-right-radius: 4px;
+  }
+  .message.bot .bubble::after {
+    content: ''; position: absolute; left: -8px; bottom: 0;
+    width: 20px; height: 20px;
+    background: #2a0050; /* 與氣泡主色對接 */
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    border-bottom-left-radius: 4px;
   }
 
-  .message.bot .bubble:hover {
-    background: linear-gradient(135deg, rgba(74, 0, 128, 0.95), rgba(42, 0, 80, 0.95));
-    transform: translateY(-4px) scale(1.02);
-    border-color: rgba(224, 170, 255, 1);
-  }
+  @keyframes bubbleBreath { 0%, 100% { box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.8); } 50% { box-shadow: 0 18px 40px -8px rgba(0, 0, 0, 0.9), 0 0 50px rgba(176, 38, 255, 0.4); } }
+  @keyframes botBorderPulse { 0%, 100% { border-color: rgba(176, 38, 255, 0.45); } 50% { border-color: rgba(224, 170, 255, 1); box-shadow: 0 14px 32px -8px rgba(0, 0, 0, 0.9), 0 0 60px rgba(176, 38, 255, 0.6); } }
 
-  .message .time {
-    font-size: 0.7rem;
-    color: rgba(199, 125, 255, 0.6);
-    margin-top: 8px;
-    margin-left: 10px;
-    margin-right: 10px;
-    transition: all 0.5s ease;
-    animation: timeFadeIn 1s 0.3s both;
-    letter-spacing: 0.3px;
-  }
+  .message .time { font-size: 0.7rem; color: rgba(199, 125, 255, 0.6); margin-top: 8px; margin-left: 10px; margin-right: 10px; }
 
-  @keyframes timeFadeIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+  /* ================= Markdown 樣式 ================= */
+  .bubble p { margin: 0 0 8px 0; } .bubble p:last-child { margin-bottom: 0; }
+  .bubble strong { color: #e0aaff; text-shadow: 0 0 12px rgba(224, 170, 255, 0.6); }
+  .bubble h1, .bubble h2, .bubble h3 { margin: 12px 0 8px; background: linear-gradient(90deg, #c77dff, #e0aaff, #b026ff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .bubble code:not(pre code) { background: rgba(176, 38, 255, 0.3); padding: 2px 8px; border-radius: 10px; color: #e0aaff; }
+  .bubble pre { background: rgba(5, 0, 13, 0.85) !important; border: 1px solid rgba(176, 38, 255, 0.5); border-radius: 18px; padding: 14px; overflow-x: auto; margin: 12px 0; }
+  .bubble table { border-collapse: separate; border-spacing: 0; margin: 10px 0; border-radius: 14px; overflow: hidden; border: 1px solid rgba(176, 38, 255, 0.5); }
+  .bubble th, .bubble td { border-bottom: 1px solid rgba(176, 38, 255, 0.25); border-right: 1px solid rgba(176, 38, 255, 0.25); padding: 8px 12px; }
+  .bubble th { background: rgba(74, 0, 128, 0.5); color: #e0aaff; }
 
-  .message:hover .time {
-    color: rgba(224, 170, 255, 1);
-    transform: translateX(4px);
-    text-shadow: 0 0 10px rgba(224, 170, 255, 0.8);
-  }
+  /* ================= 跟進建議區 ================= */
+  .followup-section { padding: 10px 18px 6px; background: linear-gradient(180deg, transparent, rgba(21, 0, 41, 0.6)); border-top: 1px solid rgba(176, 38, 255, 0.25); animation: followupSlideIn 0.8s both; }
+  @keyframes followupSlideIn { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
+  .followup-title { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: rgba(199, 125, 255, 0.85); margin-bottom: 8px; }
+  .followup-title .dot { width: 8px; height: 8px; border-radius: 50%; background: #e0aaff; box-shadow: 0 0 14px rgba(224, 170, 255, 1); animation: dotPulse 1.8s infinite; }
+  @keyframes dotPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.6); } }
+  .followup-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .followup-chip { background: linear-gradient(135deg, rgba(74, 0, 128, 0.8), rgba(42, 0, 80, 0.8)); border: 1px solid rgba(176, 38, 255, 0.5); border-radius: 100px; padding: 8px 16px; font-size: 0.85rem; color: #e0c8ff; cursor: pointer; transition: all 0.5s; animation: chipAppear 0.7s both; }
+  @keyframes chipAppear { 0% { opacity: 0; transform: translateY(30px) scale(0.4); } 60% { transform: translateY(-8px) scale(1.1); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+  .followup-chip:hover { background: rgba(123, 47, 190, 0.9); border-color: #e0aaff; color: #fff; transform: translateY(-3px) scale(1.05); box-shadow: 0 10px 25px rgba(176, 38, 255, 0.6); }
+  .auto-followup { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: rgba(199, 125, 255, 0.85); cursor: pointer; margin-left: auto; }
+  .toggle-switch { width: 38px; height: 22px; background: rgba(5, 0, 13, 0.7); border-radius: 100px; position: relative; transition: all 0.5s; border: 1px solid rgba(176, 38, 255, 0.5); }
+  .toggle-switch::after { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(135deg, #7b2fbe, #b026ff); top: 2px; left: 2px; transition: all 0.5s; }
+  .auto-followup.on .toggle-switch { background: rgba(123, 47, 190, 0.5); border-color: #b026ff; }
+  .auto-followup.on .toggle-switch::after { left: 18px; background: #e0aaff; }
+  .followup-empty { font-size: 0.78rem; color: rgba(199, 125, 255, 0.45); font-style: italic; }
 
-  /* 逐字浮現光標 */
-  .cursor-blink {
-    display: inline-block;
-    width: 8px;
-    height: 1.1em;
-    background: linear-gradient(180deg, #b026ff, #e0aaff);
-    vertical-align: middle;
-    margin-left: 2px;
-    border-radius: 2px;
-    animation: cursorBlink 0.9s steps(2) infinite;
-    box-shadow: 0 0 12px rgba(224, 170, 255, 1);
-  }
+  /* ================= 底部輸入 & 簡化按鈕 ================= */
+  .chat-footer { padding: 14px 18px 18px; display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, rgba(21, 0, 41, 0.85), rgba(42, 0, 80, 0.65)); backdrop-filter: blur(16px); border-top: 1px solid rgba(176, 38, 255, 0.25); position: relative; z-index: 2; }
+  .chat-footer input { flex: 1; background: rgba(5, 0, 13, 0.7); border: 1px solid rgba(176, 38, 255, 0.4); border-radius: 100px; padding: 16px 24px; color: #f0e5ff; font-size: 0.95rem; outline: none; transition: all 0.6s; }
+  .chat-footer input:focus { border-color: #b026ff; box-shadow: 0 0 0 4px rgba(176, 38, 255, 0.2), 0 0 50px rgba(123, 47, 190, 0.5); background: rgba(21, 0, 41, 0.95); }
+  .chat-footer input::placeholder { color: rgba(199, 125, 255, 0.55); }
 
-  @keyframes cursorBlink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
-  }
-
-  /* 逐字浮現的字元 */
-  .char {
-    display: inline-block;
-    animation: charAppear 0.35s cubic-bezier(0.2, 0.9, 0.3, 1) both;
-  }
-
-  @keyframes charAppear {
-    0% {
-      opacity: 0;
-      transform: translateY(6px) scale(0.7);
-      filter: blur(3px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      filter: blur(0);
-    }
-  }
-
-  /* ===== Markdown 樣式 ===== */
-  .bubble p { margin: 0 0 8px 0; }
-  .bubble p:last-child { margin-bottom: 0; }
-  .bubble strong {
-    color: #e0aaff;
-    font-weight: 700;
-    text-shadow: 0 0 12px rgba(224, 170, 255, 0.6);
-  }
-  .bubble em { color: #c77dff; font-style: italic; }
-  .bubble h1, .bubble h2, .bubble h3 {
-    margin: 12px 0 8px;
-    font-weight: 600;
-    transition: all 0.5s ease;
-    background: linear-gradient(90deg, #c77dff, #e0aaff, #b026ff, #c77dff);
-    background-size: 300% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: titleGradient 5s linear infinite;
-  }
-  .bubble h1:hover, .bubble h2:hover, .bubble h3:hover {
-    transform: translateX(6px);
-    filter: drop-shadow(0 0 18px rgba(224, 170, 255, 0.9));
-  }
-  .bubble h1 { font-size: 1.15rem; }
-  .bubble h2 { font-size: 1.05rem; }
-  .bubble h3 { font-size: 1rem; }
-
-  .bubble ul, .bubble ol { margin: 8px 0; padding-left: 24px; }
-  .bubble li { margin: 5px 0; transition: all 0.4s ease; }
-  .bubble li:hover {
-    transform: translateX(6px);
-    color: #e0aaff;
-    text-shadow: 0 0 10px rgba(224, 170, 255, 0.5);
-  }
-
-  .bubble code:not(pre code) {
-    background: rgba(176, 38, 255, 0.3);
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-family: 'Consolas', 'Monaco', monospace;
-    font-size: 0.88em;
-    color: #e0aaff;
-    transition: all 0.5s ease;
-    display: inline-block;
-    border: 1px solid rgba(199, 125, 255, 0.3);
-  }
-  .bubble code:not(pre code):hover {
-    background: rgba(224, 170, 255, 0.5);
-    transform: scale(1.1) rotate(-2deg);
-    box-shadow: 0 0 20px rgba(224, 170, 255, 0.8);
-  }
-
-  .bubble pre {
-    background: rgba(5, 0, 13, 0.85) !important;
-    border: 1px solid rgba(176, 38, 255, 0.5);
-    border-radius: 18px;
-    padding: 14px 16px;
-    overflow-x: auto;
-    margin: 12px 0;
-    font-size: 0.85rem;
-    transition: all 0.6s ease;
-    position: relative;
-  }
-  .bubble pre:hover {
-    border-color: rgba(224, 170, 255, 1);
-    box-shadow:
-      0 0 60px rgba(176, 38, 255, 0.6),
-      0 0 0 1px rgba(224, 170, 255, 0.6) inset;
-    transform: translateY(-3px);
-  }
-  .bubble pre code {
-    background: transparent !important;
-    padding: 0;
-    font-family: 'Consolas', 'Monaco', monospace;
-    color: #f0e5ff;
-  }
-
-  .bubble blockquote {
-    border-left: 4px solid #b026ff;
-    padding-left: 14px;
-    margin: 10px 0;
-    color: #d0b8ff;
-    font-style: italic;
-    transition: all 0.5s ease;
-    background: linear-gradient(90deg, rgba(176, 38, 255, 0.15), transparent);
-    border-radius: 4px;
-  }
-  .bubble blockquote:hover {
-    border-left-color: #e0aaff;
-    padding-left: 22px;
-    color: #f0e5ff;
-    text-shadow: 0 0 15px rgba(224, 170, 255, 0.6);
-    background: linear-gradient(90deg, rgba(176, 38, 255, 0.3), transparent);
-  }
-
-  .bubble table {
-    border-collapse: separate;
-    border-spacing: 0;
-    margin: 10px 0;
-    font-size: 0.9rem;
-    border-radius: 14px;
-    overflow: hidden;
-    border: 1px solid rgba(176, 38, 255, 0.5);
-    transition: all 0.5s ease;
-  }
-  .bubble table:hover {
-    border-color: rgba(224, 170, 255, 0.9);
-    box-shadow: 0 0 45px rgba(176, 38, 255, 0.6);
-  }
-  .bubble th, .bubble td {
-    border: none;
-    border-bottom: 1px solid rgba(176, 38, 255, 0.25);
-    border-right: 1px solid rgba(176, 38, 255, 0.25);
-    padding: 8px 12px;
-    transition: background 0.4s ease;
-  }
-  .bubble th:last-child, .bubble td:last-child { border-right: none; }
-  .bubble tr:last-child td { border-bottom: none; }
-  .bubble th {
-    background: rgba(74, 0, 128, 0.5);
-    color: #e0aaff;
-    font-weight: 600;
-  }
-  .bubble tr:hover td { background: rgba(176, 38, 255, 0.2); }
-
-  .bubble a {
-    color: #c77dff;
-    text-decoration: none;
-    border-bottom: 1.5px dashed rgba(199, 125, 255, 0.7);
-    transition: all 0.5s ease;
-  }
-  .bubble a:hover {
-    color: #e0aaff;
-    border-bottom-style: solid;
-    text-shadow: 0 0 20px rgba(224, 170, 255, 1);
-  }
-
-  /* ===== 跟進建議區 ===== */
-  .followup-section {
-    padding: 10px 18px 6px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    background: linear-gradient(180deg, transparent, rgba(21, 0, 41, 0.6));
-    border-top: 1px solid rgba(176, 38, 255, 0.25);
-    animation: followupSlideIn 0.8s cubic-bezier(0.2, 0.9, 0.3, 1) both;
-    position: relative;
-    z-index: 2;
-  }
-
-  @keyframes followupSlideIn {
-    0% {
-      opacity: 0;
-      transform: translateY(30px) scale(0.95);
-      filter: blur(8px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      filter: blur(0);
-    }
-  }
-
-  .followup-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.78rem;
-    color: rgba(199, 125, 255, 0.85);
-    letter-spacing: 0.5px;
-    font-weight: 500;
-    padding-left: 4px;
-  }
-
-  .followup-title .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: radial-gradient(circle, #e0aaff, #7b2fbe);
-    box-shadow: 0 0 14px rgba(224, 170, 255, 1), 0 0 28px rgba(176, 38, 255, 0.8);
-    animation: dotPulse 1.8s ease-in-out infinite;
-  }
-
-  @keyframes dotPulse {
-    0%, 100% { transform: scale(1); opacity: 0.7; }
-    50% { transform: scale(2); opacity: 1; box-shadow: 0 0 30px rgba(224, 170, 255, 1); }
-  }
-
-  .followup-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .followup-chip {
-    background: linear-gradient(135deg, rgba(74, 0, 128, 0.8), rgba(42, 0, 80, 0.8));
-    border: 1px solid rgba(176, 38, 255, 0.5);
-    border-radius: 100px;
-    padding: 8px 16px;
-    font-size: 0.85rem;
-    color: #e0c8ff;
-    cursor: pointer;
-    transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
-    position: relative;
-    overflow: hidden;
-    animation: chipAppear 0.7s cubic-bezier(0.2, 0.9, 0.3, 1) both;
-    backdrop-filter: blur(12px);
-    white-space: nowrap;
-    max-width: 100%;
-    text-overflow: ellipsis;
-    font-weight: 500;
-    transform-style: preserve-3d;
-  }
-
-  @keyframes chipAppear {
-    0% {
-      opacity: 0;
-      transform: translateY(30px) scale(0.4) rotateX(90deg);
-      filter: blur(10px);
-    }
-    60% {
-      opacity: 1;
-      transform: translateY(-8px) scale(1.15) rotateX(-10deg);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0) scale(1) rotateX(0);
-      filter: blur(0);
-    }
-  }
-
-  .followup-chip::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, transparent, rgba(224, 170, 255, 0.5), transparent);
-    background-size: 200% 100%;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    animation: chipShine 3s linear infinite;
-  }
-
-  @keyframes chipShine {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-
-  .followup-chip:hover {
-    background: linear-gradient(135deg, rgba(123, 47, 190, 0.9), rgba(74, 0, 128, 0.95));
-    border-color: rgba(224, 170, 255, 1);
-    color: #ffffff;
-    transform: translateY(-5px) scale(1.08) rotateX(10deg);
-    box-shadow:
-      0 20px 40px -6px rgba(74, 0, 128, 1),
-      0 0 45px rgba(176, 38, 255, 0.8),
-      0 0 80px rgba(224, 170, 255, 0.4);
-    text-shadow: 0 0 12px rgba(224, 170, 255, 0.9);
-  }
-
-  .followup-chip:hover::before { opacity: 1; }
-
-  .followup-chip:active {
-    transform: translateY(0) scale(0.94) rotateX(0);
-    transition: all 0.1s ease;
-  }
-
-  .followup-empty {
-    font-size: 0.78rem;
-    color: rgba(199, 125, 255, 0.45);
-    padding: 8px 4px;
-    font-style: italic;
-    letter-spacing: 0.3px;
-  }
-
-  .auto-followup {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.78rem;
-    color: rgba(199, 125, 255, 0.85);
-    cursor: pointer;
-    user-select: none;
-    margin-left: auto;
-    transition: color 0.4s ease;
-  }
-
-  .auto-followup:hover { color: rgba(224, 170, 255, 1); }
-
-  .toggle-switch {
-    width: 38px;
-    height: 22px;
-    background: rgba(5, 0, 13, 0.7);
-    border-radius: 100px;
-    position: relative;
-    transition: all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
-    border: 1px solid rgba(176, 38, 255, 0.5);
-  }
-
-  .toggle-switch::after {
-    content: '';
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #7b2fbe, #b026ff);
-    top: 2px;
-    left: 2px;
-    transition: all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
-    box-shadow: 0 0 12px rgba(199, 125, 255, 0.9);
-  }
-
-  .auto-followup.on .toggle-switch {
-    background: rgba(123, 47, 190, 0.5);
-    border-color: #b026ff;
-    box-shadow: 0 0 20px rgba(176, 38, 255, 0.8);
-  }
-
-  .auto-followup.on .toggle-switch::after {
-    left: 18px;
-    background: linear-gradient(135deg, #e0aaff, #b026ff);
-    box-shadow: 0 0 22px rgba(224, 170, 255, 1);
-  }
-
-  /* ===== 底部輸入 ===== */
-  .chat-footer {
-    padding: 14px 18px 18px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: linear-gradient(135deg, rgba(21, 0, 41, 0.85), rgba(42, 0, 80, 0.65));
-    backdrop-filter: blur(16px);
-    border-top: 1px solid rgba(176, 38, 255, 0.25);
-    position: relative;
-    z-index: 2;
-  }
-
-  .chat-footer input {
-    flex: 1;
-    background: rgba(5, 0, 13, 0.7);
-    border: 1px solid rgba(176, 38, 255, 0.4);
-    border-radius: 100px;
-    padding: 16px 24px;
-    color: #f0e5ff;
-    font-size: 0.95rem;
-    outline: none;
-    transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
-    backdrop-filter: blur(10px);
-    letter-spacing: 0.3px;
-  }
-
-  .chat-footer input:focus {
-    border-color: var(--purple-neon);
-    box-shadow:
-      0 0 0 4px rgba(176, 38, 255, 0.2),
-      0 0 70px rgba(123, 47, 190, 0.6),
-      inset 0 0 25px rgba(199, 125, 255, 0.15);
-    background: rgba(21, 0, 41, 0.95);
-    transform: scale(1.012);
-    padding-left: 28px;
-  }
-
-  .chat-footer input::placeholder {
-    color: rgba(199, 125, 255, 0.55);
-    transition: all 0.5s ease;
-  }
-
-  .chat-footer input:focus::placeholder {
-    color: rgba(199, 125, 255, 0.25);
-    transform: translateX(8px);
-  }
-
-  /* ===== 發送按鈕 — 能量球 ===== */
+  /* 發送按鈕 - 大幅簡化，只保留核心樣式與輕微反饋 */
   .send-btn {
-    background: linear-gradient(145deg, #4a0080, #7b2fbe, #b026ff, #7b2fbe);
-    background-size: 300% 300%;
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
-    border: 1px solid rgba(224, 170, 255, 0.55);
-    flex-shrink: 0;
-    color: white;
-    position: relative;
-    animation:
-      sendBreath 4s ease-in-out infinite,
-      sendGradient 6s ease infinite;
-    box-shadow:
-      0 10px 30px rgba(74, 0, 128, 0.95),
-      0 0 40px rgba(176, 38, 255, 0.6),
-      inset 0 1px 0 rgba(255, 255, 255, 0.35),
-      inset 0 -2px 8px rgba(0, 0, 0, 0.4);
-    overflow: visible;
+    background: linear-gradient(145deg, #4a0080, #7b2fbe, #b026ff);
+    width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; color: white; border: 1px solid rgba(224, 170, 255, 0.55); flex-shrink: 0;
+    cursor: pointer; transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.4s;
+    box-shadow: 0 8px 25px rgba(74, 0, 128, 0.8), inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+  .send-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(74, 0, 128, 1), 0 0 30px rgba(176, 38, 255, 0.6); }
+  .send-btn:active { transform: scale(0.92); }
+  .send-btn span { display: inline-block; transition: transform 0.3s; }
+  .send-btn:hover span { transform: translateX(3px); }
+  .send-btn:disabled { opacity: 0.5; pointer-events: none; }
+
+  /* ================= 分裂動畫相關（由 JS 動態創建） ================= */
+  /* 飛行的幽靈氣泡 */
+  .flying-bubble {
+    position: fixed; z-index: 9999; pointer-events: none;
+    padding: 14px 22px; border-radius: 22px;
+    font-size: 0.98rem; font-weight: 500; color: white;
+    background: linear-gradient(135deg, #7b2fbe, #b026ff);
+    box-shadow: 0 10px 30px rgba(176, 38, 255, 0.8);
+    transition: all 0.8s cubic-bezier(0.2, 0.9, 0.3, 1);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 70vw;
+  }
+  .flying-bubble.suck {
+    transform: translate(var(--tx), var(--ty)) scale(0.1);
+    opacity: 0; filter: blur(10px);
+  }
+  .flying-bubble.split {
+    transform: scale(0.1); opacity: 0;
+    filter: blur(5px);
+  }
+  .flying-bubble.fly {
+    transform: translate(var(--dx), var(--dy)) scale(1);
+    opacity: 1; filter: blur(0);
+  }
+  
+  /* 氣泡落地彈跳 */
+  .bubble.land {
+    animation: bubbleLand 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  @keyframes bubbleLand {
+    0% { transform: scale(0.5); opacity: 0; }
+    60% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
   }
 
-  @keyframes sendGradient {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-  }
-
-  @keyframes sendBreath {
-    0%, 100% {
-      box-shadow:
-        0 10px 30px rgba(74, 0, 128, 0.95),
-        0 0 0 0 rgba(176, 38, 255, 0.5),
-        0 0 50px rgba(123, 47, 190, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.35);
-      transform: scale(1);
-    }
-    50% {
-      box-shadow:
-        0 16px 50px rgba(74, 0, 128, 1),
-        0 0 0 15px rgba(176, 38, 255, 0.15),
-        0 0 100px rgba(176, 38, 255, 0.8),
-        inset 0 1px 0 rgba(255, 255, 255, 0.45);
-      transform: scale(1.05);
-    }
-  }
-
-  .send-btn::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.75), transparent 70%);
-    opacity: 0;
-    transition: opacity 0.6s ease;
-    pointer-events: none;
-  }
-
-  .send-btn::after {
-    content: '';
-    position: absolute;
-    inset: -10px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    border-top-color: rgba(224, 170, 255, 1);
-    border-right-color: rgba(176, 38, 255, 0.6);
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    animation: spinRing 2.5s linear infinite;
-    pointer-events: none;
-  }
-
-  @keyframes spinRing {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  .send-btn span {
-    display: inline-block;
-    transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
-    animation: arrowFloat 2s ease-in-out infinite;
-    z-index: 2;
-    filter: drop-shadow(0 0 6px rgba(224, 170, 255, 1));
-  }
-
-  @keyframes arrowFloat {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(4px); }
-  }
-
-  .send-btn:hover {
-    transform: scale(1.18) translateY(-5px);
-    box-shadow:
-      0 25px 60px rgba(74, 0, 128, 1),
-      0 0 0 18px rgba(176, 38, 255, 0.15),
-      0 0 120px rgba(224, 170, 255, 0.7),
-      inset 0 1px 0 rgba(255, 255, 255, 0.45);
-    animation-play-state: paused, running;
-  }
-
-  .send-btn:hover::before { opacity: 1; }
-  .send-btn:hover::after { opacity: 1; }
-  .send-btn:hover span { transform: translateX(6px) scale(1.25); }
-
-  .send-btn:active {
-    transform: scale(0.85) translateY(4px);
-    transition: all 0.1s ease;
-  }
-
-  /* 發送時的強力動畫 */
-  .send-btn.flash {
-    animation: sendFlash 1s cubic-bezier(0.2, 0.9, 0.3, 1);
-  }
-
-  @keyframes sendFlash {
-    0% {
-      transform: scale(1.5);
-      box-shadow:
-        0 0 0 0 rgba(224, 170, 255, 1),
-        0 0 150px rgba(224, 170, 255, 1),
-        0 0 250px rgba(176, 38, 255, 1);
-      background: linear-gradient(145deg, #b026ff, #e0aaff, #ffffff);
-    }
-    30% {
-      transform: scale(0.9);
-    }
-    60% {
-      transform: scale(1.15);
-      box-shadow:
-        0 0 0 25px rgba(224, 170, 255, 0.3),
-        0 0 100px rgba(224, 170, 255, 0.8);
-    }
-    100% {
-      transform: scale(1);
-      box-shadow: 0 10px 30px rgba(74, 0, 128, 0.95);
-      background: linear-gradient(145deg, #4a0080, #7b2fbe, #b026ff);
-    }
-  }
-
-  /* 發送衝刺動畫 */
-  .send-btn.sending {
-    animation: sendDash 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
-  }
-
-  @keyframes sendDash {
-    0% { transform: scale(1) translateX(0); }
-    50% { transform: scale(1.2) translateX(12px); }
-    100% { transform: scale(1) translateX(0); }
-  }
-
-  /* 能量波擴散 */
-  .energy-wave {
-    position: fixed;
-    border-radius: 50%;
-    border: 3px solid rgba(224, 170, 255, 0.9);
-    pointer-events: none;
-    z-index: 1000;
-    transform: translate(-50%, -50%) scale(0);
-    animation: energyWaveExpand 1.2s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
-    box-shadow:
-      0 0 40px rgba(224, 170, 255, 0.9),
-      inset 0 0 40px rgba(176, 38, 255, 0.6);
-  }
-
-  @keyframes energyWaveExpand {
-    0% {
-      transform: translate(-50%, -50%) scale(0);
-      opacity: 1;
-    }
-    100% {
-      transform: translate(-50%, -50%) scale(8);
-      opacity: 0;
-    }
-  }
-
-  /* 訊息路徑光點 */
-  .message-trail {
-    position: fixed;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: radial-gradient(circle, #ffffff, #e0aaff 40%, #b026ff 70%, transparent);
-    pointer-events: none;
-    z-index: 999;
-    box-shadow:
-      0 0 20px rgba(224, 170, 255, 1),
-      0 0 40px rgba(176, 38, 255, 0.8);
-    animation: trailFly 0.9s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
-  }
-
-  @keyframes trailFly {
-    0% {
-      opacity: 1;
-      transform: scale(1);
-    }
-    100% {
-      opacity: 0;
-      transform: scale(0.2) translate(var(--dx, 0), var(--dy, 0));
-    }
-  }
-
-  /* 發送爆發粒子 */
-  .burst-particle {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
+  /* 飛行軌跡粒子 */
+  .trail-dot {
+    position: fixed; width: 8px; height: 8px; border-radius: 50%;
     background: radial-gradient(circle, #e0aaff, transparent);
-    pointer-events: none;
-    animation: burst 1.2s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
-    box-shadow: 0 0 18px rgba(224, 170, 255, 1);
+    pointer-events: none; z-index: 9998;
+    box-shadow: 0 0 15px rgba(224, 170, 255, 0.8);
+    animation: trailFade 0.6s ease-out forwards;
   }
+  @keyframes trailFade { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.2); } }
 
-  @keyframes burst {
-    0% { transform: translate(0, 0) scale(1); opacity: 1; }
-    100% { transform: translate(var(--tx), var(--ty)) scale(0.1); opacity: 0; }
+  /* 能量衝擊波（分裂時） */
+  .split-wave {
+    position: fixed; border-radius: 50%; border: 2px solid rgba(224, 170, 255, 0.8);
+    pointer-events: none; z-index: 9997;
+    transform: translate(-50%, -50%) scale(0);
+    animation: splitWaveExpand 0.8s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
   }
+  @keyframes splitWaveExpand { to { transform: translate(-50%, -50%) scale(5); opacity: 0; } }
 
-  /* 發送按鈕內部能量環 */
-  .send-btn .energy-ring {
-    position: absolute;
-    inset: -5px;
-    border-radius: 50%;
-    border: 2px solid rgba(224, 170, 255, 0.7);
-    opacity: 0;
-    pointer-events: none;
-    animation: energyRing 2s ease-out infinite;
-  }
+  /* Toast 样式 */
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(40px); background: rgba(74, 0, 128, 0.98); backdrop-filter: blur(16px); padding: 12px 28px; border-radius: 100px; color: #e0c8ff; font-size: 0.9rem; border: 1px solid rgba(176, 38, 255, 0.7); opacity: 0; transition: all 0.7s cubic-bezier(0.2, 0.9, 0.3, 1); pointer-events: none; z-index: 10000; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  .send-btn .energy-ring:nth-child(2) { animation-delay: 0.7s; }
-  .send-btn .energy-ring:nth-child(3) { animation-delay: 1.4s; }
-
-  @keyframes energyRing {
-    0% {
-      transform: scale(0.9);
-      opacity: 0.9;
-    }
-    100% {
-      transform: scale(1.8);
-      opacity: 0;
-    }
-  }
-
-  /* ===== 打字指示器 ===== */
-  .typing-indicator {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 22px;
-    background: linear-gradient(135deg, rgba(74, 0, 128, 0.95), rgba(42, 0, 80, 0.95));
-    border-radius: 40px;
-    width: fit-content;
-    margin-top: 4px;
-    border: 1px solid rgba(176, 38, 255, 0.6);
-    transition: all 0.5s ease;
-    animation: typingBreath 2s ease-in-out infinite;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 10px 30px -6px rgba(0, 0, 0, 0.9);
-  }
-
-  @keyframes typingBreath {
-    0%, 100% {
-      border-color: rgba(176, 38, 255, 0.6);
-      box-shadow:
-        0 10px 30px -6px rgba(0, 0, 0, 0.9),
-        0 0 40px rgba(123, 47, 190, 0.5);
-    }
-    50% {
-      border-color: rgba(224, 170, 255, 1);
-      box-shadow:
-        0 10px 30px -6px rgba(0, 0, 0, 0.9),
-        0 0 80px rgba(176, 38, 255, 0.9);
-    }
-  }
-
-  .typing-indicator span {
-    width: 10px;
-    height: 10px;
-    background: radial-gradient(circle at 30% 30%, #e0aaff, #7b2fbe);
-    border-radius: 50%;
-    display: inline-block;
-    animation: typingBounce 1.6s infinite cubic-bezier(0.2, 0.9, 0.3, 1);
-    box-shadow: 0 0 15px rgba(224, 170, 255, 0.9);
-  }
-
-  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-  .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-
-  @keyframes typingBounce {
-    0%, 60%, 100% {
-      transform: translateY(0) scale(1);
-      opacity: 0.5;
-      box-shadow: 0 0 10px rgba(176, 38, 255, 0.5);
-    }
-    30% {
-      transform: translateY(-16px) scale(1.6);
-      opacity: 1;
-      box-shadow: 0 0 35px rgba(224, 170, 255, 1);
-    }
-  }
-
-  /* ===== Toast ===== */
-  .toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%) translateY(40px) scale(0.85);
-    background: linear-gradient(135deg, rgba(74, 0, 128, 0.98), rgba(42, 0, 80, 0.98));
-    backdrop-filter: blur(16px);
-    padding: 12px 28px;
-    border-radius: 100px;
-    color: #e0c8ff;
-    font-size: 0.9rem;
-    border: 1px solid rgba(176, 38, 255, 0.7);
-    box-shadow:
-      0 15px 45px rgba(0, 0, 0, 0.8),
-      0 0 50px rgba(123, 47, 190, 0.7);
-    opacity: 0;
-    transition: all 0.7s cubic-bezier(0.2, 0.9, 0.3, 1);
-    pointer-events: none;
-    z-index: 2000;
-    white-space: nowrap;
-    font-weight: 500;
-  }
-
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1);
-  }
-
-  .copy-toast {
-    position: fixed;
-    top: 40px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-30px) scale(0.8);
-    background: linear-gradient(135deg, rgba(123, 47, 190, 0.98), rgba(176, 38, 255, 0.98));
-    backdrop-filter: blur(16px);
-    padding: 12px 28px;
-    border-radius: 100px;
-    color: #ffffff;
-    font-size: 0.88rem;
-    font-weight: 600;
-    border: 1px solid rgba(224, 170, 255, 0.7);
-    box-shadow:
-      0 20px 50px rgba(74, 0, 128, 1),
-      0 0 60px rgba(176, 38, 255, 0.8),
-      inset 0 1px 0 rgba(255, 255, 255, 0.35);
-    opacity: 0;
-    transition: all 0.7s cubic-bezier(0.2, 0.9, 0.3, 1);
-    pointer-events: none;
-    z-index: 3000;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    animation: copyToastGlow 2s ease-in-out infinite;
-  }
-
-  @keyframes copyToastGlow {
-    0%, 100% {
-      box-shadow:
-        0 20px 50px rgba(74, 0, 128, 1),
-        0 0 60px rgba(176, 38, 255, 0.8);
-    }
-    50% {
-      box-shadow:
-        0 20px 50px rgba(74, 0, 128, 1),
-        0 0 100px rgba(224, 170, 255, 1);
-    }
-  }
-
-  .copy-toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1);
-  }
-
-  /* ===== 響應式 ===== */
   @media (max-width: 520px) {
     .app-container { height: 94vh; border-radius: 32px; }
-    .chat-header { padding: 12px 14px; }
-    .message { max-width: 90%; }
-    .bubble { padding: 12px 18px; font-size: 0.92rem; border-radius: 24px; }
-    .chat-footer { padding: 12px 14px 16px; }
-    .chat-footer input { padding: 14px 20px; }
+    .bubble { padding: 12px 18px; font-size: 0.92rem; }
     .send-btn { width: 52px; height: 52px; font-size: 1.6rem; }
-    .followup-section { padding: 8px 14px 4px; }
-    .followup-chip { font-size: 0.78rem; padding: 6px 12px; }
-    .conv-avatar { width: 46px; height: 46px; font-size: 1.4rem; }
-    .list-title { font-size: 1.3rem; }
-  }
-
-  .chat-footer input:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
   }
 </style>
 </head>
 <body>
 
-<!-- 極光多層背景 -->
 <div class="aurora-bg">
   <div class="aurora-layer aurora-1"></div>
   <div class="aurora-layer aurora-2"></div>
   <div class="aurora-layer aurora-3"></div>
   <div class="aurora-layer aurora-4"></div>
 </div>
-
-<!-- 星塵 -->
 <div class="stars-bg" id="starsBg"></div>
 
-<!-- 主容器 -->
 <div class="app-container" id="appContainer">
-
-  <!-- ===== 視圖 1：會話列表 ===== -->
+  <!-- 視圖1：會話列表 -->
   <div class="view" id="listView">
     <div class="list-header">
-      <div class="list-title">
-        <span class="title-icon">✦</span>
-        <span>紫耀會話</span>
-      </div>
+      <div class="list-title"><span class="title-icon">✦</span><span>紫耀會話</span></div>
       <div class="list-subtitle">選擇一個對話開始</div>
     </div>
-
-    <div class="conversation-list" id="conversationList">
-      <!-- 動態生成 -->
-    </div>
+    <div class="conversation-list" id="conversationList"></div>
   </div>
 
-  <!-- ===== 視圖 2：聊天詳情 ===== -->
+  <!-- 視圖2：聊天詳情 -->
   <div class="view view-right-hidden" id="chatView">
     <div class="chat-header">
       <button class="back-btn" id="backBtn">←</button>
       <div class="chat-header-info">
-        <div class="chat-header-name" id="chatHeaderName">
-          <span id="chatHeaderEmoji">💬</span>
-          <span id="chatHeaderTitle">正常對話</span>
-        </div>
-        <div class="chat-header-status">
-          <span class="status-dot"></span>
-          <span id="chatHeaderStatus">在线 · DeepSeek 已连接</span>
-        </div>
+        <div class="chat-header-name"><span id="chatHeaderEmoji">💬</span><span id="chatHeaderTitle">正常對話</span></div>
+        <div class="chat-header-status"><span class="status-dot"></span><span id="chatHeaderStatus">在线</span></div>
         <div class="api-input-wrapper">
-          <input type="password" id="apiKeyInput" placeholder="输入 DeepSeek API 密钥..." autocomplete="off" spellcheck="false">
+          <input type="password" id="apiKeyInput" placeholder="输入 DeepSeek API 密钥...">
           <button class="save-btn" id="saveApiBtn">保存</button>
         </div>
       </div>
     </div>
 
-    <div class="chat-messages" id="chatMessages">
-      <!-- 動態生成 -->
-    </div>
+    <div class="chat-messages" id="chatMessages"></div>
 
     <div class="followup-section" id="followupSection">
       <div class="followup-title">
-        <span class="dot"></span>
-        <span>可能想問</span>
-        <div class="auto-followup" id="autoFollowup">
-          <span class="toggle-switch"></span>
-          <span>自動追問</span>
-        </div>
+        <span class="dot"></span><span>可能想問</span>
+        <div class="auto-followup" id="autoFollowup"><span class="toggle-switch"></span><span>自動追問</span></div>
       </div>
-      <div class="followup-list" id="followupList">
-        <span class="followup-empty">AI 回覆後將顯示跟進建議...</span>
-      </div>
+      <div class="followup-list" id="followupList"><span class="followup-empty">AI 回覆後將顯示跟進建議...</span></div>
     </div>
 
     <div class="chat-footer">
-      <input type="text" id="messageInput" placeholder="输入消息..." autocomplete="off" spellcheck="false">
-      <button class="send-btn" id="sendBtn">
-        <span>➤</span>
-        <span class="energy-ring"></span>
-        <span class="energy-ring"></span>
-        <span class="energy-ring"></span>
-      </button>
+      <input type="text" id="messageInput" placeholder="输入消息..." autocomplete="off">
+      <button class="send-btn" id="sendBtn"><span>➤</span></button>
     </div>
   </div>
-
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="copy-toast" id="copyToast">✨ 已複製到剪貼板</div>
 
 <script>
 (function() {
-  // ===== 會話數據 =====
+  // ================= 數據 =================
   const conversations = [
-    {
-      id: 'normal',
-      emoji: '💬',
-      title: '正常對話',
-      preview: '你好！我是 DeepSeek 助手...',
-      time: '剛剛',
-      avatarClass: 'avatar-1',
-      status: '在线 · DeepSeek 已连接',
-      welcome: '你好！我是 DeepSeek 助手 ✨<br><br>请先输入 API 密钥，然后就可以开始对话了。<br><br><span style="color: rgba(224, 170, 255, 0.7); font-size: 0.85em;">💡 点击任意气泡即可复制内容</span>',
-      history: []
-    },
-    {
-      id: 'roleplay',
-      emoji: '🎭',
-      title: '角色扮演',
-      preview: '你是我的专属武侠小说家...',
-      time: '昨天',
-      avatarClass: 'avatar-2',
-      status: '角色模式 · 武侠世界',
-      welcome: '欢迎来到武侠世界 🗡️<br><br>我是你的专属武侠小说家。请告诉我你想扮演的角色或想展开的剧情，我们一起创造江湖传奇。',
-      history: []
-    },
-    {
-      id: 'game',
-      emoji: '🎮',
-      title: '游戏询问',
-      preview: '最近有什么好玩的游戏...',
-      time: '昨天',
-      avatarClass: 'avatar-3',
-      status: '游戏助手 · 在线',
-      welcome: '你好！我是你的游戏助手 🎮<br><br>想找新游戏？想了解攻略？还是想聊聊最近的热门大作？',
-      history: []
-    },
-    {
-      id: 'study',
-      emoji: '📚',
-      title: '学习助手',
-      preview: '帮我解释一下量子力学...',
-      time: '星期一',
-      avatarClass: 'avatar-4',
-      status: '学习模式 · 专注中',
-      welcome: '你好！我是你的学习助手 📚<br><br>无论是数学、物理、编程还是语言学习，我都能帮你。',
-      history: []
-    }
+    { id: 'normal', emoji: '💬', title: '正常對話', preview: '你好！我是 DeepSeek 助手...', time: '剛剛', avatarClass: 'avatar-1', status: '在线 · DeepSeek 已连接', welcome: '你好！我是 DeepSeek 助手 ✨<br><br>请先输入 API 密钥，然后就可以开始对话了。<br><br><span style="color: rgba(224, 170, 255, 0.7); font-size: 0.85em;">💡 点击任意气泡即可复制内容</span>', history: [] },
+    { id: 'roleplay', emoji: '🎭', title: '角色扮演', preview: '你是我的专属武侠小说家...', time: '昨天', avatarClass: 'avatar-2', status: '角色模式 · 武侠世界', welcome: '欢迎来到武侠世界 🗡️<br><br>我是你的专属武侠小说家。请告诉我你想扮演的角色或想展开的剧情。', history: [] },
+    { id: 'game', emoji: '🎮', title: '游戏询问', preview: '最近有什么好玩的游戏...', time: '昨天', avatarClass: 'avatar-3', status: '游戏助手 · 在线', welcome: '你好！我是你的游戏助手 🎮<br><br>想找新游戏？想了解攻略？还是想聊聊最近的热门大作？', history: [] },
+    { id: 'study', emoji: '📚', title: '学习助手', preview: '帮我解释一下量子力学...', time: '星期一', avatarClass: 'avatar-4', status: '学习模式 · 专注中', welcome: '你好！我是你的学习助手 📚<br><br>无论是数学、物理、编程还是语言学习，我都能帮你。', history: [] }
   ];
 
   let currentConversation = null;
@@ -1926,13 +327,12 @@
   let isWaitingForResponse = false;
   let autoFollowupEnabled = false;
 
-  // ===== DOM =====
+  // ================= DOM =================
   const appContainer = document.getElementById('appContainer');
   const listView = document.getElementById('listView');
   const chatView = document.getElementById('chatView');
   const conversationList = document.getElementById('conversationList');
   const backBtn = document.getElementById('backBtn');
-  const chatHeaderName = document.getElementById('chatHeaderName');
   const chatHeaderEmoji = document.getElementById('chatHeaderEmoji');
   const chatHeaderTitle = document.getElementById('chatHeaderTitle');
   const chatHeaderStatus = document.getElementById('chatHeaderStatus');
@@ -1942,14 +342,13 @@
   const messageInput = document.getElementById('messageInput');
   const sendBtn = document.getElementById('sendBtn');
   const toastEl = document.getElementById('toast');
-  const copyToastEl = document.getElementById('copyToast');
   const starsBg = document.getElementById('starsBg');
   const followupList = document.getElementById('followupList');
   const autoFollowupToggle = document.getElementById('autoFollowup');
 
   if (apiKey) apiKeyInput.value = apiKey;
 
-  // ===== 渲染會話列表 =====
+  // ================= 渲染列表 =================
   function renderConversationList() {
     conversationList.innerHTML = '';
     conversations.forEach((conv, i) => {
@@ -1959,101 +358,59 @@
       item.innerHTML = `
         <div class="conv-avatar ${conv.avatarClass}">${conv.emoji}</div>
         <div class="conv-content">
-          <div class="conv-name">
-            <span>${conv.title}</span>
-            <span class="conv-time">${conv.time}</span>
-          </div>
+          <div class="conv-name"><span>${conv.title}</span><span class="conv-time">${conv.time}</span></div>
           <div class="conv-preview">${conv.preview}</div>
-        </div>
-      `;
+        </div>`;
       item.addEventListener('click', () => openConversation(conv));
       conversationList.appendChild(item);
     });
   }
 
-  // ===== 開啟會話 =====
+  // ================= 開啟會話 =================
   function openConversation(conv) {
     currentConversation = conv;
-
-    // 更新頭部
     chatHeaderEmoji.textContent = conv.emoji;
     chatHeaderTitle.textContent = conv.title;
     chatHeaderStatus.textContent = conv.status;
 
-    // 渲染訊息
     chatMessages.innerHTML = '';
     if (conv.history.length === 0) {
       addMessageToUI('bot', conv.welcome, true);
       conv.history.push({ role: 'assistant', content: conv.welcome, isHTML: true });
     } else {
-      conv.history.forEach(msg => {
-        addMessageToUI(msg.role === 'user' ? 'user' : 'bot', msg.content, msg.isHTML);
-      });
+      conv.history.forEach(msg => addMessageToUI(msg.role === 'user' ? 'user' : 'bot', msg.content, msg.isHTML));
     }
 
-    // 切換視圖
     listView.classList.add('view-hidden');
     chatView.classList.remove('view-right-hidden');
-
-    // 滾到底部
-    setTimeout(() => {
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-      messageInput.focus();
-    }, 500);
+    setTimeout(() => { chatMessages.scrollTop = chatMessages.scrollHeight; messageInput.focus(); }, 500);
   }
 
-  // ===== 返回列表 =====
+  // ================= 返回列表 =================
   backBtn.addEventListener('click', () => {
     listView.classList.remove('view-hidden');
     chatView.classList.add('view-right-hidden');
-    setTimeout(() => {
-      currentConversation = null;
-    }, 600);
+    setTimeout(() => { currentConversation = null; }, 600);
   });
 
-  // ===== 3D 傾斜 =====
+  // ================= 3D 傾斜 & 滑鼠光軌 & 星塵 =================
   appContainer.addEventListener('mousemove', (e) => {
     const rect = appContainer.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
     appContainer.style.transform = `perspective(1500px) rotateY(${x * 2.5}deg) rotateX(${-y * 2.5}deg) translateY(-4px)`;
   });
+  appContainer.addEventListener('mouseleave', () => { appContainer.style.transform = ''; });
 
-  appContainer.addEventListener('mouseleave', () => {
-    appContainer.style.transform = '';
-  });
-
-  // ===== 氣泡光暈跟隨 =====
   document.addEventListener('mousemove', (e) => {
     const bubble = e.target.closest('.bubble');
     if (bubble) {
       const rect = bubble.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      bubble.style.setProperty('--mx', x + '%');
-      bubble.style.setProperty('--my', y + '%');
+      bubble.style.setProperty('--mx', ((e.clientX - rect.left) / rect.width) * 100 + '%');
+      bubble.style.setProperty('--my', ((e.clientY - rect.top) / rect.height) * 100 + '%');
     }
   });
 
-  // ===== 滑鼠光軌 =====
-  let lastTrailTime = 0;
-  document.addEventListener('mousemove', (e) => {
-    const now = Date.now();
-    if (now - lastTrailTime < 45) return;
-    lastTrailTime = now;
-
-    const trail = document.createElement('div');
-    trail.className = 'mouse-trail';
-    trail.style.left = e.clientX + 'px';
-    trail.style.top = e.clientY + 'px';
-    const size = 10 + Math.random() * 10;
-    trail.style.width = size + 'px';
-    trail.style.height = size + 'px';
-    document.body.appendChild(trail);
-    setTimeout(() => trail.remove(), 1000);
-  });
-
-  // ===== 星塵 =====
   function createStars() {
     for (let i = 0; i < 70; i++) {
       const star = document.createElement('div');
@@ -2061,8 +418,7 @@
       star.style.left = Math.random() * 100 + '%';
       star.style.bottom = '-20px';
       const size = Math.random() * 4 + 1.5;
-      star.style.width = size + 'px';
-      star.style.height = size + 'px';
+      star.style.width = size + 'px'; star.style.height = size + 'px';
       star.style.animationDuration = (Math.random() * 20 + 15) + 's, ' + (Math.random() * 2 + 1.5) + 's';
       star.style.animationDelay = (Math.random() * 20) + 's, ' + (Math.random() * 2) + 's';
       starsBg.appendChild(star);
@@ -2070,147 +426,40 @@
   }
   createStars();
 
-  // ===== Toast =====
+  // ================= Toast =================
   function showToast(text, duration = 2000) {
-    toastEl.textContent = text;
-    toastEl.classList.add('show');
+    toastEl.textContent = text; toastEl.classList.add('show');
     clearTimeout(window.toastTimer);
-    window.toastTimer = setTimeout(() => {
-      toastEl.classList.remove('show');
-    }, duration);
+    window.toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration);
   }
 
-  function showCopyToast() {
-    copyToastEl.classList.add('show');
-    clearTimeout(window.copyToastTimer);
-    window.copyToastTimer = setTimeout(() => {
-      copyToastEl.classList.remove('show');
-    }, 1800);
-  }
-
-  // ===== 複製 =====
+  // ================= 複製 =================
   function copyBubbleContent(bubble, e) {
     let text = bubble.innerText || bubble.textContent || '';
-    text = text.trim();
-    if (!text) return;
-
-    const copy = async () => {
-      try {
-        await navigator.clipboard.writeText(text);
-        return true;
-      } catch (err) {
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.position = 'fixed';
-        ta.style.opacity = '0';
-        document.body.appendChild(ta);
-        ta.select();
-        try {
-          document.execCommand('copy');
-          document.body.removeChild(ta);
-          return true;
-        } catch (e) {
-          document.body.removeChild(ta);
-          return false;
-        }
+    text = text.trim(); if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      bubble.classList.add('copied'); setTimeout(() => bubble.classList.remove('copied'), 900);
+      if (e) {
+        const rect = bubble.getBoundingClientRect();
+        const ripple = document.createElement('span');
+        ripple.style.cssText = `position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(224,170,255,.9),transparent 70%);transform:scale(0);pointer-events:none;z-index:5;animation:copyRipple 1s forwards;width:${Math.max(rect.width,rect.height)}px;height:${Math.max(rect.width,rect.height)}px;left:${e.clientX-rect.left-Math.max(rect.width,rect.height)/2}px;top:${e.clientY-rect.top-Math.max(rect.width,rect.height)/2}px;`;
+        bubble.appendChild(ripple); setTimeout(() => ripple.remove(), 1000);
       }
-    };
-
-    copy().then((success) => {
-      if (success) {
-        bubble.classList.add('copied');
-        setTimeout(() => bubble.classList.remove('copied'), 900);
-
-        if (e) {
-          const rect = bubble.getBoundingClientRect();
-          const ripple = document.createElement('span');
-          ripple.classList.add('copy-ripple');
-          const size = Math.max(rect.width, rect.height);
-          ripple.style.width = ripple.style.height = size + 'px';
-          ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
-          ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
-          bubble.appendChild(ripple);
-          setTimeout(() => ripple.remove(), 1300);
-        }
-
-        showCopyToast();
-      } else {
-        showToast('复制失败', 1800);
-      }
+      showToast('✨ 已複製到剪貼板');
+    }).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('✨ 已複製');
     });
   }
 
-  // ===== 保存密鑰 =====
-  function saveApiKey() {
+  // ================= 保存密鑰 =================
+  saveApiBtn.addEventListener('click', () => {
     const key = apiKeyInput.value.trim();
-    if (!key) { showToast('密钥不能为空', 1800); return; }
-    apiKey = key;
-    localStorage.setItem('deepseek_api_key', key);
-    showToast('✅ API 密钥已保存', 1600);
-  }
+    if (!key) { showToast('密钥不能为空'); return; }
+    apiKey = key; localStorage.setItem('deepseek_api_key', key); showToast('✅ API 密钥已保存');
+  });
 
-  // ===== 能量波 + 爆炸粒子 =====
-  function createEnergyWave(e) {
-    const rect = sendBtn.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-
-    // 三層能量波
-    for (let i = 0; i < 3; i++) {
-      setTimeout(() => {
-        const wave = document.createElement('div');
-        wave.className = 'energy-wave';
-        wave.style.left = cx + 'px';
-        wave.style.top = cy + 'px';
-        wave.style.width = '60px';
-        wave.style.height = '60px';
-        wave.style.borderColor = i === 0 ? 'rgba(224, 170, 255, 0.9)' :
-                                  i === 1 ? 'rgba(176, 38, 255, 0.7)' :
-                                            'rgba(123, 47, 190, 0.5)';
-        document.body.appendChild(wave);
-        setTimeout(() => wave.remove(), 1200);
-      }, i * 120);
-    }
-
-    // 爆炸粒子
-    for (let i = 0; i < 16; i++) {
-      const p = document.createElement('span');
-      p.classList.add('burst-particle');
-      const angle = (Math.PI * 2 * i) / 16;
-      const dist = 60 + Math.random() * 50;
-      p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
-      p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
-      p.style.left = '50%';
-      p.style.top = '50%';
-      p.style.animationDelay = (i * 0.015) + 's';
-      sendBtn.appendChild(p);
-      setTimeout(() => p.remove(), 1200);
-    }
-  }
-
-  // ===== 訊息路徑光點 =====
-  function createMessageTrail(fromX, fromY, toX, toY) {
-    const steps = 12;
-    for (let i = 0; i < steps; i++) {
-      setTimeout(() => {
-        const t = i / steps;
-        const x = fromX + (toX - fromX) * t;
-        const y = fromY + (toY - fromY) * t;
-        const dot = document.createElement('div');
-        dot.className = 'message-trail';
-        dot.style.left = x + 'px';
-        dot.style.top = y + 'px';
-        const size = 8 + Math.random() * 6;
-        dot.style.width = size + 'px';
-        dot.style.height = size + 'px';
-        document.body.appendChild(dot);
-        setTimeout(() => dot.remove(), 900);
-      }, i * 40);
-    }
-  }
-
-  // ===== 添加消息到 UI =====
-  function addMessageToUI(role, content, isHTML = false) {
+  // ================= 添加消息到 UI =================
+  function addMessageToUI(role, content, isHTML = false, isLanding = false) {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', role);
 
@@ -2221,247 +470,200 @@
       try {
         const rawHtml = marked.parse(content);
         bubbleDiv.innerHTML = DOMPurify.sanitize(rawHtml);
-        bubbleDiv.querySelectorAll('pre code').forEach((block) => {
-          hljs.highlightElement(block);
-        });
-      } catch (e) {
-        bubbleDiv.textContent = content;
-      }
+        bubbleDiv.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
+      } catch (e) { bubbleDiv.textContent = content; }
     } else if (isHTML) {
       bubbleDiv.innerHTML = content;
     } else {
-      // 用戶訊息：逐字浮現
-      const text = content;
-      bubbleDiv.textContent = '';
-      let i = 0;
-      const interval = setInterval(() => {
-        if (i >= text.length) {
-          clearInterval(interval);
-          return;
-        }
-        const charSpan = document.createElement('span');
-        charSpan.className = 'char';
-        charSpan.textContent = text[i];
-        bubbleDiv.appendChild(charSpan);
-        i++;
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }, 20);
+      // 用戶訊息：如果是落地動畫，則直接填入；否則逐字浮現
+      if (isLanding) {
+        bubbleDiv.textContent = content;
+        bubbleDiv.classList.add('land');
+      } else {
+        const text = content; bubbleDiv.textContent = ''; let i = 0;
+        const interval = setInterval(() => {
+          if (i >= text.length) { clearInterval(interval); return; }
+          const span = document.createElement('span'); span.className = 'char'; span.textContent = text[i];
+          bubbleDiv.appendChild(span); i++; chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 20);
+      }
     }
 
-    bubbleDiv.addEventListener('click', (e) => {
-      e.stopPropagation();
-      copyBubbleContent(bubbleDiv, e);
-    });
+    bubbleDiv.addEventListener('click', (e) => { e.stopPropagation(); copyBubbleContent(bubbleDiv, e); });
 
     const timeDiv = document.createElement('div');
     timeDiv.classList.add('time');
-    const now = new Date();
-    timeDiv.textContent = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+    timeDiv.textContent = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 
-    messageDiv.appendChild(bubbleDiv);
-    messageDiv.appendChild(timeDiv);
-    chatMessages.appendChild(messageDiv);
-
-    requestAnimationFrame(() => {
-      chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
-    });
-
+    messageDiv.appendChild(bubbleDiv); messageDiv.appendChild(timeDiv); chatMessages.appendChild(messageDiv);
+    requestAnimationFrame(() => chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' }));
     return messageDiv;
   }
 
-  // ===== 打字指示器 =====
+  // ================= 打字指示器 =================
   function showTypingIndicator() {
     const typingDiv = document.createElement('div');
-    typingDiv.classList.add('message', 'bot');
-    typingDiv.id = 'typingIndicator';
-    const indicatorWrapper = document.createElement('div');
-    indicatorWrapper.classList.add('typing-indicator');
-    indicatorWrapper.innerHTML = '<span></span><span></span><span></span>';
-    typingDiv.appendChild(indicatorWrapper);
+    typingDiv.classList.add('message', 'bot'); typingDiv.id = 'typingIndicator';
+    typingDiv.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
     chatMessages.appendChild(typingDiv);
-    requestAnimationFrame(() => {
-      chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
-    });
-    return typingDiv;
+    requestAnimationFrame(() => chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' }));
   }
+  function removeTypingIndicator() { const el = document.getElementById('typingIndicator'); if (el) el.remove(); }
 
-  function removeTypingIndicator() {
-    const indicator = document.getElementById('typingIndicator');
-    if (indicator) indicator.remove();
-  }
-
-  // ===== 生成跟進建議 =====
+  // ================= 跟進建議 =================
   function generateFollowups(userText, botText, convId) {
     const suggestions = [];
-    const lowerBot = (botText || '').toLowerCase();
-    const lowerUser = (userText || '').toLowerCase();
-
-    if (convId === 'roleplay') {
-      suggestions.push('继续这个剧情');
-      suggestions.push('换个场景');
-      suggestions.push('加入一个角色');
-    } else if (convId === 'game') {
-      suggestions.push('推荐类似游戏');
-      suggestions.push('这个游戏怎么玩？');
-      suggestions.push('有什么隐藏玩法？');
-    } else if (convId === 'study') {
-      suggestions.push('可以详细解释吗？');
-      suggestions.push('给我一个例题');
-      suggestions.push('有什么实际应用？');
-    } else if (botText.includes('```') || lowerBot.includes('code') || botText.includes('代码')) {
-      suggestions.push('可以帮我解释这段代码吗？');
-      suggestions.push('给我一个更简单的例子');
-      suggestions.push('这段代码有什么注意事项？');
-    } else if (lowerUser.includes('+') || lowerUser.includes('=') || /[0-9]/.test(userText)) {
-      suggestions.push('再来一个类似的题目');
-      suggestions.push('为什么这样算？');
-      suggestions.push('还有其他解法吗？');
-    } else if (userText.length < 8) {
-      suggestions.push('可以详细解释吗？');
-      suggestions.push('给我一个例子');
-      suggestions.push('这有什么实际应用？');
-    } else {
-      suggestions.push('继续深入讲讲');
-      suggestions.push('能举个例子吗？');
-      suggestions.push('这和其他概念有什么关系？');
-    }
-
+    if (convId === 'roleplay') suggestions.push('继续这个剧情', '换个场景', '加入一个角色');
+    else if (convId === 'game') suggestions.push('推荐类似游戏', '这个游戏怎么玩？', '有什么隐藏玩法？');
+    else if (convId === 'study') suggestions.push('可以详细解释吗？', '给我一个例题', '有什么实际应用？');
+    else if (botText.includes('```') || botText.includes('代码')) suggestions.push('可以帮我解释这段代码吗？', '给我一个更简单的例子', '这段代码有什么注意事项？');
+    else if (userText.length < 8) suggestions.push('可以详细解释吗？', '给我一个例子', '这有什么实际应用？');
+    else suggestions.push('继续深入讲讲', '能举个例子吗？', '这和其他概念有什么关系？');
     return suggestions.slice(0, 3);
   }
-
   function showFollowups(suggestions) {
     followupList.innerHTML = '';
     suggestions.forEach((text, i) => {
-      const chip = document.createElement('button');
-      chip.classList.add('followup-chip');
-      chip.textContent = text;
+      const chip = document.createElement('button'); chip.className = 'followup-chip'; chip.textContent = text;
       chip.style.animationDelay = (i * 0.12) + 's';
-      chip.addEventListener('click', (e) => {
-        e.stopPropagation();
-        messageInput.value = text;
-        messageInput.focus();
-        chip.style.transform = 'scale(0.9) rotateX(20deg)';
-        setTimeout(() => chip.style.transform = '', 200);
-      });
+      chip.addEventListener('click', (e) => { e.stopPropagation(); messageInput.value = text; messageInput.focus(); });
       followupList.appendChild(chip);
     });
   }
+  function resetFollowups() { followupList.innerHTML = '<span class="followup-empty">AI 回覆後將顯示跟進建議...</span>'; }
 
-  function resetFollowups() {
-    followupList.innerHTML = '<span class="followup-empty">AI 回覆後將顯示跟進建議...</span>';
-  }
-
-  // ===== 調用 API =====
+  // ================= 調用 API =================
   async function callDeepSeekAPI(userMessage) {
-    if (!apiKey) {
-      addMessageToUI('bot', '⚠️ 请先输入并保存 DeepSeek API 密钥。');
-      return null;
-    }
-
+    if (!apiKey) { addMessageToUI('bot', '⚠️ 请先输入并保存 DeepSeek API 密钥。'); return null; }
     const history = currentConversation.history.filter(m => !m.isHTML).slice(-10);
-    const messages = history.map(m => ({
-      role: m.role === 'user' ? 'user' : 'assistant',
-      content: m.content
-    })).concat([{ role: 'user', content: userMessage }]);
-
-    const url = 'https://api.deepseek.com/v1/chat/completions';
-    const requestBody = {
-      model: 'deepseek-chat',
-      messages: messages,
-      temperature: 0.7,
-      stream: false
-    };
-
+    const messages = history.map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.content })).concat([{ role: 'user', content: userMessage }]);
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify(requestBody)
+      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({ model: 'deepseek-chat', messages, temperature: 0.7, stream: false })
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
-        throw new Error(errorMsg);
-      }
-
+      if (!response.ok) { const err = await response.json().catch(() => ({})); throw new Error(err.error?.message || `HTTP ${response.status}`); }
       const data = await response.json();
       const botReply = data.choices?.[0]?.message?.content;
-      if (!botReply) throw new Error('API 返回内容为空');
-
-      return botReply;
-
+      if (!botReply) throw new Error('API 返回内容为空'); return botReply;
     } catch (error) {
-      console.error('DeepSeek API 错误:', error);
-      let friendlyMsg = '';
-      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-        friendlyMsg = '🌐 网络请求失败。可能原因：① 你用 file:// 打开（需改用本机伺服器）② 网络不通 ③ 浏览器扩充阻挡';
-      } else if (error.message.includes('401')) {
-        friendlyMsg = '🔑 API 密钥无效或已过期。';
-      } else if (error.message.includes('402')) {
-        friendlyMsg = '💰 帐户余额不足。';
-      } else if (error.message.includes('429')) {
-        friendlyMsg = '⏳ 请求太频繁，请稍后再试。';
-      } else {
-        friendlyMsg = `❌ 请求失败：${error.message || '未知错误'}`;
-      }
-      return friendlyMsg;
+      let msg = '';
+      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) msg = '🌐 网络请求失败。可能是网络不通或浏览器阻挡。';
+      else if (error.message.includes('401')) msg = '🔑 API 密钥无效或已过期。';
+      else if (error.message.includes('402')) msg = '💰 帐户余额不足。';
+      else msg = `❌ 请求失败：${error.message || '未知错误'}`;
+      return msg;
     }
   }
 
-  // ===== 發送消息 =====
+  // ================= 🌟 核心：發送訊息（細胞分裂動畫） =================
   async function sendMessage() {
-    if (isWaitingForResponse) { showToast('请等待当前回复完成', 1200); return; }
-    if (!currentConversation) return;
-
+    if (isWaitingForResponse || !currentConversation) return;
     const text = messageInput.value.trim();
-    if (!text) { showToast('请输入消息内容', 1200); return; }
-
-    // 取得發送按鈕位置（用於能量波與訊息路徑）
+    if (!text) { showToast('请输入消息内容'); return; }
+    
     const btnRect = sendBtn.getBoundingClientRect();
     const btnX = btnRect.left + btnRect.width / 2;
     const btnY = btnRect.top + btnRect.height / 2;
 
-    // 發送按鈕動畫
-    sendBtn.classList.add('flash');
-    sendBtn.classList.add('sending');
-    setTimeout(() => {
-      sendBtn.classList.remove('flash');
-      sendBtn.classList.remove('sending');
-    }, 1000);
+    // 1. 創建「幽靈氣泡」準備從輸入框飛向按鈕
+    const ghost = document.createElement('div');
+    ghost.className = 'flying-bubble';
+    ghost.textContent = text;
+    ghost.style.left = (btnX - 100) + 'px'; 
+    ghost.style.top = (btnY - 40) + 'px';
+    ghost.style.opacity = '1';
+    document.body.appendChild(ghost);
 
-    // 能量波
-    createEnergyWave();
+    // 記錄輸入框位置
+    const inputRect = messageInput.getBoundingClientRect();
+    const inputX = inputRect.left + inputRect.width / 2;
+    const inputY = inputRect.top + inputRect.height / 2;
 
-    // 清空輸入
+    // 階段一：文字從輸入框「吸入」按鈕
+    requestAnimationFrame(() => {
+      ghost.style.left = inputX + 'px';
+      ghost.style.top = inputY + 'px';
+      ghost.style.transform = `translate(-50%, -50%) scale(0.1)`;
+      ghost.style.opacity = '0';
+      ghost.style.filter = 'blur(10px)';
+    });
+
+    // 2. 清空輸入框並禁用
     messageInput.value = '';
-
-    // 記錄訊息前的位置（用於訊息路徑光點）
-    const messagesRect = chatMessages.getBoundingClientRect();
-    const targetX = messagesRect.right - 100;
-    const targetY = messagesRect.bottom - 80;
-
-    // 創建訊息路徑光點
-    createMessageTrail(btnX, btnY, targetX, targetY);
-
-    // 添加用戶訊息
-    addMessageToUI('user', text);
-    currentConversation.history.push({ role: 'user', content: text });
-
-    if (!apiKey) {
-      addMessageToUI('bot', '🔑 尚未设置 API 密钥，请先在顶部输入并保存密钥。');
-      return;
-    }
-
-    isWaitingForResponse = true;
-    sendBtn.disabled = true;
     messageInput.disabled = true;
-    resetFollowups();
+    sendBtn.disabled = true;
 
-    const typingIndicator = showTypingIndicator();
+    // 等待吸入動畫完成（約 400ms）
+    setTimeout(() => {
+      ghost.remove(); // 移除幽靈
+
+      // 階段二：按鈕「細胞分裂」→ 產生新氣泡
+      // 先讓按鈕膨脹
+      sendBtn.style.transform = 'scale(1.3)';
+      setTimeout(() => sendBtn.style.transform = '', 200);
+
+      // 在按鈕位置創建分裂出的新氣泡
+      const splitBubble = document.createElement('div');
+      splitBubble.className = 'flying-bubble split';
+      splitBubble.textContent = text;
+      splitBubble.style.left = btnX + 'px';
+      splitBubble.style.top = btnY + 'px';
+      document.body.appendChild(splitBubble);
+
+      // 分裂衝擊波
+      const wave = document.createElement('div');
+      wave.className = 'split-wave';
+      wave.style.cssText = `left:${btnX}px;top:${btnY}px;width:60px;height:60px;`;
+      document.body.appendChild(wave);
+      setTimeout(() => wave.remove(), 800);
+
+      // 階段三：氣泡飛向聊天區域
+      setTimeout(() => {
+        splitBubble.classList.remove('split');
+        splitBubble.classList.add('fly');
+        
+        // 計算目標位置（訊息區底部）
+        const msgRect = chatMessages.getBoundingClientRect();
+        const targetX = msgRect.right - 100;
+        const targetY = msgRect.bottom - 80;
+
+        splitBubble.style.left = targetX + 'px';
+        splitBubble.style.top = targetY + 'px';
+        splitBubble.style.transform = 'translate(-50%, -50%) scale(1)';
+
+        // 飛行軌跡粒子
+        for (let i = 0; i < 8; i++) {
+          setTimeout(() => {
+            const dot = document.createElement('div');
+            dot.className = 'trail-dot';
+            dot.style.left = (btnX + (targetX - btnX) * (i / 8)) + 'px';
+            dot.style.top = (btnY + (targetY - btnY) * (i / 8)) + 'px';
+            document.body.appendChild(dot);
+            setTimeout(() => dot.remove(), 600);
+          }, i * 40);
+        }
+
+        // 階段四：氣泡落地，真實訊息出現
+        setTimeout(() => {
+          splitBubble.remove(); // 移除幽靈氣泡
+          
+          // 真實氣泡落地
+          addMessageToUI('user', text, false, true);
+          currentConversation.history.push({ role: 'user', content: text });
+
+          // 執行 API 請求
+          executeAPI(text);
+        }, 800); // 飛行時間
+
+      }, 200); // 分裂延遲
+    }, 400); // 吸入時間
+  }
+
+  // ================= 執行 API 請求（獨立出來） =================
+  async function executeAPI(text) {
+    resetFollowups();
+    showTypingIndicator();
 
     try {
       const reply = await callDeepSeekAPI(text);
@@ -2469,10 +671,8 @@
       if (reply) {
         addMessageToUI('bot', reply);
         currentConversation.history.push({ role: 'assistant', content: reply });
-
         const suggestions = generateFollowups(text, reply, currentConversation.id);
         showFollowups(suggestions);
-
         if (autoFollowupEnabled && suggestions.length > 0) {
           setTimeout(() => {
             if (!isWaitingForResponse && currentConversation) {
@@ -2481,53 +681,30 @@
             }
           }, 1500);
         }
-      } else {
-        addMessageToUI('bot', '⚠️ 未收到有效回复。');
-      }
+      } else addMessageToUI('bot', '⚠️ 未收到有效回复。');
     } catch (error) {
-      removeTypingIndicator();
-      addMessageToUI('bot', `⚠️ 发生错误: ${error.message || '未知错误'}`);
+      removeTypingIndicator(); addMessageToUI('bot', `⚠️ 发生错误: ${error.message || '未知错误'}`);
     } finally {
-      isWaitingForResponse = false;
-      sendBtn.disabled = false;
-      messageInput.disabled = false;
-      messageInput.focus();
+      isWaitingForResponse = false; sendBtn.disabled = false; messageInput.disabled = false; messageInput.focus();
     }
   }
 
-  // ===== 事件綁定 =====
-  saveApiBtn.addEventListener('click', saveApiKey);
-
+  // ================= 綁定事件 =================
   sendBtn.addEventListener('click', () => {
+    if (isWaitingForResponse) return;
     sendMessage();
   });
-
   messageInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendBtn.click();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendBtn.click(); }
   });
-
-  apiKeyInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      saveApiKey();
-    }
-  });
-
+  apiKeyInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') saveApiBtn.click(); });
   autoFollowupToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    autoFollowupEnabled = !autoFollowupEnabled;
+    e.stopPropagation(); autoFollowupEnabled = !autoFollowupEnabled;
     autoFollowupToggle.classList.toggle('on', autoFollowupEnabled);
     showToast(autoFollowupEnabled ? '🤖 自动追问已开启' : '自动追问已关闭', 1500);
   });
 
-  window.addEventListener('load', () => {
-    if (apiKey) showToast('已加载保存的 API 密钥', 1500);
-  });
-
-  // ===== 初始化 =====
+  // ================= 初始化 =================
   renderConversationList();
 })();
 </script>
