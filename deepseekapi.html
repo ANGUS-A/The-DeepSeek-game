@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>DeepSeek 聊天 · Q弹丝滑版</title>
+  <title>DeepSeek 聊天 · Q彈絲滑</title>
 
+  <!-- Markdown 渲染 + 消毒 + 高亮 -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github-dark.min.css">
@@ -16,108 +17,71 @@
       padding: 0;
       box-sizing: border-box;
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-    }
-
-    /* ============ 弹簧曲线变量 ============ */
-    :root {
-      --spring: cubic-bezier(0.34, 1.56, 0.64, 1);        /* 强回弹 */
-      --spring-soft: cubic-bezier(0.25, 1.4, 0.5, 1);      /* 柔回弹 */
-      --bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);    /* 大弹跳 */
-      --smooth: cubic-bezier(0.4, 0, 0.2, 1);
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      background: linear-gradient(145deg, #0b0f1a 0%, #1a1f2f 100%);
+      background: radial-gradient(circle at 20% 10%, #14213d 0%, #0b0f1a 55%, #05070d 100%);
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
       padding: 16px;
       overflow: hidden;
-      position: relative;
     }
 
-    /* 背景漂浮光斑 */
-    body::before, body::after {
-      content: '';
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(90px);
-      opacity: 0.4;
-      z-index: 0;
-      pointer-events: none;
-      animation: floatBlob 16s ease-in-out infinite;
-    }
-    body::before {
-      width: 420px; height: 420px;
-      background: radial-gradient(circle, #1b6aff, transparent 70%);
-      top: -120px; left: -140px;
-    }
-    body::after {
-      width: 520px; height: 520px;
-      background: radial-gradient(circle, #00b4ff, transparent 70%);
-      bottom: -200px; right: -170px;
-      animation-delay: -8s;
-    }
-
-    @keyframes floatBlob {
-      0%, 100% { transform: translate(0,0) scale(1); }
-      50% { transform: translate(50px,-40px) scale(1.2); }
-    }
-
-    /* ============ 聊天卡片 — 入场弹跳 ============ */
+    /* ============ 主容器 ============ */
     .chat-container {
       width: 100%;
       max-width: 780px;
       height: 90vh;
       max-height: 820px;
-      background: rgba(20, 25, 40, 0.75);
+      background: rgba(20, 25, 40, 0.7);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(100, 180, 255, 0.2);
-      border-radius: 46px;
-      box-shadow: 0 30px 60px -15px rgba(0,0,0,0.7),
-                  0 0 0 1px rgba(80,160,255,0.1) inset,
-                  0 0 40px rgba(0,180,255,0.15);
+      border: 1px solid rgba(100, 180, 255, 0.18);
+      border-radius: 42px;
+      box-shadow:
+        0 30px 60px -20px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(80, 160, 255, 0.08) inset,
+        0 0 60px rgba(0, 150, 255, 0.08);
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      position: relative;
-      z-index: 1;
-      transition: box-shadow 0.5s var(--smooth),
-                  border-color 0.5s var(--smooth),
-                  transform 0.6s var(--spring);
-      animation: containerIn 1s var(--spring) both;
+      transition: box-shadow 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                  border-color 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      animation: containerEnter 0.9s cubic-bezier(0.22, 1.2, 0.36, 1) both;
     }
 
-    @keyframes containerIn {
-      0% { opacity: 0; transform: translateY(60px) scale(0.85); }
-      60% { opacity: 1; transform: translateY(-8px) scale(1.02); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
+    @keyframes containerEnter {
+      0%   { opacity: 0; transform: scale(0.92) translateY(20px); }
+      60%  { opacity: 1; transform: scale(1.015) translateY(-4px); }
+      80%  { transform: scale(0.995) translateY(2px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
     }
 
     .chat-container:focus-within {
-      border-color: rgba(0, 200, 255, 0.5);
-      transform: scale(1.005);
-      box-shadow: 0 40px 70px -15px rgba(0,150,255,0.35),
-                  0 0 0 1px rgba(0,220,255,0.3) inset,
-                  0 0 60px rgba(0,200,255,0.25);
+      border-color: rgba(0, 200, 255, 0.45);
+      box-shadow:
+        0 35px 65px -18px rgba(0, 150, 255, 0.3),
+        0 0 0 1px rgba(0, 220, 255, 0.28) inset,
+        0 0 60px rgba(0, 200, 255, 0.18);
     }
 
-    /* ============ 头部 ============ */
+    /* ============ 頂部 ============ */
     .chat-header {
       padding: 18px 22px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 12px;
-      background: rgba(10, 18, 30, 0.6);
-      border-bottom: 1px solid rgba(70, 150, 255, 0.15);
+      background: rgba(10, 18, 30, 0.55);
+      border-bottom: 1px solid rgba(70, 150, 255, 0.12);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
     }
 
-    /* ============ API 输入框 ============ */
     .api-input-wrapper {
       flex: 1;
       min-width: 180px;
@@ -125,17 +89,18 @@
       align-items: center;
       background: rgba(0, 0, 0, 0.35);
       border-radius: 100px;
-      padding: 2px 2px 2px 22px;
-      border: 1px solid rgba(120, 180, 255, 0.25);
-      transition: all 0.5s var(--spring);
+      padding: 2px 2px 2px 20px;
+      border: 1px solid rgba(120, 180, 255, 0.22);
+      transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     .api-input-wrapper:focus-within {
       border-color: #4da6ff;
-      box-shadow: 0 0 0 4px rgba(77,166,255,0.15),
-                  0 0 24px rgba(0,140,255,0.25);
-      background: rgba(10, 25, 45, 0.85);
-      transform: scale(1.02);
+      box-shadow:
+        0 0 0 4px rgba(77, 166, 255, 0.14),
+        0 0 30px rgba(0, 140, 255, 0.22);
+      background: rgba(10, 25, 45, 0.8);
+      transform: scale(1.01);
     }
 
     .api-input-wrapper input {
@@ -151,11 +116,11 @@
     }
 
     .api-input-wrapper input::placeholder {
-      color: rgba(170, 210, 255, 0.45);
+      color: rgba(170, 210, 255, 0.42);
       font-weight: 300;
     }
 
-    /* ============ 按钮通用 ============ */
+    /* ============ 通用按鈕 ============ */
     button {
       background: none;
       border: none;
@@ -165,63 +130,63 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.5s var(--spring);
-      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                  background 0.4s ease;
       user-select: none;
       letter-spacing: 0.2px;
     }
 
-    /* ============ 保存按钮 ============ */
+    /* ---- 保存按鈕 ---- */
     .save-btn {
       background: linear-gradient(135deg, #1b6aff, #00b4ff);
       border-radius: 100px;
-      padding: 11px 22px;
+      padding: 11px 20px;
       font-size: 0.85rem;
-      box-shadow: 0 6px 16px rgba(0, 120, 255, 0.35);
+      box-shadow:
+        0 8px 18px rgba(0, 120, 255, 0.32),
+        0 0 0 0 rgba(0, 200, 255, 0.5);
       border: 1px solid rgba(255, 255, 255, 0.15);
-      color: white;
       font-weight: 600;
       white-space: nowrap;
       position: relative;
       overflow: hidden;
-      animation: btnBreath 3s ease-in-out infinite;
+      animation: btnBreath 3.2s ease-in-out infinite;
     }
 
     @keyframes btnBreath {
-      0%, 100% {
-        box-shadow: 0 6px 16px rgba(0, 120, 255, 0.35);
-        transform: scale(1);
-      }
-      50% {
-        box-shadow: 0 8px 26px rgba(0, 180, 255, 0.65);
-        transform: scale(1.03);
-      }
+      0%, 100% { box-shadow: 0 8px 18px rgba(0, 120, 255, 0.32), 0 0 0 0 rgba(0, 200, 255, 0.5); }
+      50%      { box-shadow: 0 8px 22px rgba(0, 150, 255, 0.5),  0 0 0 6px rgba(0, 200, 255, 0.08); }
     }
 
     .save-btn::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.5), transparent 70%);
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.45), transparent 70%);
       opacity: 0;
-      transition: opacity 0.4s ease;
+      transition: opacity 0.5s ease;
     }
 
     .save-btn:hover {
-      transform: translateY(-4px) scale(1.08);
-      box-shadow: 0 16px 32px rgba(0, 150, 255, 0.65);
-      animation: none;
+      transform: translateY(-3px) scale(1.05);
+      box-shadow:
+        0 14px 26px rgba(0, 150, 255, 0.55),
+        0 0 0 8px rgba(0, 180, 255, 0.1);
     }
 
     .save-btn:hover::after { opacity: 1; }
 
     .save-btn:active {
-      transform: translateY(2px) scale(0.92);
-      box-shadow: 0 3px 10px rgba(0, 120, 255, 0.6);
-      transition: all 0.12s var(--bounce);
+      transform: translateY(1px) scale(0.9);
+      box-shadow:
+        0 3px 8px rgba(0, 120, 255, 0.5),
+        0 0 0 4px rgba(0, 200, 255, 0.25);
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.15s ease;
     }
 
-    /* ============ 消息区 ============ */
+    /* ============ 訊息區 ============ */
     .chat-messages {
       flex: 1;
       overflow-y: auto;
@@ -230,144 +195,101 @@
       flex-direction: column;
       gap: 18px;
       scroll-behavior: smooth;
-      background: radial-gradient(ellipse at 30% 10%, rgba(30,70,120,0.2), transparent 70%);
-      overflow-x: hidden;
+      background: radial-gradient(ellipse at 30% 10%, rgba(30, 70, 120, 0.18), transparent 70%);
     }
 
-    .chat-messages::-webkit-scrollbar { width: 7px; }
+    .chat-messages::-webkit-scrollbar { width: 6px; }
     .chat-messages::-webkit-scrollbar-track {
-      background: rgba(255,255,255,0.02);
-      border-radius: 20px;
-      margin: 6px 0;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 100px;
+      margin: 8px 0;
     }
     .chat-messages::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, rgba(100,180,255,0.5), rgba(0,150,255,0.7));
-      border-radius: 20px;
-      transition: background 0.3s;
+      background: linear-gradient(180deg, #4da6ff, #1b6aff);
+      border-radius: 100px;
+      transition: background 0.4s;
     }
     .chat-messages::-webkit-scrollbar-thumb:hover {
-      background: rgba(100, 200, 255, 0.9);
+      background: linear-gradient(180deg, #7ec8ff, #4da6ff);
     }
 
-    /* ============ 消息气泡 — Q弹入场 ============ */
+    /* ============ 訊息氣泡（Q彈核心） ============ */
     .message {
       max-width: 85%;
       display: flex;
       flex-direction: column;
-      transform-origin: bottom;
-      animation: messageQ 0.7s var(--spring) forwards;
       opacity: 0;
       will-change: transform, opacity;
     }
 
-    /* 用户消息从右下方弹入 */
     .message.user {
       align-self: flex-end;
       align-items: flex-end;
-      transform-origin: bottom right;
-      animation: messageQRight 0.65s var(--spring) forwards;
+      animation: bubblePopRight 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
 
-    /* bot 消息从左下方弹入 */
     .message.bot {
       align-self: flex-start;
       align-items: flex-start;
-      transform-origin: bottom left;
-      animation: messageQLeft 0.65s var(--spring) forwards;
+      animation: bubblePopLeft 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
 
-    @keyframes messageQRight {
-      0% {
-        opacity: 0;
-        transform: translate(40px, 20px) scale(0.5) rotate(6deg);
-      }
-      50% {
-        opacity: 1;
-        transform: translate(-6px, -4px) scale(1.08) rotate(-2deg);
-      }
-      75% {
-        transform: translate(3px, 2px) scale(0.97) rotate(1deg);
-      }
-      100% {
-        opacity: 1;
-        transform: translate(0, 0) scale(1) rotate(0);
-      }
+    /* Q彈：從右側彈出（用戶） */
+    @keyframes bubblePopRight {
+      0%   { opacity: 0; transform: translateX(30px) scale(0.4) rotate(-4deg); }
+      50%  { opacity: 1; transform: translateX(-6px) scale(1.08) rotate(1.5deg); }
+      70%  { transform: translateX(3px) scale(0.96) rotate(-0.6deg); }
+      85%  { transform: translateX(-1px) scale(1.015) rotate(0.2deg); }
+      100% { opacity: 1; transform: translateX(0) scale(1) rotate(0); }
     }
 
-    @keyframes messageQLeft {
-      0% {
-        opacity: 0;
-        transform: translate(-40px, 20px) scale(0.5) rotate(-6deg);
-      }
-      50% {
-        opacity: 1;
-        transform: translate(6px, -4px) scale(1.08) rotate(2deg);
-      }
-      75% {
-        transform: translate(-3px, 2px) scale(0.97) rotate(-1deg);
-      }
-      100% {
-        opacity: 1;
-        transform: translate(0, 0) scale(1) rotate(0);
-      }
+    /* Q彈：從左側彈出（AI） */
+    @keyframes bubblePopLeft {
+      0%   { opacity: 0; transform: translateX(-30px) scale(0.4) rotate(4deg); }
+      50%  { opacity: 1; transform: translateX(6px) scale(1.08) rotate(-1.5deg); }
+      70%  { transform: translateX(-3px) scale(0.96) rotate(0.6deg); }
+      85%  { transform: translateX(1px) scale(1.015) rotate(-0.2deg); }
+      100% { opacity: 1; transform: translateX(0) scale(1) rotate(0); }
     }
 
-    @keyframes messageQ {
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    /* ============ 气泡本体 — 极圆润 ============ */
+    /* 氣泡本體：完全圓滑 */
     .bubble {
-      padding: 15px 22px;
-      border-radius: 32px;   /* 超大圆角，无任何尖角 */
+      padding: 14px 22px;
+      border-radius: 28px;            /* 基礎圓角極大 */
       font-size: 0.98rem;
       line-height: 1.6;
       word-break: break-word;
-      transition: all 0.5s var(--spring);
+      box-shadow: 0 10px 22px -8px rgba(0, 0, 0, 0.5);
       border: 1px solid rgba(255, 255, 255, 0.06);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       letter-spacing: 0.2px;
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.5s ease;
       position: relative;
-      overflow: hidden;
-      will-change: transform;
     }
 
+    /* 用超大字體半徑讓尾巴也變圓（不用 clip-path 避免尖角） */
     .message.user .bubble {
-      background: linear-gradient(135deg, #0066ff, #0099ff);
+      background: linear-gradient(135deg, #0b6eff, #00a2ff);
       color: white;
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      box-shadow: 0 14px 26px -8px rgba(0, 120, 255, 0.55);
-      animation: bubbleShine 3s ease-in-out infinite;
-    }
-
-    /* 气泡上有一道缓慢扫过的光晕 */
-    @keyframes bubbleShine {
-      0%, 100% { box-shadow: 0 14px 26px -8px rgba(0,120,255,0.55); }
-      50% { box-shadow: 0 18px 34px -8px rgba(0,160,255,0.85); }
+      border-radius: 30px 30px 12px 30px;   /* 右下角小圓，依然圓滑 */
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 14px 24px -10px rgba(0, 120, 255, 0.55);
     }
 
     .message.bot .bubble {
-      background: rgba(30, 42, 60, 0.85);
+      background: rgba(32, 44, 64, 0.85);
       color: #e6f0ff;
-      border: 1px solid rgba(80, 160, 255, 0.28);
-      box-shadow: 0 14px 26px -8px rgba(0, 0, 0, 0.6);
+      border-radius: 30px 30px 30px 12px;   /* 左下角小圓，依然圓滑 */
+      border: 1px solid rgba(80, 160, 255, 0.22);
+      box-shadow: 0 14px 24px -10px rgba(0, 0, 0, 0.6);
     }
 
-    /* 悬浮 Q 弹 */
+    /* 氣泡 hover 有輕微 Q 彈 */
     .bubble:hover {
-      transform: translateY(-4px) scale(1.02);
-    }
-
-    .message.user .bubble:hover {
-      box-shadow: 0 20px 40px -10px rgba(0, 140, 255, 0.8);
-      transform: translateY(-4px) scale(1.03);
-    }
-
-    .message.bot .bubble:hover {
-      box-shadow: 0 20px 38px -10px rgba(0, 80, 180, 0.6);
-      border-color: rgba(80, 180, 255, 0.55);
-      transform: translateY(-4px) scale(1.02);
+      transform: scale(1.012) translateY(-1px);
+      box-shadow: 0 16px 28px -10px rgba(0, 150, 255, 0.35);
     }
 
     .message .time {
@@ -379,288 +301,298 @@
       letter-spacing: 0.3px;
     }
 
-    /* ============ Markdown 内容样式 ============ */
-    .bubble p { margin: 0 0 8px 0; }
-    .bubble p:last-child { margin-bottom: 0; }
-    .bubble strong { color: #7ec8ff; font-weight: 700; }
-    .bubble em { color: #a8d8ff; font-style: italic; }
-    .bubble h1, .bubble h2, .bubble h3, .bubble h4 {
-      margin: 12px 0 6px; color: #b8e0ff; font-weight: 600; line-height: 1.35;
-    }
-    .bubble h1 { font-size: 1.2rem; }
-    .bubble h2 { font-size: 1.08rem; }
-    .bubble h3 { font-size: 1rem; }
-    .bubble h4 { font-size: 0.95rem; }
-    .bubble h1:first-child, .bubble h2:first-child, .bubble h3:first-child { margin-top: 0; }
-
-    .bubble ul, .bubble ol { margin: 8px 0; padding-left: 24px; }
-    .bubble li { margin: 5px 0; line-height: 1.55; }
-    .bubble li::marker { color: #4da6ff; }
-
-    .bubble code:not(pre code) {
-      background: rgba(0, 100, 200, 0.28);
-      padding: 3px 8px;
-      border-radius: 10px;
-      font-family: 'Consolas', 'Monaco', monospace;
-      font-size: 0.88em;
-      color: #9fd5ff;
-      border: 1px solid rgba(80, 160, 255, 0.2);
-    }
-
-    .bubble pre {
-      background: rgba(0, 0, 0, 0.55) !important;
-      border: 1px solid rgba(80, 160, 255, 0.28);
-      border-radius: 22px;
-      padding: 14px 16px;
-      overflow-x: auto;
-      margin: 10px 0;
-      font-size: 0.85rem;
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
-    }
-    .bubble pre code {
-      background: transparent !important;
-      padding: 0;
-      font-family: 'Consolas', 'Monaco', monospace;
-      color: #e6f0ff;
-      border: none;
-    }
-
-    .bubble blockquote {
-      border-left: 3px solid #4da6ff;
-      padding: 8px 14px;
-      margin: 10px 0;
-      color: #a8c8e8;
-      font-style: italic;
-      background: rgba(0, 100, 200, 0.1);
-      border-radius: 0 18px 18px 0;
-    }
-
-    .bubble table {
-      border-collapse: separate;
-      border-spacing: 0;
-      margin: 10px 0;
-      font-size: 0.9rem;
-      border-radius: 18px;
-      overflow: hidden;
-      border: 1px solid rgba(80, 160, 255, 0.3);
-    }
-    .bubble th, .bubble td {
-      border-bottom: 1px solid rgba(80, 160, 255, 0.2);
-      padding: 8px 12px;
-    }
-    .bubble th { background: rgba(0, 100, 200, 0.25); color: #bfe2ff; font-weight: 600; }
-    .bubble tr:last-child td { border-bottom: none; }
-
-    .bubble a {
-      color: #4da6ff;
-      text-decoration: none;
-      border-bottom: 1px dashed rgba(77, 166, 255, 0.5);
-      transition: all 0.3s ease;
-    }
-    .bubble a:hover { color: #7ec8ff; border-bottom-style: solid; border-bottom-color: #7ec8ff; }
-
-    .bubble hr {
-      border: none;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(80,160,255,0.4), transparent);
-      margin: 14px 0;
-    }
-
-    /* ============ 底部输入 ============ */
+    /* ============ 底部輸入 ============ */
     .chat-footer {
       padding: 16px 22px 20px 22px;
       display: flex;
       align-items: center;
       gap: 12px;
-      background: rgba(10, 18, 30, 0.6);
+      background: rgba(10, 18, 30, 0.55);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      border-top: 1px solid rgba(70, 150, 255, 0.15);
+      border-top: 1px solid rgba(70, 150, 255, 0.12);
     }
 
     .chat-footer input {
       flex: 1;
       background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(120, 180, 255, 0.25);
+      border: 1px solid rgba(120, 180, 255, 0.22);
       border-radius: 100px;
       padding: 16px 24px;
       color: white;
       font-size: 0.95rem;
       outline: none;
-      transition: all 0.5s var(--spring);
       letter-spacing: 0.3px;
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .chat-footer input:focus {
       border-color: #4da6ff;
-      box-shadow: 0 0 0 4px rgba(77,166,255,0.15),
-                  0 0 28px rgba(0,150,255,0.25);
-      background: rgba(10, 25, 45, 0.85);
-      transform: scale(1.02);
+      box-shadow:
+        0 0 0 5px rgba(77, 166, 255, 0.14),
+        0 0 30px rgba(0, 150, 255, 0.22);
+      background: rgba(10, 25, 45, 0.8);
+      transform: scale(1.015);
     }
 
     .chat-footer input::placeholder {
-      color: rgba(170, 210, 255, 0.45);
+      color: rgba(170, 210, 255, 0.42);
       font-weight: 300;
     }
 
-    .chat-footer input:disabled {
-      opacity: 0.55;
-      background: rgba(0, 0, 0, 0.2);
-      border-color: rgba(120, 180, 255, 0.1);
-      cursor: not-allowed;
-    }
-
-    /* ============ 发送按钮 — 更圆、更Q ============ */
+    /* ============ 發送按鈕（Q彈 + 光暈） ============ */
     .send-btn {
       background: linear-gradient(145deg, #0b6eff, #00a2ff);
-      width: 62px;
-      height: 62px;
-      border-radius: 50%;       /* 完美圆形 */
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 1.7rem;
-      box-shadow: 0 10px 26px rgba(0, 120, 255, 0.5),
-                  inset 0 -2px 8px rgba(0, 0, 0, 0.15),
-                  inset 0 2px 8px rgba(255, 255, 255, 0.25);
-      transition: all 0.5s var(--spring);
-      border: none;
+      box-shadow:
+        0 10px 22px rgba(0, 120, 255, 0.4),
+        0 0 0 0 rgba(0, 180, 255, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       flex-shrink: 0;
       color: white;
       position: relative;
       overflow: hidden;
-      animation: sendBreath 2.6s ease-in-out infinite;
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                  background 0.4s ease;
+      animation: sendPulse 2.8s ease-in-out infinite;
     }
 
-    /* 呼吸光晕 */
-    @keyframes sendBreath {
+    @keyframes sendPulse {
       0%, 100% {
-        box-shadow: 0 10px 26px rgba(0, 120, 255, 0.5),
-                    0 0 0 0 rgba(0, 180, 255, 0.5),
-                    inset 0 -2px 8px rgba(0,0,0,0.15),
-                    inset 0 2px 8px rgba(255,255,255,0.25);
-        transform: scale(1);
+        box-shadow: 0 10px 22px rgba(0, 120, 255, 0.4),
+                    0 0 0 0 rgba(0, 180, 255, 0.55);
       }
       50% {
-        box-shadow: 0 12px 34px rgba(0, 160, 255, 0.75),
-                    0 0 0 8px rgba(0, 180, 255, 0.12),
-                    inset 0 -2px 8px rgba(0,0,0,0.15),
-                    inset 0 2px 8px rgba(255,255,255,0.25);
-        transform: scale(1.04);
+        box-shadow: 0 10px 26px rgba(0, 150, 255, 0.55),
+                    0 0 0 9px rgba(0, 180, 255, 0.08);
       }
     }
 
-    /* 内圈光斑 */
     .send-btn::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.6), transparent 65%);
+      background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.55), transparent 70%);
       opacity: 0;
-      transition: opacity 0.4s;
-      border-radius: 50%;
+      transition: opacity 0.5s;
     }
 
-    /* 外圈涟漪 */
-    .send-btn::after {
-      content: '';
-      position: absolute;
-      inset: -4px;
-      border-radius: 50%;
-      background: transparent;
-      border: 2px solid rgba(0, 200, 255, 0.5);
-      opacity: 0;
-      transition: all 0.6s var(--spring);
+    /* 內部箭頭圖標自繪（用文字） */
+    .send-btn .arrow {
+      display: inline-block;
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform: translateX(1px);
     }
 
     .send-btn:hover {
-      transform: scale(1.15) rotate(6deg);
-      box-shadow: 0 18px 38px rgba(0, 150, 255, 0.85),
-                  inset 0 -2px 8px rgba(0,0,0,0.15),
-                  inset 0 2px 8px rgba(255,255,255,0.3);
-      animation: none;
+      transform: scale(1.12) translateY(-3px) rotate(-4deg);
+      box-shadow:
+        0 18px 32px rgba(0, 150, 255, 0.6),
+        0 0 0 12px rgba(0, 170, 255, 0.1);
     }
 
     .send-btn:hover::before { opacity: 1; }
 
-    .send-btn:hover::after {
-      inset: -10px;
-      opacity: 1;
-      border-color: rgba(0, 200, 255, 0);
-      background: radial-gradient(circle, rgba(0,180,255,0.3), transparent 70%);
+    .send-btn:hover .arrow {
+      transform: translateX(4px) scale(1.08);
     }
 
     .send-btn:active {
-      transform: scale(0.85) rotate(-4deg);
-      box-shadow: 0 4px 14px rgba(0, 120, 255, 0.7);
-      transition: all 0.15s var(--bounce);
+      transform: scale(0.82) rotate(6deg);
+      box-shadow:
+        0 4px 12px rgba(0, 120, 255, 0.6),
+        0 0 0 6px rgba(0, 200, 255, 0.25);
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.15s ease;
     }
 
-    .send-btn:disabled {
-      opacity: 0.5;
-      transform: scale(0.95);
-      pointer-events: none;
-      filter: grayscale(0.5);
-      box-shadow: none;
-      animation: none;
-    }
-
-    /* ============ 打字指示器 ============ */
+    /* ============ 打字指示器（波浪彈跳） ============ */
     .typing-indicator {
       display: flex;
       align-items: center;
       gap: 5px;
-      padding: 12px 22px;
+      padding: 14px 22px;
       background: rgba(40, 60, 90, 0.8);
-      border-radius: 100px;
+      border-radius: 30px 30px 30px 14px;
       width: fit-content;
-      border: 1px solid rgba(80, 160, 255, 0.3);
-      box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.5);
-      animation: typingIn 0.5s var(--spring) both;
-    }
-
-    @keyframes typingIn {
-      0% { opacity: 0; transform: scale(0.4) translateY(10px); }
-      60% { opacity: 1; transform: scale(1.08) translateY(-2px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); }
+      border: 1px solid rgba(80, 160, 255, 0.28);
+      box-shadow: 0 10px 22px -8px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      animation: bubblePopLeft 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
     }
 
     .typing-indicator span {
-      width: 8px;
-      height: 8px;
-      background: #7abaff;
+      width: 7px;
+      height: 7px;
+      background: linear-gradient(135deg, #7ec8ff, #4da6ff);
       border-radius: 50%;
       display: inline-block;
-      animation: typingBounce 1.4s infinite var(--spring);
+      animation: typingBounce 1.5s infinite cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 0 8px rgba(77, 166, 255, 0.6);
     }
 
-    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.18s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.36s; }
 
     @keyframes typingBounce {
-      0%, 60%, 100% { transform: translateY(0) scale(1); opacity: 0.5; }
-      30% { transform: translateY(-9px) scale(1.2); opacity: 1; }
+      0%, 60%, 100% { transform: translateY(0) scale(1); opacity: 0.55; }
+      30%           { transform: translateY(-9px) scale(1.3); opacity: 1; }
+    }
+
+    /* ============ Markdown 內容樣式（全部圓滑） ============ */
+    .bubble p { margin: 0 0 8px 0; }
+    .bubble p:last-child { margin-bottom: 0; }
+
+    .bubble strong {
+      color: #7ec8ff;
+      font-weight: 700;
+    }
+
+    .bubble em {
+      color: #a8d8ff;
+      font-style: italic;
+    }
+
+    .bubble h1, .bubble h2, .bubble h3, .bubble h4 {
+      margin: 12px 0 8px;
+      color: #b8e0ff;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .bubble h1 { font-size: 1.2rem; }
+    .bubble h2 { font-size: 1.1rem; }
+    .bubble h3 { font-size: 1rem; }
+    .bubble h4 { font-size: 0.95rem; }
+
+    .bubble ul, .bubble ol {
+      margin: 8px 0;
+      padding-left: 24px;
+    }
+    .bubble li { margin: 5px 0; }
+    .bubble ul li::marker { color: #4da6ff; }
+    .bubble ol li::marker { color: #4da6ff; font-weight: 600; }
+
+    /* 行內程式碼：圓滑 */
+    .bubble code:not(pre code) {
+      background: rgba(0, 100, 200, 0.28);
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.88em;
+      color: #9fd5ff;
+      border: 1px solid rgba(80, 160, 255, 0.15);
+    }
+
+    /* 程式碼區塊：大圓角 */
+    .bubble pre {
+      background: rgba(0, 0, 0, 0.5) !important;
+      border: 1px solid rgba(80, 160, 255, 0.22);
+      border-radius: 16px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      margin: 12px 0;
+      font-size: 0.85rem;
+      box-shadow: inset 0 0 20px rgba(0, 100, 200, 0.08);
+    }
+    .bubble pre code {
+      background: transparent !important;
+      padding: 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      color: #e6f0ff;
+      border: none;
+    }
+    .bubble pre::-webkit-scrollbar { height: 6px; }
+    .bubble pre::-webkit-scrollbar-thumb {
+      background: rgba(77, 166, 255, 0.5);
+      border-radius: 100px;
+    }
+
+    /* 引用區塊：圓滑邊 */
+    .bubble blockquote {
+      border-left: 4px solid #4da6ff;
+      border-radius: 0 12px 12px 0;
+      padding: 8px 14px;
+      margin: 10px 0;
+      color: #a8c8e8;
+      font-style: italic;
+      background: rgba(0, 100, 200, 0.1);
+    }
+
+    /* 表格：圓滑邊框 */
+    .bubble table {
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 10px 0;
+      font-size: 0.9rem;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(80, 160, 255, 0.28);
+    }
+    .bubble th, .bubble td {
+      border: none;
+      border-bottom: 1px solid rgba(80, 160, 255, 0.18);
+      border-right: 1px solid rgba(80, 160, 255, 0.18);
+      padding: 8px 14px;
+    }
+    .bubble th:last-child, .bubble td:last-child { border-right: none; }
+    .bubble tr:last-child td { border-bottom: none; }
+    .bubble th {
+      background: rgba(0, 100, 200, 0.28);
+      color: #bfe2ff;
+      font-weight: 600;
+    }
+    .bubble tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* 連結：圓滑下劃線 */
+    .bubble a {
+      color: #4da6ff;
+      text-decoration: none;
+      border-bottom: 1.5px dashed rgba(77, 166, 255, 0.5);
+      transition: color 0.3s, border-color 0.3s;
+      padding-bottom: 1px;
+    }
+    .bubble a:hover {
+      color: #7ec8ff;
+      border-bottom-color: #7ec8ff;
+      border-bottom-style: solid;
+    }
+
+    /* 水平線 */
+    .bubble hr {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(77, 166, 255, 0.4), transparent);
+      margin: 14px 0;
+      border-radius: 100px;
     }
 
     /* ============ Toast ============ */
     .toast {
       position: fixed;
-      bottom: 30px;
+      bottom: 34px;
       left: 50%;
-      transform: translateX(-50%) translateY(30px) scale(0.85);
+      transform: translateX(-50%) translateY(30px) scale(0.9);
       background: rgba(20, 35, 60, 0.95);
       backdrop-filter: blur(14px);
-      padding: 12px 26px;
+      padding: 12px 28px;
       border-radius: 100px;
       color: #bfe2ff;
       font-size: 0.9rem;
-      border: 1px solid rgba(0, 180, 255, 0.4);
-      box-shadow: 0 10px 34px rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(0, 180, 255, 0.35);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
       opacity: 0;
-      transition: all 0.55s var(--spring);
+      transition: all 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
       pointer-events: none;
       z-index: 1000;
       white-space: nowrap;
@@ -671,45 +603,66 @@
       transform: translateX(-50%) translateY(0) scale(1);
     }
 
-    /* ============ 小屏 ============ */
+    /* 禁用狀態 */
+    .send-btn:disabled, .save-btn:disabled {
+      opacity: 0.5;
+      transform: scale(0.96);
+      pointer-events: none;
+      filter: grayscale(0.4);
+      animation: none;
+    }
+
+    .chat-footer input:disabled {
+      opacity: 0.55;
+      background: rgba(0, 0, 0, 0.2);
+      border-color: rgba(120, 180, 255, 0.1);
+      cursor: not-allowed;
+    }
+
+    /* 小螢幕 */
     @media (max-width: 520px) {
-      .chat-container { height: 94vh; border-radius: 36px; }
+      .chat-container { height: 94vh; border-radius: 32px; }
       .chat-header { padding: 14px 16px; }
       .message { max-width: 92%; }
-      .bubble { padding: 13px 18px; font-size: 0.92rem; border-radius: 28px; }
+      .bubble { padding: 12px 18px; font-size: 0.92rem; border-radius: 24px; }
+      .message.user .bubble { border-radius: 26px 26px 10px 26px; }
+      .message.bot .bubble { border-radius: 26px 26px 26px 10px; }
       .chat-footer { padding: 12px 16px 16px; }
       .chat-footer input { padding: 14px 20px; }
-      .send-btn { width: 56px; height: 56px; font-size: 1.5rem; }
+      .send-btn { width: 52px; height: 52px; font-size: 1.5rem; }
     }
   </style>
 </head>
 <body>
 
 <div class="chat-container">
+  <!-- 頭部 -->
   <div class="chat-header">
     <div class="api-input-wrapper">
-      <input type="password" id="apiKeyInput" placeholder="输入 DeepSeek API 密钥..." autocomplete="off" spellcheck="false">
+      <input type="password" id="apiKeyInput" placeholder="輸入 DeepSeek API 密鑰..." autocomplete="off" spellcheck="false">
     </div>
-    <button class="save-btn" id="saveApiBtn">保存密钥</button>
+    <button class="save-btn" id="saveApiBtn">保存密鑰</button>
   </div>
 
+  <!-- 訊息區 -->
   <div class="chat-messages" id="chatMessages">
     <div class="message bot">
-      <div class="bubble">你好！我是 DeepSeek 助手 ✨<br>请先输入 API 密钥，然后就可以开始对话了。</div>
-      <div class="time">刚刚</div>
+      <div class="bubble">你好！我是 DeepSeek 助手 ✨ 請先輸入 API 密鑰，然後我們就可以開始聊天了！</div>
+      <div class="time">剛剛</div>
     </div>
   </div>
 
+  <!-- 底部 -->
   <div class="chat-footer">
-    <input type="text" id="messageInput" placeholder="输入消息..." autocomplete="off" spellcheck="false">
-    <button class="send-btn" id="sendBtn">➤</button>
+    <input type="text" id="messageInput" placeholder="輸入訊息..." autocomplete="off" spellcheck="false">
+    <button class="send-btn" id="sendBtn"><span class="arrow">➤</span></button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  (function() {
+  (function () {
     const apiKeyInput = document.getElementById('apiKeyInput');
     const saveApiBtn = document.getElementById('saveApiBtn');
     const chatMessages = document.getElementById('chatMessages');
@@ -722,34 +675,39 @@
 
     if (apiKey) apiKeyInput.value = apiKey;
 
-    marked.setOptions({ breaks: true, gfm: true });
+    // 設定 marked 選項
+    marked.setOptions({
+      breaks: true,      // 單個換行也換行
+      gfm: true,         // GitHub 風格
+      headerIds: false,
+      mangle: false
+    });
 
+    // Toast
     function showToast(text, duration = 2000) {
       toastEl.textContent = text;
       toastEl.classList.add('show');
       clearTimeout(window.toastTimer);
-      window.toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration);
+      window.toastTimer = setTimeout(() => {
+        toastEl.classList.remove('show');
+      }, duration);
     }
 
+    // 保存密鑰
     function saveApiKey() {
       const key = apiKeyInput.value.trim();
-      if (!key) { showToast('密钥不能为空', 1800); return; }
+      if (!key) {
+        showToast('密鑰不能為空', 1800);
+        return;
+      }
       apiKey = key;
       localStorage.setItem('deepseek_api_key', key);
-      showToast('✅ API 密钥已保存', 1600);
-      // Q弹反馈
-      saveApiBtn.animate(
-        [
-          { transform: 'scale(1)' },
-          { transform: 'scale(0.85)' },
-          { transform: 'scale(1.1)' },
-          { transform: 'scale(1)' }
-        ],
-        { duration: 500, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
-      );
+      showToast('✅ API 密鑰已保存', 1600);
+      saveApiBtn.style.transform = 'scale(0.88)';
+      setTimeout(() => { saveApiBtn.style.transform = ''; }, 180);
     }
 
-    // 添加消息
+    // 添加訊息（含 Markdown 渲染）
     function addMessage(role, content) {
       const messageDiv = document.createElement('div');
       messageDiv.classList.add('message', role);
@@ -758,9 +716,16 @@
       bubbleDiv.classList.add('bubble');
 
       if (role === 'bot') {
-        const rawHtml = marked.parse(content);
-        bubbleDiv.innerHTML = DOMPurify.sanitize(rawHtml);
-        bubbleDiv.querySelectorAll('pre code').forEach((block) => hljs.highlightElement(block));
+        try {
+          const rawHtml = marked.parse(content);
+          bubbleDiv.innerHTML = DOMPurify.sanitize(rawHtml);
+          // 高亮程式碼
+          bubbleDiv.querySelectorAll('pre code').forEach((block) => {
+            if (window.hljs) hljs.highlightElement(block);
+          });
+        } catch (e) {
+          bubbleDiv.textContent = content;
+        }
       } else {
         bubbleDiv.textContent = content;
       }
@@ -774,18 +739,6 @@
       messageDiv.appendChild(timeDiv);
       chatMessages.appendChild(messageDiv);
 
-      // 追加一个 Q 弹涟漪在气泡外层
-      setTimeout(() => {
-        bubbleDiv.animate(
-          [
-            { transform: 'scale(1)' },
-            { transform: 'scale(1.03)' },
-            { transform: 'scale(1)' }
-          ],
-          { duration: 600, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
-        );
-      }, 650);
-
       requestAnimationFrame(() => {
         chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
       });
@@ -793,6 +746,7 @@
       return messageDiv;
     }
 
+    // 打字指示器
     function showTypingIndicator() {
       const typingDiv = document.createElement('div');
       typingDiv.classList.add('message', 'bot');
@@ -812,18 +766,14 @@
     }
 
     function removeTypingIndicator() {
-      const indicator = document.getElementById('typingIndicator');
-      if (indicator) {
-        indicator.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        indicator.style.opacity = '0';
-        indicator.style.transform = 'scale(0.6) translateY(-6px)';
-        setTimeout(() => indicator.remove(), 300);
-      }
+      const el = document.getElementById('typingIndicator');
+      if (el) el.remove();
     }
 
+    // 呼叫 DeepSeek API
     async function callDeepSeekAPI(userMessage) {
       if (!apiKey) {
-        addMessage('bot', '⚠️ 请先输入并保存 DeepSeek API 密钥。');
+        addMessage('bot', '⚠️ 請先輸入並保存 DeepSeek API 密鑰。');
         return null;
       }
 
@@ -847,41 +797,47 @@
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+          const errorMsg = errorData.error?.message || `HTTP ${response.status} ${response.statusText}`;
+          throw new Error(errorMsg);
         }
 
         const data = await response.json();
         const botReply = data.choices?.[0]?.message?.content;
-        if (!botReply) throw new Error('API 返回内容为空');
+        if (!botReply) throw new Error('API 返回內容為空');
         return botReply;
 
       } catch (error) {
-        console.error('DeepSeek API 错误:', error);
+        console.error('DeepSeek API 錯誤詳情:', error);
+
         let friendlyMsg = '';
         if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-          friendlyMsg = '🌐 网络请求失败。请改用本机伺服器打开，或检查网络。';
+          friendlyMsg = '🌐 網路請求失敗。可能原因：\n' +
+                        '① 用 `file://` 直接打開檔案（需改用本機伺服器 `http://localhost`）\n' +
+                        '② 網路無法連上 `api.deepseek.com`\n' +
+                        '③ 瀏覽器擴充功能阻擋了請求';
         } else if (error.message.includes('401')) {
-          friendlyMsg = '🔑 API 密钥无效或已过期。';
+          friendlyMsg = '🔑 API 密鑰無效或已過期，請重新申請。';
         } else if (error.message.includes('402')) {
-          friendlyMsg = '💰 账户余额不足。';
+          friendlyMsg = '💰 帳戶餘額不足，請前往 DeepSeek 平台充值。';
         } else if (error.message.includes('429')) {
-          friendlyMsg = '⏳ 请求太频繁，请稍后再试。';
+          friendlyMsg = '⏳ 請求太頻繁，請稍後再試。';
         } else {
-          friendlyMsg = `❌ 请求失败：${error.message || '未知错误'}`;
+          friendlyMsg = `❌ 請求失敗：${error.message || '未知錯誤'}`;
         }
         return friendlyMsg;
       }
     }
 
+    // 發送
     async function sendMessage() {
       if (isWaitingForResponse) {
-        showToast('请等待当前回复完成', 1200);
+        showToast('請等待當前回覆完成', 1200);
         return;
       }
 
       const text = messageInput.value.trim();
       if (!text) {
-        showToast('请输入消息内容', 1200);
+        showToast('請輸入訊息內容', 1200);
         return;
       }
 
@@ -889,7 +845,7 @@
       addMessage('user', text);
 
       if (!apiKey) {
-        addMessage('bot', '🔑 尚未设置 API 密钥，请先在顶部输入并保存密钥。');
+        addMessage('bot', '🔑 尚未設定 API 密鑰，請先在頂部輸入並保存密鑰。');
         return;
       }
 
@@ -897,16 +853,16 @@
       sendBtn.disabled = true;
       messageInput.disabled = true;
 
-      const typingIndicator = showTypingIndicator();
+      showTypingIndicator();
 
       try {
         const reply = await callDeepSeekAPI(text);
         removeTypingIndicator();
         if (reply) addMessage('bot', reply);
-        else addMessage('bot', '⚠️ 未收到有效回复。');
+        else addMessage('bot', '⚠️ 未收到有效回覆。');
       } catch (error) {
         removeTypingIndicator();
-        addMessage('bot', `⚠️ 发生错误: ${error.message || '未知错误'}`);
+        addMessage('bot', `⚠️ 發生錯誤: ${error.message || '未知錯誤'}`);
       } finally {
         isWaitingForResponse = false;
         sendBtn.disabled = false;
@@ -915,6 +871,7 @@
       }
     }
 
+    // 事件綁定
     saveApiBtn.addEventListener('click', saveApiKey);
     sendBtn.addEventListener('click', sendMessage);
 
@@ -926,11 +883,14 @@
     });
 
     apiKeyInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); saveApiKey(); }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveApiKey();
+      }
     });
 
     window.addEventListener('load', () => {
-      if (apiKey) showToast('已加载保存的 API 密钥', 1500);
+      if (apiKey) showToast('已載入保存的 API 密鑰', 1500);
       messageInput.focus();
     });
 
