@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>DeepSeek 聊天 · 跟進進化版</title>
+<title>DeepSeek 聊天 · 跟進 + 複製</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github-dark.min.css">
@@ -45,7 +45,7 @@
     height: 200%;
     top: -50%;
     left: -50%;
-    background: 
+    background:
       radial-gradient(circle at 20% 30%, rgba(0, 120, 255, 0.22) 0%, transparent 40%),
       radial-gradient(circle at 80% 70%, rgba(150, 0, 255, 0.15) 0%, transparent 40%),
       radial-gradient(circle at 50% 50%, rgba(0, 220, 255, 0.12) 0%, transparent 50%);
@@ -54,7 +54,7 @@
   }
 
   .aurora-bg::after {
-    background: 
+    background:
       radial-gradient(circle at 70% 20%, rgba(0, 180, 255, 0.18) 0%, transparent 45%),
       radial-gradient(circle at 30% 80%, rgba(80, 0, 200, 0.15) 0%, transparent 45%);
     animation: auroraMove2 25s ease-in-out infinite alternate;
@@ -98,19 +98,6 @@
     100% { transform: translateY(-110vh) translateX(-20px) scale(0.3); opacity: 0; }
   }
 
-  /* 粒子連線層 */
-  .particle-lines {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  .particle-lines svg {
-    width: 100%;
-    height: 100%;
-  }
-
   /* ===== 主卡片 ===== */
   .chat-container {
     position: relative;
@@ -128,7 +115,7 @@
     flex-direction: column;
     overflow: hidden;
     transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.6s ease, border-color 0.6s ease;
-    animation: 
+    animation:
       cardEntrance 1.2s cubic-bezier(0.2, 0.9, 0.3, 1) both,
       cardFloat 7s ease-in-out infinite alternate,
       cardGlow 4s ease-in-out infinite alternate;
@@ -155,13 +142,13 @@
 
   @keyframes cardGlow {
     0% {
-      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8), 
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8),
                   0 0 0 1px rgba(80, 160, 255, 0.1) inset,
                   0 0 30px rgba(0, 180, 255, 0.1);
       border-color: rgba(100, 180, 255, 0.2);
     }
     100% {
-      box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.9), 
+      box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.9),
                   0 0 0 1px rgba(80, 200, 255, 0.3) inset,
                   0 0 70px rgba(0, 200, 255, 0.3);
       border-color: rgba(0, 200, 255, 0.5);
@@ -227,7 +214,6 @@
     50% { left: 100%; }
   }
 
-  /* API 輸入框 */
   .api-input-wrapper {
     flex: 1;
     min-width: 160px;
@@ -315,7 +301,6 @@
     user-select: none;
   }
 
-  /* 保存按鈕 */
   .save-btn {
     background: linear-gradient(135deg, #1b6aff, #00b4ff);
     border-radius: 100px;
@@ -379,7 +364,6 @@
     animation-play-state: paused;
   }
 
-  /* 保存成功脈衝 */
   .save-btn.saved {
     animation: savePulse 0.8s cubic-bezier(0.2, 0.9, 0.3, 1);
   }
@@ -503,6 +487,14 @@
     position: relative;
     overflow: hidden;
     animation: bubbleBreath 5s ease-in-out infinite;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* 點擊時閃爍提示 */
+  .bubble:active {
+    transform: scale(0.98);
+    transition: all 0.1s ease;
   }
 
   @keyframes bubbleBreath {
@@ -514,7 +506,33 @@
     }
   }
 
-  /* 氣泡光暈漣漪波紋 */
+  /* 複製成功時的脈衝 */
+  .bubble.copied {
+    animation: copyPulse 0.7s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+
+  @keyframes copyPulse {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.06); box-shadow: 0 0 0 8px rgba(0, 220, 255, 0.4), 0 0 40px rgba(0, 220, 255, 0.8); }
+    100% { transform: scale(1); box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.6); }
+  }
+
+  /* 複製漣漪 */
+  .copy-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 220, 255, 0.6), transparent 70%);
+    transform: scale(0);
+    animation: copyRippleExpand 0.9s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  @keyframes copyRippleExpand {
+    to { transform: scale(5); opacity: 0; }
+  }
+
+  /* 氣泡光暈跟隨滑鼠 */
   .bubble::before {
     content: '';
     position: absolute;
@@ -652,14 +670,8 @@
   .bubble h3 { font-size: 1rem; }
 
   .bubble ul, .bubble ol { margin: 8px 0; padding-left: 24px; }
-  .bubble li {
-    margin: 5px 0;
-    transition: all 0.4s ease;
-  }
-  .bubble li:hover {
-    transform: translateX(5px);
-    color: #bfe2ff;
-  }
+  .bubble li { margin: 5px 0; transition: all 0.4s ease; }
+  .bubble li:hover { transform: translateX(5px); color: #bfe2ff; }
 
   .bubble code:not(pre code) {
     background: rgba(0, 100, 200, 0.28);
@@ -754,20 +766,24 @@
     text-shadow: 0 0 18px rgba(100, 200, 255, 0.8);
   }
 
-  /* ===== 跟進建議區 ===== */
+  /* ===== 跟進建議區（永遠顯示，AI 回覆後填入） ===== */
   .followup-section {
-    padding: 0 22px 8px 22px;
+    padding: 12px 22px 8px 22px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    background: rgba(8, 14, 26, 0.5);
+    border-top: 1px solid rgba(70, 150, 255, 0.15);
     animation: followupSlideIn 0.7s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+    min-height: 0;
+    transition: all 0.5s ease;
   }
 
   @keyframes followupSlideIn {
     0% {
       opacity: 0;
-      transform: translateY(20px) scale(0.95);
-      filter: blur(6px);
+      transform: translateY(30px) scale(0.95);
+      filter: blur(8px);
     }
     100% {
       opacity: 1;
@@ -783,9 +799,8 @@
     font-size: 0.78rem;
     color: rgba(140, 190, 255, 0.7);
     letter-spacing: 0.5px;
-    text-transform: uppercase;
     font-weight: 500;
-    padding-left: 8px;
+    padding-left: 4px;
   }
 
   .followup-title .dot {
@@ -829,12 +844,16 @@
   @keyframes chipAppear {
     0% {
       opacity: 0;
-      transform: translateX(-20px) scale(0.8);
+      transform: translateY(15px) scale(0.7);
       filter: blur(4px);
+    }
+    60% {
+      opacity: 1;
+      transform: translateY(-4px) scale(1.08);
     }
     100% {
       opacity: 1;
-      transform: translateX(0) scale(1);
+      transform: translateY(0) scale(1);
       filter: blur(0);
     }
   }
@@ -843,7 +862,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, transparent, rgba(0, 200, 255, 0.25), transparent);
+    background: linear-gradient(90deg, transparent, rgba(0, 200, 255, 0.3), transparent);
     background-size: 200% 100%;
     opacity: 0;
     transition: opacity 0.5s ease;
@@ -863,13 +882,20 @@
     box-shadow: 0 12px 25px -6px rgba(0, 180, 255, 0.5), 0 0 25px rgba(0, 200, 255, 0.3);
   }
 
-  .followup-chip:hover::before {
-    opacity: 1;
-  }
+  .followup-chip:hover::before { opacity: 1; }
 
   .followup-chip:active {
-    transform: translateY(0) scale(0.96);
+    transform: translateY(0) scale(0.94);
     transition: all 0.1s ease;
+  }
+
+  /* 空狀態提示 */
+  .followup-empty {
+    font-size: 0.78rem;
+    color: rgba(140, 190, 255, 0.4);
+    padding: 8px 4px;
+    font-style: italic;
+    letter-spacing: 0.3px;
   }
 
   /* 自動追問開關 */
@@ -883,11 +909,10 @@
     cursor: pointer;
     user-select: none;
     transition: color 0.4s ease;
+    margin-left: auto;
   }
 
-  .auto-followup:hover {
-    color: rgba(180, 220, 255, 1);
-  }
+  .auto-followup:hover { color: rgba(180, 220, 255, 1); }
 
   .toggle-switch {
     width: 36px;
@@ -955,7 +980,6 @@
     transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
     backdrop-filter: blur(8px);
     position: relative;
-    background-image: linear-gradient(90deg, transparent, transparent);
   }
 
   .chat-footer input:focus {
@@ -1085,7 +1109,6 @@
     }
   }
 
-  /* 爆炸粒子 */
   .burst-particle {
     position: absolute;
     width: 8px;
@@ -1097,17 +1120,10 @@
   }
 
   @keyframes burst {
-    0% {
-      transform: translate(0, 0) scale(1);
-      opacity: 1;
-    }
-    100% {
-      transform: translate(var(--tx), var(--ty)) scale(0.3);
-      opacity: 0;
-    }
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0.3); opacity: 0; }
   }
 
-  /* 漣漪 */
   .ripple {
     position: absolute;
     border-radius: 50%;
@@ -1210,6 +1226,36 @@
     transform: translateX(-50%) translateY(0) scale(1);
   }
 
+  /* 複製專用 Toast */
+  .copy-toast {
+    position: fixed;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-30px) scale(0.8);
+    background: linear-gradient(135deg, rgba(0, 150, 255, 0.95), rgba(0, 200, 255, 0.95));
+    backdrop-filter: blur(16px);
+    padding: 10px 24px;
+    border-radius: 100px;
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 15px 40px rgba(0, 150, 255, 0.7), 0 0 30px rgba(0, 200, 255, 0.5);
+    opacity: 0;
+    transition: all 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
+    pointer-events: none;
+    z-index: 2000;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .copy-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+
   /* ===== 響應式 ===== */
   @media (max-width: 520px) {
     .chat-container { height: 94vh; border-radius: 32px; }
@@ -1219,7 +1265,7 @@
     .chat-footer { padding: 12px 16px 16px; }
     .chat-footer input { padding: 14px 20px; }
     .send-btn { width: 52px; height: 52px; font-size: 1.6rem; }
-    .followup-section { padding: 0 16px 6px 16px; }
+    .followup-section { padding: 10px 16px 6px 16px; }
     .followup-chip { font-size: 0.78rem; padding: 6px 12px; }
   }
 
@@ -1234,7 +1280,6 @@
 
 <div class="aurora-bg"></div>
 <div class="bg-particles" id="bgParticles"></div>
-<div class="particle-lines"><svg id="linesSvg"></svg></div>
 
 <div class="chat-container" id="chatContainer">
   <div class="chat-header">
@@ -1246,22 +1291,24 @@
 
   <div class="chat-messages" id="chatMessages">
     <div class="message bot">
-      <div class="bubble">你好！我是 DeepSeek 助手。请先输入 API 密钥，然后就可以开始对话了 ✨</div>
+      <div class="bubble">你好！我是 DeepSeek 助手。请先输入 API 密钥，然后就可以开始对话了 ✨<br><br><span style="color: rgba(180, 220, 255, 0.7); font-size: 0.85em;">💡 提示：点击任意气泡即可复制内容</span></div>
       <div class="time">刚刚</div>
     </div>
   </div>
 
-  <!-- 跟進建議區 -->
-  <div class="followup-section" id="followupSection" style="display:none;">
+  <!-- 跟進建議區（永遠顯示） -->
+  <div class="followup-section" id="followupSection">
     <div class="followup-title">
       <span class="dot"></span>
       <span>可能想問</span>
-      <div class="auto-followup" id="autoFollowup" style="margin-left:auto;">
+      <div class="auto-followup" id="autoFollowup">
         <span class="toggle-switch"></span>
         <span>自動追問</span>
       </div>
     </div>
-    <div class="followup-list" id="followupList"></div>
+    <div class="followup-list" id="followupList">
+      <span class="followup-empty">AI 回覆後將顯示跟進建議...</span>
+    </div>
   </div>
 
   <div class="chat-footer">
@@ -1271,6 +1318,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="copy-toast" id="copyToast">📋 已複製</div>
 
 <script>
 (function() {
@@ -1280,27 +1328,25 @@
   const messageInput = document.getElementById('messageInput');
   const sendBtn = document.getElementById('sendBtn');
   const toastEl = document.getElementById('toast');
+  const copyToastEl = document.getElementById('copyToast');
   const bgParticles = document.getElementById('bgParticles');
   const chatContainer = document.getElementById('chatContainer');
-  const followupSection = document.getElementById('followupSection');
   const followupList = document.getElementById('followupList');
   const autoFollowupToggle = document.getElementById('autoFollowup');
-  const linesSvg = document.getElementById('linesSvg');
 
   let apiKey = localStorage.getItem('deepseek_api_key') || '';
   let isWaitingForResponse = false;
-  let conversationHistory = [];   // 對話上下文
+  let conversationHistory = [];
   let autoFollowupEnabled = false;
-  let followupChips = [];
 
   if (apiKey) apiKeyInput.value = apiKey;
 
-  // ===== 卡片 3D 傾斜跟隨滑鼠 =====
+  // ===== 卡片 3D 傾斜 =====
   chatContainer.addEventListener('mousemove', (e) => {
     const rect = chatContainer.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
-    chatContainer.style.transform = `perspective(1500px) rotateY(${x * 3}deg) rotateX(${-y * 3}deg) translateY(-4px)`;
+    chatContainer.style.transform = `perspective(1500px) rotateY(${x * 2.5}deg) rotateX(${-y * 2.5}deg) translateY(-4px)`;
   });
 
   chatContainer.addEventListener('mouseleave', () => {
@@ -1319,7 +1365,7 @@
     }
   });
 
-  // ===== 動態背景粒子 =====
+  // ===== 背景粒子 =====
   function createParticles() {
     for (let i = 0; i < 40; i++) {
       const span = document.createElement('span');
@@ -1336,35 +1382,6 @@
   }
   createParticles();
 
-  // ===== 粒子連線 =====
-  function drawLines() {
-    const particles = bgParticles.querySelectorAll('span');
-    const rect = document.body.getBoundingClientRect();
-    linesSvg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
-    let html = '';
-    const points = [];
-    particles.forEach((p) => {
-      const r = p.getBoundingClientRect();
-      const x = r.left + r.width / 2;
-      const y = r.top + r.height / 2;
-      points.push({ x, y, opacity: parseFloat(p.style.opacity) || 0.5 });
-    });
-    for (let i = 0; i < points.length; i++) {
-      for (let j = i + 1; j < points.length; j++) {
-        const dx = points[i].x - points[j].x;
-        const dy = points[i].y - points[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 150) {
-          const opacity = (1 - dist / 150) * 0.15;
-          html += `<line x1="${points[i].x}" y1="${points[i].y}" x2="${points[j].x}" y2="${points[j].y}" stroke="rgba(80, 200, 255, ${opacity})" stroke-width="0.6" />`;
-        }
-      }
-    }
-    linesSvg.innerHTML = html;
-  }
-
-  let lineTimer = setInterval(drawLines, 120);
-
   // ===== Toast =====
   function showToast(text, duration = 2000) {
     toastEl.textContent = text;
@@ -1373,6 +1390,73 @@
     window.toastTimer = setTimeout(() => {
       toastEl.classList.remove('show');
     }, duration);
+  }
+
+  // ===== 複製 Toast =====
+  function showCopyToast() {
+    copyToastEl.classList.add('show');
+    clearTimeout(window.copyToastTimer);
+    window.copyToastTimer = setTimeout(() => {
+      copyToastEl.classList.remove('show');
+    }, 1500);
+  }
+
+  // ===== 複製氣泡內容 =====
+  function copyBubbleContent(bubble, e) {
+    // 取得純文字內容
+    let text = bubble.innerText || bubble.textContent || '';
+    text = text.trim();
+
+    if (!text) return;
+
+    // 使用 Clipboard API
+    const copyToClipboard = async () => {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (err) {
+        // 降級方案
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+          return true;
+        } catch (e) {
+          document.body.removeChild(textarea);
+          return false;
+        }
+      }
+    };
+
+    copyToClipboard().then((success) => {
+      if (success) {
+        // 氣泡脈衝動畫
+        bubble.classList.add('copied');
+        setTimeout(() => bubble.classList.remove('copied'), 700);
+
+        // 複製漣漪
+        if (e) {
+          const rect = bubble.getBoundingClientRect();
+          const ripple = document.createElement('span');
+          ripple.classList.add('copy-ripple');
+          const size = Math.max(rect.width, rect.height);
+          ripple.style.width = ripple.style.height = size + 'px';
+          ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+          ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+          bubble.appendChild(ripple);
+          setTimeout(() => ripple.remove(), 900);
+        }
+
+        showCopyToast();
+      } else {
+        showToast('复制失败，请手动选取', 1800);
+      }
+    });
   }
 
   // ===== 保存密鑰 =====
@@ -1399,7 +1483,6 @@
     btn.appendChild(ripple);
     setTimeout(() => ripple.remove(), 900);
 
-    // 爆炸粒子
     for (let i = 0; i < 8; i++) {
       const p = document.createElement('span');
       p.classList.add('burst-particle');
@@ -1416,7 +1499,7 @@
   }
 
   // ===== 添加消息 =====
-  function addMessage(role, content, skipTyping = false) {
+  function addMessage(role, content) {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', role);
 
@@ -1437,6 +1520,12 @@
       bubbleDiv.textContent = content;
     }
 
+    // 點擊複製
+    bubbleDiv.addEventListener('click', (e) => {
+      e.stopPropagation();
+      copyBubbleContent(bubbleDiv, e);
+    });
+
     const timeDiv = document.createElement('div');
     timeDiv.classList.add('time');
     const now = new Date();
@@ -1445,26 +1534,6 @@
     messageDiv.appendChild(bubbleDiv);
     messageDiv.appendChild(timeDiv);
     chatMessages.appendChild(messageDiv);
-
-    // 逐字浮現（僅機器人純文字）
-    if (role === 'bot' && !skipTyping && !bubbleDiv.querySelector('*')) {
-      const text = bubbleDiv.textContent;
-      bubbleDiv.textContent = '';
-      const cursor = document.createElement('span');
-      cursor.classList.add('cursor-blink');
-      bubbleDiv.appendChild(cursor);
-      let i = 0;
-      const interval = setInterval(() => {
-        if (i >= text.length) {
-          clearInterval(interval);
-          cursor.remove();
-          return;
-        }
-        cursor.insertAdjacentText('beforebegin', text[i]);
-        i++;
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }, 15);
-    }
 
     requestAnimationFrame(() => {
       chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
@@ -1497,18 +1566,22 @@
   // ===== 生成跟進建議 =====
   function generateFollowups(userText, botText) {
     const suggestions = [];
-    const lowerBot = botText.toLowerCase();
+    const lowerBot = (botText || '').toLowerCase();
+    const lowerUser = (userText || '').toLowerCase();
 
-    // 根據上下文生成 3 個建議
-    if (botText.includes('```') || botText.includes('代码') || botText.includes('code')) {
+    if (botText.includes('```') || lowerBot.includes('code') || botText.includes('代码')) {
       suggestions.push('可以帮我解释一下这段代码吗？');
       suggestions.push('能给我一个更简单的例子吗？');
       suggestions.push('这段代码有什么需要注意的地方？');
-    } else if (botText.includes('1+1') || botText.includes('数学') || botText.includes('计算')) {
+    } else if (lowerUser.includes('+') || lowerUser.includes('=') || /[0-9]/.test(userText)) {
       suggestions.push('再给我出一个类似的题目');
       suggestions.push('为什么是这样计算的？');
       suggestions.push('还有其他解法吗？');
-    } else if (userText.length < 10) {
+    } else if (lowerUser.includes('什麼') || lowerUser.includes('什么') || lowerUser.includes('how')) {
+      suggestions.push('可以详细解释一下吗？');
+      suggestions.push('能给我举个例子吗？');
+      suggestions.push('这有什么实际应用？');
+    } else if (userText.length < 8) {
       suggestions.push('可以详细解释一下吗？');
       suggestions.push('能给我举个例子吗？');
       suggestions.push('这有什么实际应用？');
@@ -1524,35 +1597,32 @@
   // ===== 顯示跟進建議 =====
   function showFollowups(suggestions) {
     followupList.innerHTML = '';
-    followupChips = suggestions;
-    followupSection.style.display = 'flex';
 
     suggestions.forEach((text, i) => {
       const chip = document.createElement('button');
       chip.classList.add('followup-chip');
       chip.textContent = text;
-      chip.style.animationDelay = (i * 0.08) + 's';
+      chip.style.animationDelay = (i * 0.1) + 's';
       chip.addEventListener('click', (e) => {
         e.stopPropagation();
         messageInput.value = text;
         messageInput.focus();
-        // 輕觸反饋
-        chip.style.transform = 'scale(0.94)';
+        chip.style.transform = 'scale(0.9)';
         setTimeout(() => chip.style.transform = '', 150);
       });
       followupList.appendChild(chip);
     });
 
     // 重新觸發動畫
-    followupSection.style.animation = 'none';
-    void followupSection.offsetWidth;
-    followupSection.style.animation = '';
+    const section = document.getElementById('followupSection');
+    section.style.animation = 'none';
+    void section.offsetWidth;
+    section.style.animation = '';
   }
 
-  // ===== 隱藏跟進建議 =====
-  function hideFollowups() {
-    followupSection.style.display = 'none';
-    followupList.innerHTML = '';
+  // ===== 重置跟進建議 =====
+  function resetFollowups() {
+    followupList.innerHTML = '<span class="followup-empty">AI 回覆後將顯示跟進建議...</span>';
   }
 
   // ===== 調用 API =====
@@ -1562,7 +1632,6 @@
       return null;
     }
 
-    // 帶上對話歷史（最近 10 條）
     const messages = conversationHistory.slice(-10).concat([
       { role: 'user', content: userMessage }
     ]);
@@ -1595,7 +1664,6 @@
       const botReply = data.choices?.[0]?.message?.content;
       if (!botReply) throw new Error('API 返回内容为空');
 
-      // 記錄對話歷史
       conversationHistory.push({ role: 'user', content: userMessage });
       conversationHistory.push({ role: 'assistant', content: botReply });
 
@@ -1629,7 +1697,6 @@
     sendBtn.classList.add('flash');
     setTimeout(() => sendBtn.classList.remove('flash'), 700);
 
-    hideFollowups();
     messageInput.value = '';
     addMessage('user', text);
 
@@ -1641,6 +1708,7 @@
     isWaitingForResponse = true;
     sendBtn.disabled = true;
     messageInput.disabled = true;
+    resetFollowups();
 
     const typingIndicator = showTypingIndicator();
 
@@ -1650,8 +1718,9 @@
       if (reply) {
         addMessage('bot', reply);
 
-        // 生成跟進建議
+        // 生成並顯示跟進建議（保證執行）
         const suggestions = generateFollowups(text, reply);
+        console.log('生成跟進建議:', suggestions);
         showFollowups(suggestions);
 
         // 自動追問
@@ -1700,22 +1769,11 @@
   });
 
   // 自動追問開關
-  autoFollowupToggle.addEventListener('click', () => {
+  autoFollowupToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
     autoFollowupEnabled = !autoFollowupEnabled;
     autoFollowupToggle.classList.toggle('on', autoFollowupEnabled);
     showToast(autoFollowupEnabled ? '🤖 自动追问已开启' : '自动追问已关闭', 1500);
-  });
-
-  // 點擊輸入框時隱藏跟進區
-  messageInput.addEventListener('focus', () => {
-    // 不隱藏，保留建議方便點擊
-  });
-
-  // 點擊消息區隱藏跟進
-  chatMessages.addEventListener('click', (e) => {
-    if (!e.target.closest('.followup-chip')) {
-      // 保留
-    }
   });
 
   window.addEventListener('load', () => {
