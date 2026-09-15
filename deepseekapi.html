@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>DeepSeek · 紫耀会話（iOS 質感）</title>
+<title>DeepSeek · 紫耀会話</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github-dark.min.css">
@@ -113,6 +113,13 @@
 
   .message .time { font-size: 0.7rem; color: rgba(199, 125, 255, 0.6); margin-top: 8px; margin-left: 10px; margin-right: 10px; }
 
+  /* 訊息落地動畫 */
+  @keyframes bubbleLand { 
+    0% { transform: scale(0.7); opacity: 0; } 
+    60% { transform: scale(1.04); opacity: 1; } 
+    100% { transform: scale(1); opacity: 1; } 
+  }
+
   /* ================= Markdown 樣式 ================= */
   .bubble p { margin: 0 0 8px 0; } .bubble p:last-child { margin-bottom: 0; }
   .bubble strong { color: #e0aaff; } .bubble h1, .bubble h2, .bubble h3 { margin: 12px 0 8px; color: #e0aaff; }
@@ -145,7 +152,7 @@
   .chat-footer input:focus { border-color: #b026ff; box-shadow: 0 0 0 4px rgba(176, 38, 255, 0.2), 0 0 50px rgba(123, 47, 190, 0.5); background: rgba(21, 0, 41, 0.95); }
   .chat-footer input::placeholder { color: rgba(199, 125, 255, 0.55); }
 
-  /* 發送按鈕 - 極簡，只保留核心樣式與微反饋 */
+  /* 發送按鈕 - 極簡，按壓時有「吸收感」反饋 */
   .send-btn {
     background: linear-gradient(145deg, #4a0080, #7b2fbe, #b026ff);
     width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -156,7 +163,7 @@
   }
   .send-btn::before {
     content: ''; position: absolute; inset: 0; border-radius: 50%;
-    background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.4), transparent 70%);
+    background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.5), transparent 70%);
     opacity: 0; transition: opacity 0.4s ease;
   }
   .send-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 12px 30px rgba(74, 0, 128, 1), 0 0 30px rgba(176, 38, 255, 0.6); }
@@ -165,21 +172,25 @@
   .send-btn span { display: inline-block; transition: transform 0.4s var(--apple-spring); }
   .send-btn:hover span { transform: translateX(2px); }
   .send-btn:disabled { opacity: 0.5; pointer-events: none; }
-  .send-btn.pulsing { animation: btnPulse 0.6s var(--apple-spring); }
-  @keyframes btnPulse { 0% { transform: scale(1); } 50% { transform: scale(1.15); box-shadow: 0 0 40px rgba(176, 38, 255, 0.8); } 100% { transform: scale(1); } }
 
-  /* ================= 幽靈氣泡（用於發送動畫） ================= */
-  /* 掛載到 body，使用 fixed 定位，避免 app-container 的 backdrop-filter 產生包含塊干擾 */
-  .ghost-bubble {
-    position: fixed; z-index: 9999; pointer-events: none;
-    padding: 14px 22px; border-radius: 22px;
-    font-size: 0.98rem; font-weight: 500; color: white;
-    background: linear-gradient(135deg, #7b2fbe, #b026ff);
-    box-shadow: 0 10px 30px rgba(176, 38, 255, 0.8);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    max-width: 70%; opacity: 0; transform-origin: center center;
-    transition: all 0.55s cubic-bezier(0.25, 0.1, 0.25, 1);
-    left: 0; top: 0;
+  /* 按下時的「吸收感」反饋 */
+  .send-btn.pulsing { animation: btnPulse 0.5s var(--apple-spring); }
+  @keyframes btnPulse { 
+    0% { transform: scale(1); box-shadow: 0 8px 25px rgba(74, 0, 128, 0.8); }
+    40% { transform: scale(1.18); box-shadow: 0 0 50px rgba(176, 38, 255, 1), 0 0 80px rgba(224, 170, 255, 0.6); background: linear-gradient(145deg, #7b2fbe, #b026ff, #e0aaff); }
+    100% { transform: scale(1); box-shadow: 0 8px 25px rgba(74, 0, 128, 0.8); }
+  }
+
+  /* 能量波紋（從按鈕擴散） */
+  .energy-ripple {
+    position: fixed; border-radius: 50%; pointer-events: none; z-index: 9998;
+    border: 2px solid rgba(224, 170, 255, 0.8);
+    transform: translate(-50%, -50%) scale(0);
+    animation: energyRipple 0.8s var(--apple-spring) forwards;
+  }
+  @keyframes energyRipple {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
   }
 
   /* Toast 样式 */
@@ -194,14 +205,10 @@
   @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0) scale(1); opacity: 0.5; } 30% { transform: translateY(-12px) scale(1.3); opacity: 1; } }
   @keyframes typingBreath { 0%, 100% { border-color: rgba(176, 38, 255, 0.6); } 50% { border-color: rgba(224, 170, 255, 1); box-shadow: 0 0 40px rgba(176, 38, 255, 0.6); } }
 
-  /* 訊息落地動畫 */
-  @keyframes bubbleLand { 0% { transform: scale(0.85); opacity: 0; } 60% { transform: scale(1.03); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
-
   @media (max-width: 520px) {
     .app-container { height: 94vh; border-radius: 32px; }
     .bubble { padding: 12px 18px; font-size: 0.92rem; }
     .send-btn { width: 52px; height: 52px; font-size: 1.6rem; }
-    .ghost-bubble { padding: 12px 18px; font-size: 0.92rem; }
   }
 </style>
 </head>
@@ -339,7 +346,7 @@
     setTimeout(() => { currentConversation = null; }, 600);
   });
 
-  // ================= 3D 傾斜 & 滑鼠光軌 & 星塵 =================
+  // ================= 3D 傾斜 & 星塵 =================
   appContainer.addEventListener('mousemove', (e) => {
     const rect = appContainer.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
@@ -419,18 +426,18 @@
 
     messageDiv.appendChild(bubbleDiv); messageDiv.appendChild(timeDiv); chatMessages.appendChild(messageDiv);
     
-    // 如果是落地，添加蘋果彈跳動畫
+    // 落地彈跳動畫（用於用戶發送 + 機器人回覆）
     if (isLanding) {
       bubbleDiv.style.animation = 'none';
       bubbleDiv.offsetHeight; /* 觸發重繪 */
-      bubbleDiv.style.animation = 'bubbleLand 0.6s var(--apple-spring)';
+      bubbleDiv.style.animation = 'bubbleLand 0.5s var(--apple-spring)';
     }
 
     requestAnimationFrame(() => chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' }));
     return messageDiv;
   }
 
-  // ================= 打字指示器（修復版：獨立包裝，避免錯位） =================
+  // ================= 打字指示器 =================
   function showTypingIndicator() {
     const typingDiv = document.createElement('div');
     typingDiv.classList.add('message', 'bot'); typingDiv.id = 'typingIndicator';
@@ -486,94 +493,51 @@
     }
   }
 
-  // ================= 🌟 核心：發送訊息（修復版 iOS 質感細胞分裂動畫） =================
+  // ================= 發送訊息（簡化版：按鈕脈衝 + 直接發送） =================
   async function sendMessage() {
     if (isWaitingForResponse || !currentConversation) return;
     const text = messageInput.value.trim();
     if (!text) { showToast('请输入消息内容'); return; }
-    
-    // 1. 獲取所有相關座標（全部基於視口，杜絕 Bug）
+
+    // 1. 發送按鈕脈衝動畫（吸收感）
+    sendBtn.classList.add('pulsing');
+    setTimeout(() => sendBtn.classList.remove('pulsing'), 500);
+
+    // 2. 能量波紋擴散
     const btnRect = sendBtn.getBoundingClientRect();
-    const inputRect = messageInput.getBoundingClientRect();
-    const msgRect = chatMessages.getBoundingClientRect();
-
-    const btnX = btnRect.left + btnRect.width / 2;
-    const btnY = btnRect.top + btnRect.height / 2;
-    const inputX = inputRect.left + inputRect.width / 2;
-    const inputY = inputRect.top + inputRect.height / 2;
-    // 目標位置設為聊天區域底部偏右
-    const targetX = msgRect.right - 100;
-    const targetY = msgRect.bottom - 80;
-
-    // 2. 創建幽靈氣泡（絕對定位在 body 上，避免 backdrop-filter 干擾）
-    const ghost = document.createElement('div');
-    ghost.className = 'ghost-bubble';
-    ghost.textContent = text;
-    ghost.style.left = inputX + 'px';
-    ghost.style.top = inputY + 'px';
-    ghost.style.transform = 'translate(-50%, -50%) scale(1)';
-    ghost.style.opacity = '1';
-    document.body.appendChild(ghost);
-
-    // 3. 清空輸入框並禁用
-    messageInput.value = '';
-    messageInput.disabled = true;
-    sendBtn.disabled = true;
-
-    // 4. 階段一：文字從輸入框「吸入」按鈕（使用 requestAnimationFrame 確保 transition 觸發）
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        ghost.style.left = btnX + 'px';
-        ghost.style.top = btnY + 'px';
-        ghost.style.transform = 'translate(-50%, -50%) scale(0.1)';
-        ghost.style.opacity = '0';
-        ghost.style.filter = 'blur(8px)';
-      });
-    });
-
-    // 5. 階段二：按鈕脈衝（模擬吸收能量）
-    setTimeout(() => {
-      ghost.remove();
-      sendBtn.classList.add('pulsing');
-      
-      // 在按鈕位置創建分裂出的新氣泡
-      const splitBubble = document.createElement('div');
-      splitBubble.className = 'ghost-bubble';
-      splitBubble.textContent = text;
-      splitBubble.style.left = btnX + 'px';
-      splitBubble.style.top = btnY + 'px';
-      splitBubble.style.transform = 'translate(-50%, -50%) scale(0.1)';
-      splitBubble.style.opacity = '0';
-      document.body.appendChild(splitBubble);
-
-      // 6. 階段三：氣泡飛向聊天區域（帶有 Apple 彈簧感）
+    const cx = btnRect.left + btnRect.width / 2;
+    const cy = btnRect.top + btnRect.height / 2;
+    for (let i = 0; i < 2; i++) {
       setTimeout(() => {
-        splitBubble.style.transition = 'all 0.8s var(--apple-spring)';
-        splitBubble.style.left = targetX + 'px';
-        splitBubble.style.top = targetY + 'px';
-        splitBubble.style.transform = 'translate(-50%, -50%) scale(1)';
-        splitBubble.style.opacity = '1';
-        splitBubble.style.filter = 'blur(0)';
+        const ripple = document.createElement('div');
+        ripple.className = 'energy-ripple';
+        ripple.style.left = cx + 'px';
+        ripple.style.top = cy + 'px';
+        ripple.style.width = '60px';
+        ripple.style.height = '60px';
+        ripple.style.borderColor = i === 0 ? 'rgba(224, 170, 255, 0.9)' : 'rgba(176, 38, 255, 0.6)';
+        document.body.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 900);
+      }, i * 100);
+    }
 
-        // 7. 階段四：氣泡落地，真實訊息出現
-        setTimeout(() => {
-          splitBubble.remove(); // 移除幽靈氣泡
-          
-          // 真實氣泡落地（觸發 bubbleLand 動畫）
-          addMessageToUI('user', text, false, true);
-          currentConversation.history.push({ role: 'user', content: text });
+    // 3. 清空輸入框
+    messageInput.value = '';
 
-          // 執行 API 請求
-          executeAPI(text);
-          sendBtn.classList.remove('pulsing');
-        }, 800); // 飛行時間
+    // 4. 直接添加用戶訊息到聊天區（帶落地彈跳）
+    addMessageToUI('user', text, false, true);
+    currentConversation.history.push({ role: 'user', content: text });
 
-      }, 150); // 分裂延遲
-    }, 550); // 吸入時間
-  }
+    // 5. 檢查 API 密鑰
+    if (!apiKey) {
+      addMessageToUI('bot', '🔑 尚未设置 API 密钥，请先在顶部输入并保存密钥。');
+      return;
+    }
 
-  // ================= 執行 API 請求（獨立出來） =================
-  async function executeAPI(text) {
+    // 6. 執行 API 請求
+    isWaitingForResponse = true;
+    sendBtn.disabled = true;
+    messageInput.disabled = true;
     resetFollowups();
     showTypingIndicator();
 
@@ -581,7 +545,7 @@
       const reply = await callDeepSeekAPI(text);
       removeTypingIndicator();
       if (reply) {
-        addMessageToUI('bot', reply);
+        addMessageToUI('bot', reply, false, true);
         currentConversation.history.push({ role: 'assistant', content: reply });
         const suggestions = generateFollowups(text, reply, currentConversation.id);
         showFollowups(suggestions);
@@ -595,9 +559,13 @@
         }
       } else addMessageToUI('bot', '⚠️ 未收到有效回复。');
     } catch (error) {
-      removeTypingIndicator(); addMessageToUI('bot', `⚠️ 发生错误: ${error.message || '未知错误'}`);
+      removeTypingIndicator();
+      addMessageToUI('bot', `⚠️ 发生错误: ${error.message || '未知错误'}`);
     } finally {
-      isWaitingForResponse = false; sendBtn.disabled = false; messageInput.disabled = false; messageInput.focus();
+      isWaitingForResponse = false;
+      sendBtn.disabled = false;
+      messageInput.disabled = false;
+      messageInput.focus();
     }
   }
 
