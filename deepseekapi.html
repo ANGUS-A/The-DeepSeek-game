@@ -123,23 +123,6 @@
   .bubble th,.bubble td{border-bottom:1px solid var(--border-soft);border-right:1px solid var(--border-soft);padding:8px 12px;}
   .bubble th{background:var(--accent-soft);color:var(--accent-3);}
 
-  /* 跟進建議 */
-  .followup-section{padding:10px 18px 6px;background:linear-gradient(180deg,transparent,var(--card-2));border-top:1px solid var(--border-soft);animation:followupSlideIn .6s var(--apple-spring) both;}
-  @keyframes followupSlideIn{0%{opacity:0;transform:translateY(20px);}100%{opacity:1;transform:translateY(0);}}
-  .followup-title{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text-2);margin-bottom:8px;}
-  .followup-title .dot{width:8px;height:8px;border-radius:50%;background:var(--accent-2);box-shadow:0 0 14px var(--accent-glow);animation:dotPulse 1.8s infinite;}
-  @keyframes dotPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.6);}}
-  .followup-list{display:flex;flex-wrap:wrap;gap:8px;}
-  .followup-chip{background:var(--bubble-bot-bg);border:1px solid var(--border-medium);border-radius:100px;padding:8px 16px;font-size:.85rem;color:var(--text-2);cursor:pointer;transition:all .4s var(--apple-spring);animation:chipAppear .5s var(--apple-spring) both;}
-  @keyframes chipAppear{0%{opacity:0;transform:translateY(15px) scale(.8);}100%{opacity:1;transform:translateY(0) scale(1);}}
-  .followup-chip:hover{border-color:var(--border-strong);color:var(--text-1);transform:translateY(-3px) scale(1.05);}
-  .auto-followup{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text-2);cursor:pointer;margin-left:auto;}
-  .toggle-switch{width:38px;height:22px;background:rgba(0,0,0,.15);border-radius:100px;position:relative;transition:all .4s var(--apple-spring);border:1px solid var(--border-medium);}
-  .toggle-switch::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:var(--accent-1);top:2px;left:2px;transition:all .4s var(--apple-spring);}
-  .auto-followup.on .toggle-switch{border-color:var(--border-strong);background:var(--accent-soft);}
-  .auto-followup.on .toggle-switch::after{left:18px;background:var(--accent-2);}
-  .followup-empty{font-size:.78rem;color:var(--text-3);font-style:italic;}
-
   /* ================= 底部輸入（新增上傳功能） ================= */
   .chat-footer { padding:14px 18px 18px; display:flex; align-items:center; gap:10px; background:linear-gradient(135deg,var(--header-1),var(--header-2)); backdrop-filter:blur(16px); border-top:1px solid var(--border-soft); position:relative; z-index:2; }
   .attach-btn { width:42px; height:42px; border-radius:50%; background:transparent; border:1px solid var(--border-medium); color:var(--accent-2); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:all .4s var(--apple-spring); font-size:1.4rem; }
@@ -265,10 +248,10 @@
 
     <div class="followup-section" id="followupSection">
       <div class="followup-title">
-        <span class="dot"></span><span>可能想問</span>
-        <div class="auto-followup" id="autoFollowup"><span class="toggle-switch"></span><span>自動追問</span></div>
+        <span class="dot"></span>
+        <div class="auto-followup" id="autoFollowup"><span class="toggle-switch"></div>
       </div>
-      <div class="followup-list" id="followupList"><span class="followup-empty">AI 回覆後將顯示跟進建議...</span></div>
+      <div class="followup-list" id="followupList"><span class="followup-empty"></div>
     </div>
 
     <div class="chat-footer">
@@ -582,28 +565,6 @@
     requestAnimationFrame(() => chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior:'smooth' }));
   }
   function removeTypingIndicator() { const el = document.getElementById('typingIndicator'); if (el) el.remove(); }
-
-  // ================= 跟進建議 =================
-  function generateFollowups(userText, botText, convId) {
-    const s = [];
-    if (convId === 'roleplay') s.push('继续这个剧情','换个场景','加入一个角色');
-    else if (convId === 'game') s.push('推荐类似游戏','这个游戏怎么玩？','有什么隐藏玩法？');
-    else if (convId === 'study') s.push('可以详细解释吗？','给我一个例题','有什么实际应用？');
-    else if (botText.includes('```') || botText.includes('代码')) s.push('可以帮我解释这段代码吗？','给我一个更简单的例子','这段代码有什么注意事项？');
-    else if (userText.length < 8) s.push('可以详细解释吗？','给我一个例子','这有什么实际应用？');
-    else s.push('继续深入讲讲','能举个例子吗？','这和其他概念有什么关系？');
-    return s.slice(0, 3);
-  }
-  function showFollowups(suggestions) {
-    followupList.innerHTML = '';
-    suggestions.forEach((text, i) => {
-      const chip = document.createElement('button'); chip.className = 'followup-chip'; chip.textContent = text;
-      chip.style.animationDelay = (i * 0.12) + 's';
-      chip.addEventListener('click', (e) => { e.stopPropagation(); messageInput.value = text; messageInput.focus(); });
-      followupList.appendChild(chip);
-    });
-  }
-  function resetFollowups() { followupList.innerHTML = '<span class="followup-empty">AI 回覆後將顯示跟進建議...</span>'; }
 
   // ================= API =================
   async function callDeepSeekAPI(userMessage, imageBase64) {
