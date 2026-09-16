@@ -252,7 +252,7 @@
     <div class="chat-header">
       <button class="back-btn" id="backBtn">←</button>
       <div class="chat-header-info">
-        <div class="chat-header-name"><span id="chatHeaderEmoji">💬</span><span id="chatHeaderTitle">正常對話</span></div>
+        <div class="chat-header-name"><span id="chatHeaderEmoji">𖣐</span><span id="chatHeaderTitle">正常對話</span></div>
         <div class="chat-header-status"><span class="status-dot"></span><span id="chatHeaderStatus">在线</span></div>
         <div class="api-input-wrapper">
           <input type="password" id="apiKeyInput" placeholder="输入 DeepSeek API 密钥...">
@@ -311,9 +311,9 @@
         <div class="setting-group">
           <div class="setting-label">細節等級</div>
           <div class="perf-options" id="perfOptions">
-            <button class="perf-option" data-perf="low"><span class="perf-icon">⚡</span>極低</button>
-            <button class="perf-option" data-perf="normal"><span class="perf-icon">✨</span>一般</button>
-            <button class="perf-option" data-perf="high"><span class="perf-icon">💎</span>極高</button>
+            <button class="perf-option" data-perf="low"><span class="perf-icon">20%</span>極低</button>
+            <button class="perf-option" data-perf="normal"><span class="perf-icon">80%</span>一般</button>
+            <button class="perf-option" data-perf="high"><span class="perf-icon">100%</span>極高</button>
           </div>
         </div>
       </div>
@@ -331,10 +331,10 @@
   document.body.dataset.perf = savedPerf;
 
   const conversations = [
-    { id:'normal', emoji:'💬', title:'正常對話', preview:'你好！我是 DeepSeek 助手...', time:'剛剛', avatarClass:'avatar-1', status:'在线 · DeepSeek 已连接', welcome:'你好！我是 DeepSeek 助手 ✨<br><br>请先输入 API 密钥，然后就可以开始对话了。<br><br><span style="color: var(--text-3); font-size: 0.85em;">💡 点击任意气泡即可复制内容</span>', history:[] },
-    { id:'roleplay', emoji:'🎭', title:'角色扮演', preview:'你是我的专属武侠小说家...', time:'昨天', avatarClass:'avatar-2', status:'角色模式 · 武侠世界', welcome:'欢迎来到武侠世界 🗡️<br><br>我是你的专属武侠小说家。请告诉我你想扮演的角色或想展开的剧情。', history:[] },
-    { id:'game', emoji:'🎮', title:'游戏询问', preview:'最近有什么好玩的游戏...', time:'昨天', avatarClass:'avatar-3', status:'游戏助手 · 在线', welcome:'你好！我是你的游戏助手 🎮<br><br>想找新游戏？想了解攻略？还是想聊聊最近的热门大作？', history:[] },
-    { id:'study', emoji:'📚', title:'学习助手', preview:'帮我解释一下量子力学...', time:'星期一', avatarClass:'avatar-4', status:'学习模式 · 专注中', welcome:'你好！我是你的学习助手 📚<br><br>无论是数学、物理、编程还是语言学习，我都能帮你。', history:[] }
+    { id:'normal', emoji:'𖣐', title:'正常對話', preview:'你好！我是 DeepSeek 助手...', time:'剛剛', avatarClass:'avatar-1', status:'在线 · DeepSeek 已连接', welcome:'你好！我是 DeepSeek 助手 <br><br>请先输入 API 密钥，然后就可以开始对话了。<br><br><span style="color: var(--text-3); font-size: 0.85em;">点击任意气泡即可复制内容</span>', history:[] },
+    { id:'roleplay', emoji:'🎭', title:'角色扮演', preview:'你是我的专属武侠小说家...', time:'昨天', avatarClass:'avatar-2', status:'角色模式 · 武侠世界', welcome:'欢迎来到武侠世界 <br><br>我是你的专属武侠小说家。请告诉我你想扮演的角色或想展开的剧情。', history:[] },
+    { id:'game', emoji:'🎮', title:'游戏询问', preview:'最近有什么好玩的游戏...', time:'昨天', avatarClass:'avatar-3', status:'游戏助手 · 在线', welcome:'你好！我是你的游戏助手 <br><br>想找新游戏？想了解攻略？还是想聊聊最近的热门大作？', history:[] },
+    { id:'study', emoji:'📚', title:'学习助手', preview:'帮我解释一下量子力学...', time:'星期一', avatarClass:'avatar-4', status:'学习模式 · 专注中', welcome:'你好！我是你的学习助手 <br><br>无论是数学、物理、编程还是语言学习，我都能帮你。', history:[] }
   ];
 
   let currentConversation = null;
@@ -389,7 +389,7 @@
       op.classList.add('active');
       document.body.dataset.perf = op.dataset.perf;
       localStorage.setItem('deepseek_perf', op.dataset.perf);
-      showToast(op.dataset.perf === 'low' ? '⚡ 已切換到極低細節' : op.dataset.perf === 'high' ? '💎 已切換到極高細節' : '✨ 已切換到一般細節');
+      showToast(op.dataset.perf === 'low' ? '已切換到極低細節' : op.dataset.perf === 'high' ? '已切換到極高細節' : '已切換到一般細節');
     });
   });
   settingsBtn.addEventListener('click', () => settingsOverlay.classList.add('open'));
@@ -473,16 +473,16 @@
       bubble.style.transition = 'transform 0.3s var(--apple-spring)';
       bubble.style.transform = 'scale(1.05)';
       setTimeout(() => bubble.style.transform = '', 300);
-      showToast('✨ 已複製到剪貼板');
+      showToast('已複製到剪貼板');
     }).catch(() => {
-      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('✨ 已複製');
+      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('已複製');
     });
   }
 
   saveApiBtn.addEventListener('click', () => {
     const key = apiKeyInput.value.trim();
     if (!key) { showToast('密钥不能为空'); return; }
-    apiKey = key; localStorage.setItem('deepseek_api_key', key); showToast('✅ API 密钥已保存');
+    apiKey = key; localStorage.setItem('deepseek_api_key', key); showToast('API 密钥已保存');
   });
 
   // ================= 圖片上傳 =================
@@ -493,14 +493,14 @@
   fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) { showToast('❌ 請選擇圖片檔案'); return; }
-    if (file.size > 5 * 1024 * 1024) { showToast('❌ 圖片不能超過 5MB'); return; }
+    if (!file.type.startsWith('image/')) { showToast('請選擇圖片檔案'); return; }
+    if (file.size > 5 * 1024 * 1024) { showToast('圖片不能超過 5MB'); return; }
 
     const reader = new FileReader();
     reader.onload = (ev) => {
       pendingImageBase64 = ev.target.result;
       renderImagePreview();
-      showToast('🖼️ 圖片已準備好，按發送');
+      showToast('圖片已準備好，按發送');
     };
     reader.readAsDataURL(file);
     fileInput.value = '';
@@ -607,7 +607,7 @@
 
   // ================= API =================
   async function callDeepSeekAPI(userMessage, imageBase64) {
-    if (!apiKey) { addMessageToUI('bot', '⚠️ 请先输入并保存 DeepSeek API 密钥。'); return null; }
+    if (!apiKey) { addMessageToUI('bot', '请先输入并保存 DeepSeek API 密钥。'); return null; }
     const history = currentConversation.history.filter(m => !m.isHTML).slice(-8);
     const messages = history.map(m => {
       if (m.image) {
@@ -644,9 +644,9 @@
       if (!botReply) throw new Error('API 返回内容为空'); return botReply;
     } catch (error) {
       let msg = '';
-      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) msg = '🌐 网络请求失败。可能是网络不通或浏览器阻挡。';
-      else if (error.message.includes('401')) msg = '🔑 API 密钥无效或已过期。';
-      else if (error.message.includes('402')) msg = '💰 帐户余额不足。';
+      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) msg = '网络请求失败。可能是网络不通或浏览器阻挡。';
+      else if (error.message.includes('401')) msg = 'API 密钥无效或已过期。';
+      else if (error.message.includes('402')) msg = '帐户余额不足。';
       else msg = `❌ 请求失败：${error.message || '未知错误'}`;
       return msg;
     }
@@ -722,7 +722,7 @@
     currentConversation.history.push({ role:'user', content: text, image: imageToSend });
 
     if (!apiKey) {
-      addMessageToUI('bot', '🔑 尚未设置 API 密钥，请先在顶部输入并保存密钥。');
+      addMessageToUI('bot', '尚未设置 API 密钥，请先在顶部输入并保存密钥。');
       return;
     }
 
@@ -748,10 +748,10 @@
             }
           }, 1500);
         }
-      } else addMessageToUI('bot', '⚠️ 未收到有效回复。');
+      } else addMessageToUI('bot', '未收到有效回复。');
     } catch (error) {
       removeTypingIndicator();
-      addMessageToUI('bot', `⚠️ 发生错误: ${error.message || '未知错误'}`);
+      addMessageToUI('bot', `发生错误: ${error.message || '未知错误'}`);
     } finally {
       isWaitingForResponse = false;
       sendBtn.disabled = false;
@@ -766,7 +766,7 @@
   autoFollowupToggle.addEventListener('click', (e) => {
     e.stopPropagation(); autoFollowupEnabled = !autoFollowupEnabled;
     autoFollowupToggle.classList.toggle('on', autoFollowupEnabled);
-    showToast(autoFollowupEnabled ? '🤖 自动追问已开启' : '自动追问已关闭', 1500);
+    showToast(autoFollowupEnabled ? '自动追问已开启' : '自动追问已关闭', 1500);
   });
 
   renderConversationList();
