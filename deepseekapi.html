@@ -3,569 +3,235 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>DeepSeek</title>
+<title>DeepSeek.</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github-dark.min.css">
 <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/common.min.js"></script>
 <style>
-  /* ================= 主題變數（預設：櫻花粉，淺色系） ================= */
-  body, body[data-theme="pink"] {
-    --bg-page: #fff0f5;
-    --card-1: rgba(255, 240, 245, 0.85);
-    --card-2: rgba(255, 228, 236, 0.92);
-    --header-1: rgba(255, 235, 242, 0.92);
-    --header-2: rgba(255, 220, 232, 0.85);
-    --accent-1: #ff9eb5;
-    --accent-2: #ff7d9c;
-    --accent-3: #ffb6c1;
-    --accent-soft: rgba(255, 182, 193, 0.35);
-    --accent-glow: rgba(255, 143, 163, 0.5);
-    --text-1: #4a2c3a;
-    --text-2: rgba(74, 44, 58, 0.7);
-    --text-3: rgba(74, 44, 58, 0.45);
-    --bubble-user-bg: linear-gradient(135deg, #ff9eb5, #ff7d9c);
-    --bubble-bot-bg: rgba(255, 250, 252, 0.95);
-    --border-soft: rgba(255, 182, 193, 0.4);
-    --border-medium: rgba(255, 143, 163, 0.5);
-    --border-strong: rgba(255, 125, 156, 0.75);
-    /* 新增：上傳按鈕專用色（參考截圖的粉紫色） */
-    --upload-btn-bg: linear-gradient(135deg, #e0b3ff, #c47dff);
-    --upload-btn-icon: #1a0d2e;
-  }
+  /* ================= 主題變數（與你之前的版本完全一致） ================= */
+  body, body[data-theme="pink"] { --bg-page: #fff0f5; --card-1: rgba(255,240,245,.85); --card-2: rgba(255,228,236,.92); --header-1: rgba(255,235,242,.92); --header-2: rgba(255,220,232,.85); --accent-1: #ff9eb5; --accent-2: #ff7d9c; --accent-3: #ffb6c1; --accent-soft: rgba(255,182,193,.35); --accent-glow: rgba(255,143,163,.5); --text-1: #4a2c3a; --text-2: rgba(74,44,58,.7); --text-3: rgba(74,44,58,.45); --bubble-user-bg: linear-gradient(135deg,#ff9eb5,#ff7d9c); --bubble-bot-bg: rgba(255,250,252,.95); --border-soft: rgba(255,182,193,.4); --border-medium: rgba(255,143,163,.5); --border-strong: rgba(255,125,156,.75); }
+  body[data-theme="deepred"] { --bg-page:#1a0406;--card-1:rgba(70,15,20,.78);--card-2:rgba(40,5,10,.88);--header-1:rgba(60,12,18,.85);--header-2:rgba(85,20,28,.65);--accent-1:#e63535;--accent-2:#ff5a5a;--accent-3:#ff8080;--accent-soft:rgba(230,53,53,.4);--accent-glow:rgba(255,90,90,.7);--text-1:#fff0f0;--text-2:rgba(255,180,180,.75);--text-3:rgba(255,150,150,.5);--bubble-user-bg:linear-gradient(135deg,#c02020,#ff5050);--bubble-bot-bg:linear-gradient(135deg,rgba(70,15,20,.9),rgba(40,5,10,.9));--border-soft:rgba(230,53,53,.25);--border-medium:rgba(230,53,53,.4);--border-strong:rgba(255,90,90,.7); }
+  body[data-theme="deeppurple"] { --bg-page:#05000d;--card-1:rgba(42,0,80,.78);--card-2:rgba(21,0,41,.88);--header-1:rgba(21,0,41,.85);--header-2:rgba(42,0,80,.65);--accent-1:#7b2fbe;--accent-2:#b026ff;--accent-3:#e0aaff;--accent-soft:rgba(176,38,255,.4);--accent-glow:rgba(199,125,255,.7);--text-1:#f0e5ff;--text-2:rgba(199,125,255,.75);--text-3:rgba(199,125,255,.5);--bubble-user-bg:linear-gradient(135deg,#7b2fbe,#b026ff);--bubble-bot-bg:linear-gradient(135deg,rgba(42,0,80,.9),rgba(21,0,41,.9));--border-soft:rgba(176,38,255,.25);--border-medium:rgba(176,38,255,.4);--border-strong:rgba(224,170,255,.7); }
+  body[data-theme="deepblue"] { --bg-page:#03080f;--card-1:rgba(10,30,60,.78);--card-2:rgba(5,15,35,.88);--header-1:rgba(5,15,35,.85);--header-2:rgba(10,30,60,.65);--accent-1:#1e5fbb;--accent-2:#3a8fff;--accent-3:#7db8ff;--accent-soft:rgba(58,143,255,.4);--accent-glow:rgba(125,184,255,.7);--text-1:#e8f2ff;--text-2:rgba(150,195,255,.75);--text-3:rgba(150,195,255,.5);--bubble-user-bg:linear-gradient(135deg,#1e5fbb,#3a8fff);--bubble-bot-bg:linear-gradient(135deg,rgba(10,30,60,.9),rgba(5,15,35,.9));--border-soft:rgba(58,143,255,.25);--border-medium:rgba(58,143,255,.4);--border-strong:rgba(125,184,255,.7); }
+  body[data-theme="lightblue"] { --bg-page:#041018;--card-1:rgba(20,70,100,.75);--card-2:rgba(10,40,65,.85);--header-1:rgba(10,40,65,.85);--header-2:rgba(20,70,100,.65);--accent-1:#1e9dd9;--accent-2:#4dc6ff;--accent-3:#8fe0ff;--accent-soft:rgba(77,198,255,.4);--accent-glow:rgba(143,224,255,.7);--text-1:#e6f8ff;--text-2:rgba(140,210,245,.75);--text-3:rgba(140,210,245,.5);--bubble-user-bg:linear-gradient(135deg,#1e9dd9,#4dc6ff);--bubble-bot-bg:linear-gradient(135deg,rgba(20,70,100,.9),rgba(10,40,65,.9));--border-soft:rgba(77,198,255,.25);--border-medium:rgba(77,198,255,.4);--border-strong:rgba(143,224,255,.7); }
+  body[data-theme="green"] { --bg-page:#031207;--card-1:rgba(15,65,30,.78);--card-2:rgba(5,35,15,.88);--header-1:rgba(5,35,15,.85);--header-2:rgba(15,65,30,.65);--accent-1:#146b32;--accent-2:#1e9e4a;--accent-3:#3ac46e;--accent-soft:rgba(30,158,74,.4);--accent-glow:rgba(58,196,110,.7);--text-1:#e6ffef;--text-2:rgba(140,220,175,.75);--text-3:rgba(140,220,175,.5);--bubble-user-bg:linear-gradient(135deg,#146b32,#1e9e4a);--bubble-bot-bg:linear-gradient(135deg,rgba(15,65,30,.9),rgba(5,35,15,.9));--border-soft:rgba(30,158,74,.25);--border-medium:rgba(30,158,74,.4);--border-strong:rgba(58,196,110,.7); }
+  body[data-theme="yellow"] { --bg-page:#14100a;--card-1:rgba(85,65,15,.75);--card-2:rgba(50,35,5,.85);--header-1:rgba(50,35,5,.85);--header-2:rgba(85,65,15,.65);--accent-1:#d9a820;--accent-2:#ffcc40;--accent-3:#ffe080;--accent-soft:rgba(255,204,64,.4);--accent-glow:rgba(255,224,128,.7);--text-1:#fff9e6;--text-2:rgba(230,210,150,.75);--text-3:rgba(230,210,150,.5);--bubble-user-bg:linear-gradient(135deg,#d9a820,#ffcc40);--bubble-bot-bg:linear-gradient(135deg,rgba(85,65,15,.9),rgba(50,35,5,.9));--border-soft:rgba(255,204,64,.25);--border-medium:rgba(255,204,64,.4);--border-strong:rgba(255,224,128,.7); }
+  body[data-theme="orange"] { --bg-page:#140803;--card-1:rgba(85,40,10,.75);--card-2:rgba(50,20,5,.85);--header-1:rgba(50,20,5,.85);--header-2:rgba(85,40,10,.65);--accent-1:#d96720;--accent-2:#ff8b3a;--accent-3:#ffb37a;--accent-soft:rgba(255,139,58,.4);--accent-glow:rgba(255,179,122,.7);--text-1:#fff3e6;--text-2:rgba(235,180,140,.75);--text-3:rgba(235,180,140,.5);--bubble-user-bg:linear-gradient(135deg,#d96720,#ff8b3a);--bubble-bot-bg:linear-gradient(135deg,rgba(85,40,10,.9),rgba(50,20,5,.9));--border-soft:rgba(255,139,58,.25);--border-medium:rgba(255,139,58,.4);--border-strong:rgba(255,179,122,.7); }
+  body[data-theme="mono"] { --bg-page:#0a0a0a;--card-1:rgba(30,30,30,.78);--card-2:rgba(15,15,15,.88);--header-1:rgba(15,15,15,.85);--header-2:rgba(30,30,30,.65);--accent-1:#888;--accent-2:#b0b0b0;--accent-3:#e0e0e0;--accent-soft:rgba(176,176,176,.4);--accent-glow:rgba(224,224,224,.7);--text-1:#f0f0f0;--text-2:rgba(200,200,200,.75);--text-3:rgba(200,200,200,.5);--bubble-user-bg:linear-gradient(135deg,#555,#909090);--bubble-bot-bg:linear-gradient(135deg,rgba(30,30,30,.9),rgba(15,15,15,.9));--border-soft:rgba(176,176,176,.25);--border-medium:rgba(176,176,176,.4);--border-strong:rgba(224,224,224,.7); }
 
-  body[data-theme="deepred"] {
-    --bg-page: #1a0406; --card-1: rgba(70, 15, 20, 0.78); --card-2: rgba(40, 5, 10, 0.88); --header-1: rgba(60, 12, 18, 0.85); --header-2: rgba(85, 20, 28, 0.65); --accent-1: #e63535; --accent-2: #ff5a5a; --accent-3: #ff8080; --accent-soft: rgba(230, 53, 53, 0.4); --accent-glow: rgba(255, 90, 90, 0.7); --text-1: #fff0f0; --text-2: rgba(255, 180, 180, 0.75); --text-3: rgba(255, 150, 150, 0.5); --bubble-user-bg: linear-gradient(135deg, #c02020, #ff5050); --bubble-bot-bg: linear-gradient(135deg, rgba(70, 15, 20, 0.9), rgba(40, 5, 10, 0.9)); --border-soft: rgba(230, 53, 53, 0.25); --border-medium: rgba(230, 53, 53, 0.4); --border-strong: rgba(255, 90, 90, 0.7); --upload-btn-bg: linear-gradient(135deg, #c02020, #ff5050); --upload-btn-icon: #ffffff;
-  }
-
-  body[data-theme="deeppurple"] {
-    --bg-page: #05000d; --card-1: rgba(42, 0, 80, 0.78); --card-2: rgba(21, 0, 41, 0.88); --header-1: rgba(21, 0, 41, 0.85); --header-2: rgba(42, 0, 80, 0.65); --accent-1: #7b2fbe; --accent-2: #b026ff; --accent-3: #e0aaff; --accent-soft: rgba(176, 38, 255, 0.4); --accent-glow: rgba(199, 125, 255, 0.7); --text-1: #f0e5ff; --text-2: rgba(199, 125, 255, 0.75); --text-3: rgba(199, 125, 255, 0.5); --bubble-user-bg: linear-gradient(135deg, #7b2fbe, #b026ff); --bubble-bot-bg: linear-gradient(135deg, rgba(42, 0, 80, 0.9), rgba(21, 0, 41, 0.9)); --border-soft: rgba(176, 38, 255, 0.25); --border-medium: rgba(176, 38, 255, 0.4); --border-strong: rgba(224, 170, 255, 0.7); --upload-btn-bg: linear-gradient(135deg, #7b2fbe, #b026ff); --upload-btn-icon: #ffffff;
-  }
-
-  body[data-theme="deepblue"] {
-    --bg-page: #03080f; --card-1: rgba(10, 30, 60, 0.78); --card-2: rgba(5, 15, 35, 0.88); --header-1: rgba(5, 15, 35, 0.85); --header-2: rgba(10, 30, 60, 0.65); --accent-1: #1e5fbb; --accent-2: #3a8fff; --accent-3: #7db8ff; --accent-soft: rgba(58, 143, 255, 0.4); --accent-glow: rgba(125, 184, 255, 0.7); --text-1: #e8f2ff; --text-2: rgba(150, 195, 255, 0.75); --text-3: rgba(150, 195, 255, 0.5); --bubble-user-bg: linear-gradient(135deg, #1e5fbb, #3a8fff); --bubble-bot-bg: linear-gradient(135deg, rgba(10, 30, 60, 0.9), rgba(5, 15, 35, 0.9)); --border-soft: rgba(58, 143, 255, 0.25); --border-medium: rgba(58, 143, 255, 0.4); --border-strong: rgba(125, 184, 255, 0.7); --upload-btn-bg: linear-gradient(135deg, #1e5fbb, #3a8fff); --upload-btn-icon: #ffffff;
-  }
-
-  body[data-theme="lightblue"] {
-    --bg-page: #041018; --card-1: rgba(20, 70, 100, 0.75); --card-2: rgba(10, 40, 65, 0.85); --header-1: rgba(10, 40, 65, 0.85); --header-2: rgba(20, 70, 100, 0.65); --accent-1: #1e9dd9; --accent-2: #4dc6ff; --accent-3: #8fe0ff; --accent-soft: rgba(77, 198, 255, 0.4); --accent-glow: rgba(143, 224, 255, 0.7); --text-1: #e6f8ff; --text-2: rgba(140, 210, 245, 0.75); --text-3: rgba(140, 210, 245, 0.5); --bubble-user-bg: linear-gradient(135deg, #1e9dd9, #4dc6ff); --bubble-bot-bg: linear-gradient(135deg, rgba(20, 70, 100, 0.9), rgba(10, 40, 65, 0.9)); --border-soft: rgba(77, 198, 255, 0.25); --border-medium: rgba(77, 198, 255, 0.4); --border-strong: rgba(143, 224, 255, 0.7); --upload-btn-bg: linear-gradient(135deg, #1e9dd9, #4dc6ff); --upload-btn-icon: #ffffff;
-  }
-
-  body[data-theme="green"] {
-    --bg-page: #031207; --card-1: rgba(15, 65, 30, 0.78); --card-2: rgba(5, 35, 15, 0.88); --header-1: rgba(5, 35, 15, 0.85); --header-2: rgba(15, 65, 30, 0.65); --accent-1: #146b32; --accent-2: #1e9e4a; --accent-3: #3ac46e; --accent-soft: rgba(30, 158, 74, 0.4); --accent-glow: rgba(58, 196, 110, 0.7); --text-1: #e6ffef; --text-2: rgba(140, 220, 175, 0.75); --text-3: rgba(140, 220, 175, 0.5); --bubble-user-bg: linear-gradient(135deg, #146b32, #1e9e4a); --bubble-bot-bg: linear-gradient(135deg, rgba(15, 65, 30, 0.9), rgba(5, 35, 15, 0.9)); --border-soft: rgba(30, 158, 74, 0.25); --border-medium: rgba(30, 158, 74, 0.4); --border-strong: rgba(58, 196, 110, 0.7); --upload-btn-bg: linear-gradient(135deg, #146b32, #1e9e4a); --upload-btn-icon: #ffffff;
-  }
-
-  body[data-theme="yellow"] {
-    --bg-page: #14100a; --card-1: rgba(85, 65, 15, 0.75); --card-2: rgba(50, 35, 5, 0.85); --header-1: rgba(50, 35, 5, 0.85); --header-2: rgba(85, 65, 15, 0.65); --accent-1: #d9a820; --accent-2: #ffcc40; --accent-3: #ffe080; --accent-soft: rgba(255, 204, 64, 0.4); --accent-glow: rgba(255, 224, 128, 0.7); --text-1: #fff9e6; --text-2: rgba(230, 210, 150, 0.75); --text-3: rgba(230, 210, 150, 0.5); --bubble-user-bg: linear-gradient(135deg, #d9a820, #ffcc40); --bubble-bot-bg: linear-gradient(135deg, rgba(85, 65, 15, 0.9), rgba(50, 35, 5, 0.9)); --border-soft: rgba(255, 204, 64, 0.25); --border-medium: rgba(255, 204, 64, 0.4); --border-strong: rgba(255, 224, 128, 0.7); --upload-btn-bg: linear-gradient(135deg, #d9a820, #ffcc40); --upload-btn-icon: #1a1200;
-  }
-
-  body[data-theme="orange"] {
-    --bg-page: #140803; --card-1: rgba(85, 40, 10, 0.75); --card-2: rgba(50, 20, 5, 0.85); --header-1: rgba(50, 20, 5, 0.85); --header-2: rgba(85, 40, 10, 0.65); --accent-1: #d96720; --accent-2: #ff8b3a; --accent-3: #ffb37a; --accent-soft: rgba(255, 139, 58, 0.4); --accent-glow: rgba(255, 179, 122, 0.7); --text-1: #fff3e6; --text-2: rgba(235, 180, 140, 0.75); --text-3: rgba(235, 180, 140, 0.5); --bubble-user-bg: linear-gradient(135deg, #d96720, #ff8b3a); --bubble-bot-bg: linear-gradient(135deg, rgba(85, 40, 10, 0.9), rgba(50, 20, 5, 0.9)); --border-soft: rgba(255, 139, 58, 0.25); --border-medium: rgba(255, 139, 58, 0.4); --border-strong: rgba(255, 179, 122, 0.7); --upload-btn-bg: linear-gradient(135deg, #d96720, #ff8b3a); --upload-btn-icon: #ffffff;
-  }
-
-  body[data-theme="mono"] {
-    --bg-page: #0a0a0a; --card-1: rgba(30, 30, 30, 0.78); --card-2: rgba(15, 15, 15, 0.88); --header-1: rgba(15, 15, 15, 0.85); --header-2: rgba(30, 30, 30, 0.65); --accent-1: #888888; --accent-2: #b0b0b0; --accent-3: #e0e0e0; --accent-soft: rgba(176, 176, 176, 0.4); --accent-glow: rgba(224, 224, 224, 0.7); --text-1: #f0f0f0; --text-2: rgba(200, 200, 200, 0.75); --text-3: rgba(200, 200, 200, 0.5); --bubble-user-bg: linear-gradient(135deg, #555555, #909090); --bubble-bot-bg: linear-gradient(135deg, rgba(30, 30, 30, 0.9), rgba(15, 15, 15, 0.9)); --border-soft: rgba(176, 176, 176, 0.25); --border-medium: rgba(176, 176, 176, 0.4); --border-strong: rgba(224, 224, 224, 0.7); --upload-btn-bg: linear-gradient(135deg, #555555, #909090); --upload-btn-icon: #ffffff;
-  }
-
-  /* ================= 基礎重置 ================= */
-  * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
-  html, body { height: 100%; overflow: hidden; }
-  body { 
-    background: var(--bg-page); 
-    display: flex; justify-content: center; align-items: center; 
-    padding: 16px; margin: 0; position: relative;
-    transition: background 0.4s ease;
-  }
-
-  :root { --apple-spring: cubic-bezier(0.32, 0.72, 0, 1); }
-
-  /* ================= 粉色主題特殊適配（淺色系） ================= */
-  body[data-theme="pink"] .aurora-bg { opacity: 0.45; }
-  body[data-theme="pink"] .star {
-    background: radial-gradient(circle, #ffb6c1, rgba(255, 143, 163, 0.3) 50%, transparent 70%);
-    box-shadow: 0 0 8px rgba(255, 182, 193, 0.6);
-  }
-  body[data-theme="pink"] .app-container {
-    box-shadow: 0 30px 80px -20px rgba(255, 143, 163, 0.25), 0 0 60px rgba(255, 182, 193, 0.15);
-  }
-  body[data-theme="pink"] .bubble strong,
-  body[data-theme="pink"] .bubble h1,
-  body[data-theme="pink"] .bubble h2,
-  body[data-theme="pink"] .bubble h3 { color: #d63384; }
-  body[data-theme="pink"] .bubble code:not(pre code) {
-    background: rgba(255, 143, 163, 0.18);
-    color: #d63384;
-  }
-  body[data-theme="pink"] .bubble pre {
-    background: rgba(255, 240, 245, 0.95) !important;
-    border-color: rgba(255, 143, 163, 0.4);
-  }
-  body[data-theme="pink"] .bubble pre code { color: #4a2c3a; }
-  body[data-theme="pink"] .bubble table { border-color: rgba(255, 143, 163, 0.4); }
-  body[data-theme="pink"] .bubble th {
-    background: rgba(255, 143, 163, 0.15);
-    color: #d63384;
-  }
-  body[data-theme="pink"] .bubble td { border-color: rgba(255, 143, 163, 0.2); }
-  body[data-theme="pink"] .bubble blockquote {
-    border-left-color: #ff9eb5;
-    background: linear-gradient(90deg, rgba(255, 182, 193, 0.15), transparent);
-  }
-  body[data-theme="pink"] .bubble a { color: #d63384; }
-  body[data-theme="pink"] .typing-indicator span {
-    background: radial-gradient(circle at 30% 30%, #ff7d9c, #ff9eb5);
-    box-shadow: 0 0 10px rgba(255, 143, 163, 0.6);
-  }
-  body[data-theme="pink"] .followup-chip { color: #4a2c3a; }
-  body[data-theme="pink"] .message.user .bubble { color: #ffffff; }
+  * { margin:0; padding:0; box-sizing:border-box; font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; }
+  html,body { height:100%; overflow:hidden; }
+  body { background:var(--bg-page); display:flex; justify-content:center; align-items:center; padding:16px; margin:0; position:relative; transition:background .4s; }
+  :root { --apple-spring: cubic-bezier(.32,.72,0,1); }
 
   /* ================= 背景 ================= */
-  .aurora-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-  .aurora-layer { position: absolute; inset: -50%; filter: blur(70px); opacity: 0.85; }
-  .aurora-1 { background: radial-gradient(circle at 20% 30%, var(--accent-soft) 0%, transparent 45%), radial-gradient(circle at 80% 70%, var(--accent-glow) 0%, transparent 45%); animation: aurora1 22s ease-in-out infinite alternate; }
-  .aurora-2 { background: radial-gradient(circle at 70% 20%, var(--card-2) 0%, transparent 50%), radial-gradient(circle at 30% 80%, var(--accent-soft) 0%, transparent 50%); animation: aurora2 28s ease-in-out infinite alternate; }
-  .aurora-3 { background: radial-gradient(circle at 50% 50%, var(--accent-soft) 0%, transparent 60%), radial-gradient(circle at 15% 85%, var(--accent-glow) 0%, transparent 50%); animation: aurora3 25s ease-in-out infinite alternate; }
-  .aurora-4 { background: radial-gradient(circle at 85% 40%, var(--accent-soft) 0%, transparent 45%), radial-gradient(circle at 25% 55%, var(--accent-glow) 0%, transparent 50%); animation: aurora4 32s ease-in-out infinite alternate; }
-  @keyframes aurora1 { 0% { transform: translate(0, 0) rotate(0deg) scale(1); } 100% { transform: translate(10%, -8%) rotate(15deg) scale(1.15); } }
-  @keyframes aurora2 { 0% { transform: translate(0, 0) rotate(0deg) scale(1.1); } 100% { transform: translate(-10%, 8%) rotate(-12deg) scale(1); } }
-  @keyframes aurora3 { 0% { transform: translate(-5%, 5%) rotate(-5deg); } 100% { transform: translate(8%, -6%) rotate(8deg); } }
-  @keyframes aurora4 { 0% { transform: translate(5%, 5%) rotate(8deg) scale(1); } 100% { transform: translate(-8%, -5%) rotate(-10deg) scale(1.1); } }
-
-  .stars-bg { position: fixed; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
-  .star { position: absolute; border-radius: 50%; background: radial-gradient(circle, var(--accent-3), var(--accent-soft) 50%, transparent 70%); box-shadow: 0 0 12px var(--accent-glow), 0 0 24px var(--accent-soft); animation: starFloat linear infinite, starTwinkle ease-in-out infinite alternate; opacity: 0; }
-  @keyframes starFloat { 0% { transform: translateY(0) translateX(0); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 0.4; } 100% { transform: translateY(-110vh) translateX(50px); opacity: 0; } }
-  @keyframes starTwinkle { 0% { filter: brightness(0.7); } 100% { filter: brightness(1.6); } }
+  .aurora-bg { position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+  .aurora-layer { position:absolute; inset:-50%; filter:blur(70px); opacity:.85; }
+  .aurora-1 { background:radial-gradient(circle at 20% 30%,var(--accent-soft) 0%,transparent 45%),radial-gradient(circle at 80% 70%,var(--accent-glow) 0%,transparent 45%); animation:aurora1 22s ease-in-out infinite alternate; }
+  .aurora-2 { background:radial-gradient(circle at 70% 20%,var(--card-2) 0%,transparent 50%),radial-gradient(circle at 30% 80%,var(--accent-soft) 0%,transparent 50%); animation:aurora2 28s ease-in-out infinite alternate; }
+  .aurora-3 { background:radial-gradient(circle at 50% 50%,var(--accent-soft) 0%,transparent 60%),radial-gradient(circle at 15% 85%,var(--accent-glow) 0%,transparent 50%); animation:aurora3 25s ease-in-out infinite alternate; }
+  .aurora-4 { background:radial-gradient(circle at 85% 40%,var(--accent-soft) 0%,transparent 45%),radial-gradient(circle at 25% 55%,var(--accent-glow) 0%,transparent 50%); animation:aurora4 32s ease-in-out infinite alternate; }
+  @keyframes aurora1 { 0%{transform:translate(0,0) rotate(0) scale(1);}100%{transform:translate(10%,-8%) rotate(15deg) scale(1.15);} }
+  @keyframes aurora2 { 0%{transform:translate(0,0) rotate(0) scale(1.1);}100%{transform:translate(-10%,8%) rotate(-12deg) scale(1);} }
+  @keyframes aurora3 { 0%{transform:translate(-5%,5%) rotate(-5deg);}100%{transform:translate(8%,-6%) rotate(8deg);} }
+  @keyframes aurora4 { 0%{transform:translate(5%,5%) rotate(8deg) scale(1);}100%{transform:translate(-8%,-5%) rotate(-10deg) scale(1.1);} }
+  .stars-bg { position:fixed; inset:0; z-index:1; overflow:hidden; pointer-events:none; }
+  .star { position:absolute; border-radius:50%; background:radial-gradient(circle,var(--accent-3),var(--accent-soft) 50%,transparent 70%); box-shadow:0 0 12px var(--accent-glow),0 0 24px var(--accent-soft); animation:starFloat linear infinite, starTwinkle ease-in-out infinite alternate; opacity:0; }
+  @keyframes starFloat { 0%{transform:translateY(0) translateX(0);opacity:0;}10%{opacity:1;}90%{opacity:.4;}100%{transform:translateY(-110vh) translateX(50px);opacity:0;} }
+  @keyframes starTwinkle { 0%{filter:brightness(.7);}100%{filter:brightness(1.6);} }
 
   /* ================= 主容器 ================= */
-  .app-container {
-    position: relative; z-index: 5; width: 100%; max-width: 780px; height: 90vh; max-height: 820px;
-    background: linear-gradient(135deg, var(--card-1), var(--card-2));
-    backdrop-filter: blur(34px) saturate(200%); -webkit-backdrop-filter: blur(34px) saturate(200%);
-    border: 1px solid var(--border-medium); border-radius: 44px; overflow: hidden;
-    transition: transform 0.5s var(--apple-spring), box-shadow 0.8s ease, background 0.4s ease;
-    animation: cardEntrance 1.4s var(--apple-spring) both, cardFloat 8s ease-in-out infinite alternate;
-    transform-style: preserve-3d; isolation: isolate;
-  }
-  @keyframes cardEntrance { 0% { opacity: 0; transform: translateY(60px) scale(0.85) rotateX(15deg); filter: blur(15px); } 100% { opacity: 1; transform: translateY(0) scale(1) rotateX(0); filter: blur(0); } }
-  @keyframes cardFloat { 0% { transform: translateY(0px) rotateZ(0deg); } 100% { transform: translateY(-10px) rotateZ(0.5deg); } }
-  .app-container::after { content: ''; position: absolute; inset: 0; border-radius: 44px; background: radial-gradient(ellipse at 50% -20%, var(--accent-soft), transparent 60%); pointer-events: none; z-index: 1; }
-  .app-container::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--accent-1), var(--accent-3), var(--accent-2), var(--accent-1), transparent); background-size: 300% 100%; animation: topScan 4s linear infinite; z-index: 15; border-radius: 44px 44px 0 0; box-shadow: 0 0 20px var(--accent-glow); }
-  @keyframes topScan { 0% { background-position: 300% 0; } 100% { background-position: -300% 0; } }
+  .app-container { position:relative; z-index:5; width:100%; max-width:780px; height:90vh; max-height:820px; background:linear-gradient(135deg,var(--card-1),var(--card-2)); backdrop-filter:blur(34px) saturate(200%); -webkit-backdrop-filter:blur(34px) saturate(200%); border:1px solid var(--border-medium); border-radius:44px; overflow:hidden; transition:transform .5s var(--apple-spring), box-shadow .8s, background .4s; animation:cardEntrance 1.4s var(--apple-spring) both, cardFloat 8s ease-in-out infinite alternate; transform-style:preserve-3d; isolation:isolate; }
+  @keyframes cardEntrance { 0%{opacity:0;transform:translateY(60px) scale(.85) rotateX(15deg);filter:blur(15px);}100%{opacity:1;transform:translateY(0) scale(1) rotateX(0);filter:blur(0);} }
+  @keyframes cardFloat { 0%{transform:translateY(0) rotateZ(0);}100%{transform:translateY(-10px) rotateZ(.5deg);} }
+  .app-container::after { content:''; position:absolute; inset:0; border-radius:44px; background:radial-gradient(ellipse at 50% -20%,var(--accent-soft),transparent 60%); pointer-events:none; z-index:1; }
+  .app-container::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,transparent,var(--accent-1),var(--accent-3),var(--accent-2),var(--accent-1),transparent); background-size:300% 100%; animation:topScan 4s linear infinite; z-index:15; border-radius:44px 44px 0 0; box-shadow:0 0 20px var(--accent-glow); }
+  @keyframes topScan { 0%{background-position:300% 0;}100%{background-position:-300% 0;} }
 
-  /* ================= 視圖切換 ================= */
-  .view { position: absolute; inset: 0; display: flex; flex-direction: column; transition: transform 0.6s var(--apple-spring), opacity 0.5s ease; backface-visibility: hidden; }
-  .view-hidden { opacity: 0; pointer-events: none; transform: translateX(-12%) scale(0.96); filter: blur(8px); }
-  .view-right-hidden { opacity: 0; pointer-events: none; transform: translateX(100%); filter: blur(8px); }
+  /* 視圖切換 */
+  .view { position:absolute; inset:0; display:flex; flex-direction:column; transition:transform .6s var(--apple-spring), opacity .5s; backface-visibility:hidden; }
+  .view-hidden { opacity:0; pointer-events:none; transform:translateX(-12%) scale(.96); filter:blur(8px); }
+  .view-right-hidden { opacity:0; pointer-events:none; transform:translateX(100%); filter:blur(8px); }
 
   /* ================= 會話列表 ================= */
-  .list-header { padding: 20px 22px 16px; background: linear-gradient(135deg, var(--header-1), var(--header-2)); border-bottom: 1px solid var(--border-soft); backdrop-filter: blur(16px); position: relative; overflow: hidden; }
-  .list-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .list-title { font-size: 1.5rem; font-weight: 800; letter-spacing: 1.5px; background: linear-gradient(90deg, var(--accent-2), var(--accent-3), var(--accent-1), var(--accent-2)); background-size: 300% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: titleGradient 5s linear infinite; display: flex; align-items: center; gap: 10px; }
-  @keyframes titleGradient { 0% { background-position: 0% center; } 100% { background-position: 300% center; } }
-  .list-title .title-icon { font-size: 1.5rem; -webkit-text-fill-color: initial; color: var(--accent-2); filter: drop-shadow(0 0 12px var(--accent-glow)); }
-  .settings-btn {
-    width: 42px; height: 42px; border-radius: 50%; cursor: pointer;
-    background: var(--bubble-bot-bg);
-    border: 1px solid var(--border-medium);
-    color: var(--accent-2);
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.4s var(--apple-spring);
-    flex-shrink: 0;
-  }
-  .settings-btn:hover { transform: rotate(60deg) scale(1.1); border-color: var(--border-strong); box-shadow: 0 0 25px var(--accent-glow); }
-  .settings-btn:active { transform: rotate(60deg) scale(0.95); }
-  .list-subtitle { font-size: 0.78rem; color: var(--text-3); margin-top: 6px; letter-spacing: 0.3px; }
-  .conversation-list { flex: 1; overflow-y: auto; padding: 12px 12px 20px; display: flex; flex-direction: column; gap: 8px; background: radial-gradient(ellipse at 30% 10%, var(--accent-soft), transparent 70%); }
-  .conversation-list::-webkit-scrollbar { width: 8px; } .conversation-list::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--accent-1), var(--accent-2)); border-radius: 20px; }
-  .conv-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 20px; background: var(--bubble-bot-bg); border: 1px solid var(--border-soft); cursor: pointer; transition: all 0.5s var(--apple-spring); animation: convAppear 0.7s var(--apple-spring) both; }
-  @keyframes convAppear { 0% { opacity: 0; transform: translateX(-30px) scale(0.9); filter: blur(6px); } 100% { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); } }
-  .conv-item:hover { border-color: var(--border-strong); transform: translateX(6px) scale(1.01); box-shadow: 0 12px 30px -6px var(--accent-soft), 0 0 30px var(--accent-soft); }
-  .conv-avatar { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; border: 2px solid var(--border-medium); box-shadow: 0 0 20px var(--accent-soft); animation: avatarPulse 3s ease-in-out infinite; }
-  @keyframes avatarPulse { 0%, 100% { box-shadow: 0 0 20px var(--accent-soft); } 50% { box-shadow: 0 0 35px var(--accent-glow), 0 0 0 4px var(--accent-soft); } }
-  .avatar-1 { background: var(--bubble-user-bg); } .avatar-2 { background: linear-gradient(135deg, var(--accent-1), var(--accent-2)); } .avatar-3 { background: linear-gradient(135deg, var(--accent-2), var(--accent-3)); } .avatar-4 { background: linear-gradient(135deg, var(--card-2), var(--accent-1)); }
-  .conv-content { flex: 1; min-width: 0; } .conv-name { font-size: 1rem; font-weight: 600; color: var(--text-1); display: flex; justify-content: space-between; margin-bottom: 4px; }
-  .conv-time { font-size: 0.72rem; color: var(--text-3); } .conv-preview { font-size: 0.82rem; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .list-header { padding:20px 22px 16px; background:linear-gradient(135deg,var(--header-1),var(--header-2)); border-bottom:1px solid var(--border-soft); backdrop-filter:blur(16px); position:relative; overflow:hidden; }
+  .list-title-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .list-title { font-size:1.5rem; font-weight:800; letter-spacing:1.5px; background:linear-gradient(90deg,var(--accent-2),var(--accent-3),var(--accent-1),var(--accent-2)); background-size:300% auto; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; animation:titleGradient 5s linear infinite; display:flex; align-items:center; gap:10px; }
+  @keyframes titleGradient { 0%{background-position:0% center;}100%{background-position:300% center;} }
+  .list-title .title-icon { font-size:1.5rem; -webkit-text-fill-color:initial; color:var(--accent-2); filter:drop-shadow(0 0 12px var(--accent-glow)); }
+  .settings-btn { width:42px; height:42px; border-radius:50%; cursor:pointer; background:var(--bubble-bot-bg); border:1px solid var(--border-medium); color:var(--accent-2); display:flex; align-items:center; justify-content:center; transition:all .4s var(--apple-spring); flex-shrink:0; }
+  .settings-btn:hover { transform:rotate(60deg) scale(1.1); border-color:var(--border-strong); box-shadow:0 0 25px var(--accent-glow); }
+  .settings-btn:active { transform:rotate(60deg) scale(.95); }
+  .list-subtitle { font-size:.78rem; color:var(--text-3); margin-top:6px; letter-spacing:.3px; }
+  .conversation-list { flex:1; overflow-y:auto; padding:12px 12px 20px; display:flex; flex-direction:column; gap:8px; background:radial-gradient(ellipse at 30% 10%,var(--accent-soft),transparent 70%); }
+  .conversation-list::-webkit-scrollbar { width:8px; } .conversation-list::-webkit-scrollbar-thumb { background:linear-gradient(180deg,var(--accent-1),var(--accent-2)); border-radius:20px; }
+  .conv-item { display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:20px; background:var(--bubble-bot-bg); border:1px solid var(--border-soft); cursor:pointer; transition:all .5s var(--apple-spring); animation:convAppear .7s var(--apple-spring) both; }
+  @keyframes convAppear { 0%{opacity:0;transform:translateX(-30px) scale(.9);filter:blur(6px);}100%{opacity:1;transform:translateX(0) scale(1);filter:blur(0);} }
+  .conv-item:hover { border-color:var(--border-strong); transform:translateX(6px) scale(1.01); box-shadow:0 12px 30px -6px var(--accent-soft),0 0 30px var(--accent-soft); }
+  .conv-avatar { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.6rem; border:2px solid var(--border-medium); box-shadow:0 0 20px var(--accent-soft); animation:avatarPulse 3s ease-in-out infinite; }
+  @keyframes avatarPulse { 0%,100%{box-shadow:0 0 20px var(--accent-soft);}50%{box-shadow:0 0 35px var(--accent-glow),0 0 0 4px var(--accent-soft);} }
+  .avatar-1{background:var(--bubble-user-bg);}.avatar-2{background:linear-gradient(135deg,var(--accent-1),var(--accent-2));}.avatar-3{background:linear-gradient(135deg,var(--accent-2),var(--accent-3));}.avatar-4{background:linear-gradient(135deg,var(--card-2),var(--accent-1));}
+  .conv-content { flex:1; min-width:0; } .conv-name { font-size:1rem; font-weight:600; color:var(--text-1); display:flex; justify-content:space-between; margin-bottom:4px; }
+  .conv-time { font-size:.72rem; color:var(--text-3); } .conv-preview { font-size:.82rem; color:var(--text-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
   /* ================= 聊天視圖 ================= */
-  .chat-header { padding: 14px 18px; display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, var(--header-1), var(--header-2)); border-bottom: 1px solid var(--border-soft); backdrop-filter: blur(16px); position: relative; z-index: 2; }
-  .back-btn { background: var(--bubble-bot-bg); border: 1px solid var(--border-medium); border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: var(--accent-2); cursor: pointer; transition: all 0.4s var(--apple-spring); flex-shrink: 0; }
-  .back-btn:hover { transform: scale(1.12) translateX(-3px); border-color: var(--border-strong); box-shadow: 0 0 25px var(--accent-soft); }
-  .back-btn:active { transform: scale(0.92); }
-  .chat-header-info { flex: 1; min-width: 0; }
-  .chat-header-name { font-size: 1.05rem; font-weight: 600; color: var(--text-1); display: flex; align-items: center; gap: 8px; }
-  .chat-header-status { font-size: 0.72rem; color: var(--text-2); display: flex; align-items: center; gap: 6px; margin-top: 2px; }
-  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 8px var(--accent-glow); animation: statusPulse 2s ease-in-out infinite; }
-  @keyframes statusPulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.4); } }
-  .api-input-wrapper { display: flex; align-items: center; background: var(--bubble-bot-bg); border-radius: 100px; padding: 2px 2px 2px 16px; border: 1px solid var(--border-medium); transition: all 0.4s var(--apple-spring); margin-top: 10px; }
-  .api-input-wrapper:focus-within { border-color: var(--border-strong); box-shadow: 0 0 0 4px var(--accent-soft), 0 0 50px var(--accent-soft); }
-  .api-input-wrapper input { flex: 1; background: transparent; border: none; outline: none; color: var(--text-1); font-size: 0.85rem; padding: 10px 0; min-width: 0; }
-  .api-input-wrapper input::placeholder { color: var(--text-3); }
-  .save-btn { background: var(--bubble-user-bg); border-radius: 100px; padding: 8px 16px; font-size: 0.78rem; font-weight: 600; color: white; border: 1px solid var(--border-medium); cursor: pointer; transition: all 0.4s var(--apple-spring); }
-  .save-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 12px 30px var(--accent-soft); }
+  .chat-header { padding:14px 18px; display:flex; align-items:center; gap:12px; background:linear-gradient(135deg,var(--header-1),var(--header-2)); border-bottom:1px solid var(--border-soft); backdrop-filter:blur(16px); position:relative; z-index:2; }
+  .back-btn { background:var(--bubble-bot-bg); border:1px solid var(--border-medium); border-radius:50%; width:42px; height:42px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; color:var(--accent-2); cursor:pointer; transition:all .4s var(--apple-spring); flex-shrink:0; }
+  .back-btn:hover { transform:scale(1.12) translateX(-3px); border-color:var(--border-strong); box-shadow:0 0 25px var(--accent-soft); }
+  .back-btn:active { transform:scale(.92); }
+  .chat-header-info { flex:1; min-width:0; }
+  .chat-header-name { font-size:1.05rem; font-weight:600; color:var(--text-1); display:flex; align-items:center; gap:8px; }
+  .chat-header-status { font-size:.72rem; color:var(--text-2); display:flex; align-items:center; gap:6px; margin-top:2px; }
+  .status-dot { width:6px; height:6px; border-radius:50%; background:var(--accent-2); box-shadow:0 0 8px var(--accent-glow); animation:statusPulse 2s ease-in-out infinite; }
+  @keyframes statusPulse { 0%,100%{opacity:.6;transform:scale(1);}50%{opacity:1;transform:scale(1.4);} }
+  .api-input-wrapper { display:flex; align-items:center; background:var(--bubble-bot-bg); border-radius:100px; padding:2px 2px 2px 16px; border:1px solid var(--border-medium); transition:all .4s var(--apple-spring); margin-top:10px; }
+  .api-input-wrapper:focus-within { border-color:var(--border-strong); box-shadow:0 0 0 4px var(--accent-soft),0 0 50px var(--accent-soft); }
+  .api-input-wrapper input { flex:1; background:transparent; border:none; outline:none; color:var(--text-1); font-size:.85rem; padding:10px 0; min-width:0; }
+  .api-input-wrapper input::placeholder { color:var(--text-3); }
+  .save-btn { background:var(--bubble-user-bg); border-radius:100px; padding:8px 16px; font-size:.78rem; font-weight:600; color:#fff; border:1px solid var(--border-medium); cursor:pointer; transition:all .4s var(--apple-spring); }
+  .save-btn:hover { transform:translateY(-2px) scale(1.05); box-shadow:0 12px 30px var(--accent-soft); }
 
   /* ================= 訊息區域 ================= */
-  .chat-messages { flex: 1; overflow-y: auto; padding: 20px 18px 12px; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth; background: radial-gradient(ellipse at 30% 10%, var(--accent-soft), transparent 60%), radial-gradient(ellipse at 70% 90%, var(--accent-soft), transparent 60%); position: relative; z-index: 2; }
-  .chat-messages::-webkit-scrollbar { width: 8px; } .chat-messages::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--accent-1), var(--accent-2)); border-radius: 20px; }
+  .chat-messages { flex:1; overflow-y:auto; padding:20px 18px 12px; display:flex; flex-direction:column; gap:16px; scroll-behavior:smooth; background:radial-gradient(ellipse at 30% 10%,var(--accent-soft),transparent 60%),radial-gradient(ellipse at 70% 90%,var(--accent-soft),transparent 60%); position:relative; z-index:2; }
+  .chat-messages::-webkit-scrollbar { width:8px; } .chat-messages::-webkit-scrollbar-thumb { background:linear-gradient(180deg,var(--accent-1),var(--accent-2)); border-radius:20px; }
 
   /* ================= 訊息氣泡 ================= */
-  .message { max-width: 85%; display: flex; flex-direction: column; position: relative; }
-  .message.user { align-self: flex-end; align-items: flex-end; }
-  .message.bot { align-self: flex-start; align-items: flex-start; }
-  .bubble { padding: 14px 22px; font-size: 0.98rem; line-height: 1.65; word-break: break-word; backdrop-filter: blur(12px); position: relative; cursor: pointer; user-select: none; transition: transform 0.3s var(--apple-spring); }
-  .bubble:active { transform: scale(0.97); }
-  
-  .message.user .bubble { 
-    background: var(--bubble-user-bg); 
-    color: #ffffff; 
-    border: 1px solid var(--border-medium); 
-    border-radius: 24px 24px 6px 24px;
-    box-shadow: 0 14px 32px -8px var(--accent-soft), 0 0 40px var(--accent-soft); 
-  }
-  
-  .message.bot .bubble { 
-    background: var(--bubble-bot-bg); 
-    color: var(--text-1); 
-    border: 1px solid var(--border-medium); 
-    border-radius: 24px 24px 24px 6px;
-    box-shadow: 0 14px 32px -8px rgba(0, 0, 0, 0.15); 
-  }
+  .message { max-width:85%; display:flex; flex-direction:column; position:relative; }
+  .message.user { align-self:flex-end; align-items:flex-end; }
+  .message.bot { align-self:flex-start; align-items:flex-start; }
+  .bubble { padding:14px 22px; font-size:.98rem; line-height:1.65; word-break:break-word; backdrop-filter:blur(12px); position:relative; cursor:pointer; user-select:none; transition:transform .3s var(--apple-spring); }
+  .bubble:active { transform:scale(.97); }
+  .message.user .bubble { background:var(--bubble-user-bg); color:#fff; border:1px solid var(--border-medium); border-radius:24px 24px 6px 24px; box-shadow:0 14px 32px -8px var(--accent-soft),0 0 40px var(--accent-soft); }
+  .message.bot .bubble { background:var(--bubble-bot-bg); color:var(--text-1); border:1px solid var(--border-medium); border-radius:24px 24px 24px 6px; box-shadow:0 14px 32px -8px rgba(0,0,0,.15); }
+  .message .time { font-size:.7rem; color:var(--text-3); margin-top:8px; margin-left:10px; margin-right:10px; }
+  @keyframes bubbleLand { 0%{transform:scale(.7);opacity:0;}60%{transform:scale(1.04);opacity:1;}100%{transform:scale(1);opacity:1;} }
 
-  /* 圖片氣泡（無文字 padding） */
-  .message.image-only .bubble {
-    padding: 4px;
-    background: var(--bubble-user-bg);
-    overflow: hidden;
-  }
-  .message.image-only .bubble img {
-    display: block;
-    max-width: 240px;
-    max-height: 240px;
-    border-radius: 20px;
-    object-fit: cover;
-  }
+  /* 🆕 圖片訊息樣式（自適應主題） */
+  .message-image { max-width:260px; border-radius:18px; overflow:hidden; border:2px solid var(--border-medium); box-shadow:0 8px 24px -6px var(--accent-soft),0 0 30px var(--accent-soft); cursor:pointer; transition:transform .3s var(--apple-spring), box-shadow .3s; }
+  .message-image:hover { transform:scale(1.02); box-shadow:0 12px 30px -6px var(--accent-glow),0 0 40px var(--accent-glow); }
+  .message-image img { display:block; width:100%; height:auto; max-height:320px; object-fit:cover; }
+  .message.bot .message-image { border-radius:18px 18px 18px 6px; }
+  .message.user .message-image { border-radius:18px 18px 6px 18px; }
 
-  .message .time { font-size: 0.7rem; color: var(--text-3); margin-top: 8px; margin-left: 10px; margin-right: 10px; }
-  @keyframes bubbleLand { 0% { transform: scale(0.7); opacity: 0; } 60% { transform: scale(1.04); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+  /* Markdown */
+  .bubble p{margin:0 0 8px;}.bubble p:last-child{margin-bottom:0;}
+  .bubble strong{color:var(--accent-3);}.bubble h1,.bubble h2,.bubble h3{margin:12px 0 8px;color:var(--accent-3);}
+  .bubble code:not(pre code){background:var(--accent-soft);padding:2px 8px;border-radius:10px;color:var(--accent-3);}
+  .bubble pre{background:rgba(0,0,0,.6)!important;border:1px solid var(--border-medium);border-radius:18px;padding:14px;overflow-x:auto;margin:12px 0;}
+  .bubble table{border-collapse:separate;border-spacing:0;margin:10px 0;border-radius:14px;overflow:hidden;border:1px solid var(--border-medium);}
+  .bubble th,.bubble td{border-bottom:1px solid var(--border-soft);border-right:1px solid var(--border-soft);padding:8px 12px;}
+  .bubble th{background:var(--accent-soft);color:var(--accent-3);}
 
-  /* ================= Markdown ================= */
-  .bubble p { margin: 0 0 8px 0; } .bubble p:last-child { margin-bottom: 0; }
-  .bubble strong { color: var(--accent-3); } .bubble h1, .bubble h2, .bubble h3 { margin: 12px 0 8px; color: var(--accent-3); }
-  .bubble code:not(pre code) { background: var(--accent-soft); padding: 2px 8px; border-radius: 10px; color: var(--accent-3); }
-  .bubble pre { background: rgba(0, 0, 0, 0.6) !important; border: 1px solid var(--border-medium); border-radius: 18px; padding: 14px; overflow-x: auto; margin: 12px 0; }
-  .bubble table { border-collapse: separate; border-spacing: 0; margin: 10px 0; border-radius: 14px; overflow: hidden; border: 1px solid var(--border-medium); }
-  .bubble th, .bubble td { border-bottom: 1px solid var(--border-soft); border-right: 1px solid var(--border-soft); padding: 8px 12px; }
-  .bubble th { background: var(--accent-soft); color: var(--accent-3); }
+  /* 跟進建議 */
+  .followup-section{padding:10px 18px 6px;background:linear-gradient(180deg,transparent,var(--card-2));border-top:1px solid var(--border-soft);animation:followupSlideIn .6s var(--apple-spring) both;}
+  @keyframes followupSlideIn{0%{opacity:0;transform:translateY(20px);}100%{opacity:1;transform:translateY(0);}}
+  .followup-title{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text-2);margin-bottom:8px;}
+  .followup-title .dot{width:8px;height:8px;border-radius:50%;background:var(--accent-2);box-shadow:0 0 14px var(--accent-glow);animation:dotPulse 1.8s infinite;}
+  @keyframes dotPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.6);}}
+  .followup-list{display:flex;flex-wrap:wrap;gap:8px;}
+  .followup-chip{background:var(--bubble-bot-bg);border:1px solid var(--border-medium);border-radius:100px;padding:8px 16px;font-size:.85rem;color:var(--text-2);cursor:pointer;transition:all .4s var(--apple-spring);animation:chipAppear .5s var(--apple-spring) both;}
+  @keyframes chipAppear{0%{opacity:0;transform:translateY(15px) scale(.8);}100%{opacity:1;transform:translateY(0) scale(1);}}
+  .followup-chip:hover{border-color:var(--border-strong);color:var(--text-1);transform:translateY(-3px) scale(1.05);}
+  .auto-followup{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text-2);cursor:pointer;margin-left:auto;}
+  .toggle-switch{width:38px;height:22px;background:rgba(0,0,0,.15);border-radius:100px;position:relative;transition:all .4s var(--apple-spring);border:1px solid var(--border-medium);}
+  .toggle-switch::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:var(--accent-1);top:2px;left:2px;transition:all .4s var(--apple-spring);}
+  .auto-followup.on .toggle-switch{border-color:var(--border-strong);background:var(--accent-soft);}
+  .auto-followup.on .toggle-switch::after{left:18px;background:var(--accent-2);}
+  .followup-empty{font-size:.78rem;color:var(--text-3);font-style:italic;}
 
-  /* ================= 跟進建議 ================= */
-  .followup-section { padding: 10px 18px 6px; background: linear-gradient(180deg, transparent, var(--card-2)); border-top: 1px solid var(--border-soft); animation: followupSlideIn 0.6s var(--apple-spring) both; }
-  @keyframes followupSlideIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
-  .followup-title { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text-2); margin-bottom: 8px; }
-  .followup-title .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 14px var(--accent-glow); animation: dotPulse 1.8s infinite; }
-  @keyframes dotPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.6); } }
-  .followup-list { display: flex; flex-wrap: wrap; gap: 8px; }
-  .followup-chip { background: var(--bubble-bot-bg); border: 1px solid var(--border-medium); border-radius: 100px; padding: 8px 16px; font-size: 0.85rem; color: var(--text-2); cursor: pointer; transition: all 0.4s var(--apple-spring); animation: chipAppear 0.5s var(--apple-spring) both; }
-  @keyframes chipAppear { 0% { opacity: 0; transform: translateY(15px) scale(0.8); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-  .followup-chip:hover { border-color: var(--border-strong); color: var(--text-1); transform: translateY(-3px) scale(1.05); }
-  .auto-followup { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text-2); cursor: pointer; margin-left: auto; }
-  .toggle-switch { width: 38px; height: 22px; background: rgba(0, 0, 0, 0.15); border-radius: 100px; position: relative; transition: all 0.4s var(--apple-spring); border: 1px solid var(--border-medium); }
-  .toggle-switch::after { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: var(--accent-1); top: 2px; left: 2px; transition: all 0.4s var(--apple-spring); }
-  .auto-followup.on .toggle-switch { border-color: var(--border-strong); background: var(--accent-soft); }
-  .auto-followup.on .toggle-switch::after { left: 18px; background: var(--accent-2); }
-  .followup-empty { font-size: 0.78rem; color: var(--text-3); font-style: italic; }
+  /* ================= 底部輸入（新增上傳功能） ================= */
+  .chat-footer { padding:14px 18px 18px; display:flex; align-items:center; gap:10px; background:linear-gradient(135deg,var(--header-1),var(--header-2)); backdrop-filter:blur(16px); border-top:1px solid var(--border-soft); position:relative; z-index:2; }
+  .attach-btn { width:42px; height:42px; border-radius:50%; background:transparent; border:1px solid var(--border-medium); color:var(--accent-2); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:all .4s var(--apple-spring); font-size:1.4rem; }
+  .attach-btn:hover { transform:scale(1.1); background:var(--accent-soft); border-color:var(--border-strong); box-shadow:0 0 20px var(--accent-glow); }
+  .attach-btn:active { transform:scale(.92); }
+  .input-wrap { flex:1; position:relative; display:flex; align-items:center; }
+  .chat-footer input[type="text"] { flex:1; background:var(--bubble-bot-bg); border:1px solid var(--border-medium); border-radius:100px; padding:16px 52px 16px 24px; color:var(--text-1); font-size:.95rem; outline:none; transition:all .4s var(--apple-spring); width:100%; }
+  .chat-footer input[type="text"]:focus { border-color:var(--border-strong); box-shadow:0 0 0 4px var(--accent-soft),0 0 50px var(--accent-soft); }
+  .chat-footer input[type="text"]::placeholder { color:var(--text-3); }
+  .inline-attach { position:absolute; right:10px; top:50%; transform:translateY(-50%); width:36px; height:36px; border-radius:50%; background:transparent; border:none; color:var(--text-2); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .3s var(--apple-spring); }
+  .inline-attach:hover { background:var(--accent-soft); color:var(--accent-2); transform:translateY(-50%) scale(1.1); }
+  .inline-attach:active { transform:translateY(-50%) scale(.9); }
+  .send-btn { background:var(--bubble-user-bg); width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.6rem; color:#fff; border:1px solid var(--border-medium); flex-shrink:0; cursor:pointer; transition:transform .3s var(--apple-spring), box-shadow .4s; box-shadow:0 8px 25px var(--accent-soft),inset 0 1px 0 rgba(255,255,255,.3); position:relative; overflow:hidden; }
+  .send-btn::before { content:''; position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle at 50% 0%,rgba(255,255,255,.5),transparent 70%); opacity:0; transition:opacity .4s; }
+  .send-btn:hover { transform:translateY(-2px) scale(1.02); box-shadow:0 12px 30px var(--accent-soft),0 0 30px var(--accent-glow); }
+  .send-btn:hover::before { opacity:1; }
+  .send-btn:active { transform:scale(.92); }
+  .send-btn span { display:inline-block; transition:transform .4s var(--apple-spring); }
+  .send-btn:hover span { transform:translateX(2px); }
+  .send-btn:disabled { opacity:.5; pointer-events:none; }
+  .send-btn.pulsing { animation:btnPulse .5s var(--apple-spring); }
+  @keyframes btnPulse { 0%{transform:scale(1);}40%{transform:scale(1.18);box-shadow:0 0 50px var(--accent-glow),0 0 80px var(--accent-soft);}100%{transform:scale(1);} }
 
-  /* ================= 底部輸入區（參考截圖重構） ================= */
-  .chat-footer { 
-    padding: 12px 16px 16px; 
-    display: flex; 
-    flex-direction: column;
-    gap: 10px; 
-    background: linear-gradient(135deg, var(--header-1), var(--header-2)); 
-    backdrop-filter: blur(16px); 
-    border-top: 1px solid var(--border-soft); 
-    position: relative; 
-    z-index: 2; 
-  }
-
-  /* 圖片預覽條 */
-  .image-preview-bar {
-    display: none;
-    padding: 8px 4px;
-    gap: 10px;
-    overflow-x: auto;
-  }
-  .image-preview-bar.active {
-    display: flex;
-  }
-  .preview-item {
-    position: relative;
-    flex-shrink: 0;
-    width: 72px;
-    height: 72px;
-    border-radius: 14px;
-    overflow: hidden;
-    border: 2px solid var(--border-strong);
-    box-shadow: 0 0 20px var(--accent-soft);
-    animation: previewAppear 0.4s var(--apple-spring);
-  }
-  @keyframes previewAppear {
-    0% { opacity: 0; transform: scale(0.6); }
-    100% { opacity: 1; transform: scale(1); }
-  }
-  .preview-item img {
-    width: 100%; height: 100%; object-fit: cover;
-  }
-  .preview-remove {
-    position: absolute;
-    top: 2px; right: 2px;
-    width: 20px; height: 20px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s var(--apple-spring);
-  }
-  .preview-remove:hover {
-    background: rgba(255, 0, 60, 0.9);
-    transform: scale(1.15) rotate(90deg);
-  }
-
-  /* 輸入行：+ 按鈕 | 輸入框 | 圖片圖標 | 發送按鈕 */
-  .input-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  /* 左側 + 號按鈕 */
-  .plus-btn {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: transparent;
-    border: none;
-    color: var(--text-1);
-    font-size: 1.8rem;
-    font-weight: 300;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all 0.3s var(--apple-spring);
-    line-height: 1;
-    padding-bottom: 3px;
-  }
-  .plus-btn:hover {
-    background: var(--accent-soft);
-    transform: scale(1.1) rotate(90deg);
-  }
-  .plus-btn:active {
-    transform: scale(0.9) rotate(90deg);
-  }
-
-  /* 輸入框容器（帶內部圖片圖標） */
-  .input-field-wrapper {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    background: rgba(128, 128, 128, 0.15);
-    border: 1px solid var(--border-soft);
-    border-radius: 100px;
-    padding: 4px 6px 4px 20px;
-    transition: all 0.4s var(--apple-spring);
-    min-width: 0;
-  }
-  .input-field-wrapper:focus-within {
-    border-color: var(--border-strong);
-    background: rgba(128, 128, 128, 0.2);
-    box-shadow: 0 0 0 4px var(--accent-soft);
-  }
-  .input-field-wrapper input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: var(--text-1);
-    font-size: 0.95rem;
-    padding: 12px 0;
-    min-width: 0;
-  }
-  .input-field-wrapper input::placeholder {
-    color: var(--text-3);
-  }
-
-  /* 輸入框內的圖片圖標按鈕 */
-  .image-icon-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: transparent;
-    border: none;
-    color: var(--text-2);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.3s var(--apple-spring);
-  }
-  .image-icon-btn:hover {
-    background: var(--accent-soft);
-    color: var(--accent-2);
-    transform: scale(1.1);
-  }
-  .image-icon-btn:active {
-    transform: scale(0.9);
-  }
-
-  /* 發送按鈕（圓形，參考截圖的粉紫色） */
-  .send-btn {
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    background: var(--upload-btn-bg);
-    border: none;
-    color: var(--upload-btn-icon);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    cursor: pointer;
-    transition: transform 0.3s var(--apple-spring), box-shadow 0.4s ease;
-    box-shadow: 0 6px 20px var(--accent-soft), inset 0 1px 0 rgba(255,255,255,0.3);
-    position: relative;
-    overflow: hidden;
-  }
-  .send-btn::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.5), transparent 70%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-  .send-btn:hover {
-    transform: translateY(-2px) scale(1.06);
-    box-shadow: 0 12px 28px var(--accent-soft), 0 0 30px var(--accent-glow);
-  }
-  .send-btn:hover::before { opacity: 1; }
-  .send-btn:active { transform: scale(0.92); }
-  .send-btn svg {
-    width: 22px;
-    height: 22px;
-    transition: transform 0.3s var(--apple-spring);
-  }
-  .send-btn:hover svg { transform: translateX(2px); }
-  .send-btn:disabled { opacity: 0.5; pointer-events: none; }
-  .send-btn.pulsing { animation: btnPulse 0.5s var(--apple-spring); }
-  @keyframes btnPulse { 0% { transform: scale(1); } 40% { transform: scale(1.2); box-shadow: 0 0 50px var(--accent-glow), 0 0 80px var(--accent-soft); } 100% { transform: scale(1); } }
+  /* 🆕 圖片預覽縮圖（在輸入框上方） */
+  .image-preview-bar { position:absolute; bottom:100%; left:0; right:0; padding:10px 18px; display:none; gap:10px; background:linear-gradient(180deg,transparent,var(--header-2)); pointer-events:none; }
+  .image-preview-bar.show { display:flex; pointer-events:auto; }
+  .image-preview-item { position:relative; width:80px; height:80px; border-radius:14px; overflow:hidden; border:2px solid var(--border-medium); box-shadow:0 6px 18px var(--accent-soft); animation:previewIn .4s var(--apple-spring); }
+  @keyframes previewIn { 0%{opacity:0;transform:scale(.6);}100%{opacity:1;transform:scale(1);} }
+  .image-preview-item img { width:100%; height:100%; object-fit:cover; display:block; }
+  .image-preview-item .remove-img { position:absolute; top:2px; right:2px; width:22px; height:22px; border-radius:50%; background:rgba(0,0,0,.6); color:#fff; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:.8rem; transition:all .3s; }
+  .image-preview-item .remove-img:hover { background:var(--accent-2); transform:scale(1.15); }
 
   /* 文字融入按鈕的幽靈元素 */
-  .text-ghost {
-    position: fixed; z-index: 9999; pointer-events: none;
-    padding: 12px 22px; border-radius: 100px;
-    font-size: 0.95rem; font-weight: 400;
-    background: var(--bubble-bot-bg);
-    border: 1px solid var(--border-medium);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    max-width: 60%; transform-origin: center center;
-    transition: all 0.55s cubic-bezier(0.32, 0.72, 0, 1);
-    color: var(--text-1);
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-    box-shadow: 0 0 30px var(--accent-soft);
-  }
-
-  /* 能量波紋 */
-  .energy-ripple { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9998; border: 2px solid var(--accent-glow); transform: translate(-50%, -50%) scale(0); animation: energyRipple 0.8s var(--apple-spring) forwards; }
-  @keyframes energyRipple { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(4); opacity: 0; } }
+  .text-ghost { position:fixed; z-index:9999; pointer-events:none; padding:16px 24px; border-radius:100px; font-size:.95rem; background:var(--bubble-bot-bg); border:1px solid var(--border-medium); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60%; transition:all .55s cubic-bezier(.32,.72,0,1); color:var(--text-1); opacity:1; transform:translate(-50%,-50%) scale(1); box-shadow:0 0 30px var(--accent-soft); }
+  .energy-ripple { position:fixed; border-radius:50%; pointer-events:none; z-index:9998; border:2px solid var(--accent-glow); transform:translate(-50%,-50%) scale(0); animation:energyRipple .8s var(--apple-spring) forwards; }
+  @keyframes energyRipple { 0%{transform:translate(-50%,-50%) scale(0);opacity:1;}100%{transform:translate(-50%,-50%) scale(4);opacity:0;} }
 
   /* Toast */
-  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(40px); background: var(--card-2); backdrop-filter: blur(16px); padding: 12px 28px; border-radius: 100px; color: var(--text-1); font-size: 0.9rem; border: 1px solid var(--border-strong); opacity: 0; transition: all 0.5s var(--apple-spring); pointer-events: none; z-index: 10000; box-shadow: 0 0 30px var(--accent-soft); }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(40px); background:var(--card-2); backdrop-filter:blur(16px); padding:12px 28px; border-radius:100px; color:var(--text-1); font-size:.9rem; border:1px solid var(--border-strong); opacity:0; transition:all .5s var(--apple-spring); pointer-events:none; z-index:10000; box-shadow:0 0 30px var(--accent-soft); }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
   /* 打字指示器 */
-  .typing-wrapper { display: flex; align-items: flex-start; margin-top: 4px; }
-  .typing-indicator { display: flex; align-items: center; gap: 8px; padding: 12px 22px; background: var(--bubble-bot-bg); border-radius: 40px; width: fit-content; border: 1px solid var(--border-medium); animation: typingBreath 2s ease-in-out infinite; backdrop-filter: blur(12px); }
-  .typing-indicator span { width: 10px; height: 10px; background: radial-gradient(circle at 30% 30%, var(--accent-3), var(--accent-1)); border-radius: 50%; display: inline-block; animation: typingBounce 1.6s infinite var(--apple-spring); box-shadow: 0 0 15px var(--accent-glow); }
-  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; } .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0) scale(1); opacity: 0.5; } 30% { transform: translateY(-12px) scale(1.3); opacity: 1; } }
-  @keyframes typingBreath { 0%, 100% { border-color: var(--border-medium); } 50% { border-color: var(--border-strong); box-shadow: 0 0 40px var(--accent-soft); } }
+  .typing-wrapper { display:flex; align-items:flex-start; margin-top:4px; }
+  .typing-indicator { display:flex; align-items:center; gap:8px; padding:12px 22px; background:var(--bubble-bot-bg); border-radius:40px; width:fit-content; border:1px solid var(--border-medium); animation:typingBreath 2s ease-in-out infinite; backdrop-filter:blur(12px); }
+  .typing-indicator span { width:10px; height:10px; background:radial-gradient(circle at 30% 30%,var(--accent-3),var(--accent-1)); border-radius:50%; display:inline-block; animation:typingBounce 1.6s infinite var(--apple-spring); box-shadow:0 0 15px var(--accent-glow); }
+  .typing-indicator span:nth-child(2){animation-delay:.2s;}.typing-indicator span:nth-child(3){animation-delay:.4s;}
+  @keyframes typingBounce { 0%,60%,100%{transform:translateY(0) scale(1);opacity:.5;}30%{transform:translateY(-12px) scale(1.3);opacity:1;} }
+  @keyframes typingBreath { 0%,100%{border-color:var(--border-medium);}50%{border-color:var(--border-strong);box-shadow:0 0 40px var(--accent-soft);} }
 
-  /* ================= 設定面板 ================= */
-  .settings-overlay { position: absolute; inset: 0; z-index: 100; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity 0.4s ease; display: flex; justify-content: flex-end; border-radius: 44px; overflow: hidden; }
-  .settings-overlay.open { opacity: 1; pointer-events: auto; }
-  .settings-panel { width: 100%; max-width: 420px; height: 100%; background: linear-gradient(135deg, var(--card-1), var(--card-2)); border-left: 1px solid var(--border-medium); display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.5s var(--apple-spring); }
-  .settings-overlay.open .settings-panel { transform: translateX(0); }
-  .settings-header { padding: 20px 22px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--border-soft); }
-  .settings-header h2 { font-size: 1.2rem; color: var(--text-1); font-weight: 700; }
-  .settings-content { flex: 1; overflow-y: auto; padding: 20px 22px 30px; display: flex; flex-direction: column; gap: 28px; }
-  .settings-content::-webkit-scrollbar { width: 6px; } .settings-content::-webkit-scrollbar-thumb { background: var(--accent-1); border-radius: 20px; }
-  .setting-group { display: flex; flex-direction: column; gap: 12px; }
-  .setting-label { font-size: 0.85rem; color: var(--text-2); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
-  .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-  .theme-swatch { aspect-ratio: 1; border-radius: 18px; cursor: pointer; border: 2px solid transparent; transition: all 0.3s var(--apple-spring); position: relative; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px; }
-  .theme-swatch:hover { transform: scale(1.05); border-color: var(--border-strong); }
-  .theme-swatch.active { border-color: var(--accent-3); box-shadow: 0 0 0 3px var(--accent-soft), 0 0 30px var(--accent-soft); }
-  .theme-swatch.active::after { content: '✓'; position: absolute; top: 6px; right: 8px; color: white; font-size: 1rem; font-weight: 700; text-shadow: 0 0 8px rgba(0,0,0,0.8); }
-  .theme-swatch span { font-size: 0.68rem; color: white; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.9); letter-spacing: 0.3px; }
-  .theme-pink { background: linear-gradient(135deg, #ffb6c1, #ffc9d4, #ffe4ec); }
-  .theme-deepred { background: linear-gradient(135deg, #c02020, #ff5050, #ff8080); }
-  .theme-deeppurple { background: linear-gradient(135deg, #4a0080, #7b2fbe, #b026ff); }
-  .theme-deepblue { background: linear-gradient(135deg, #1e5fbb, #3a8fff, #7db8ff); }
-  .theme-lightblue { background: linear-gradient(135deg, #1e9dd9, #4dc6ff, #8fe0ff); }
-  .theme-green { background: linear-gradient(135deg, #146b32, #1e9e4a, #3ac46e); }
-  .theme-yellow { background: linear-gradient(135deg, #d9a820, #ffcc40, #ffe080); }
-  .theme-orange { background: linear-gradient(135deg, #d96720, #ff8b3a, #ffb37a); }
-  .theme-mono { background: linear-gradient(135deg, #333333, #777777, #cccccc); }
-  .perf-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .perf-option { padding: 14px 8px; border-radius: 16px; background: var(--bubble-bot-bg); border: 2px solid var(--border-soft); color: var(--text-2); cursor: pointer; transition: all 0.3s var(--apple-spring); font-size: 0.9rem; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .perf-option:hover { transform: translateY(-3px); border-color: var(--border-strong); }
-  .perf-option.active { border-color: var(--accent-3); background: var(--accent-soft); color: var(--text-1); box-shadow: 0 0 25px var(--accent-soft); }
-  .perf-option .perf-icon { font-size: 1.4rem; }
+  /* 設定面板 */
+  .settings-overlay { position:absolute; inset:0; z-index:100; background:rgba(0,0,0,.3); backdrop-filter:blur(8px); opacity:0; pointer-events:none; transition:opacity .4s; display:flex; justify-content:flex-end; border-radius:44px; overflow:hidden; }
+  .settings-overlay.open { opacity:1; pointer-events:auto; }
+  .settings-panel { width:100%; max-width:420px; height:100%; background:linear-gradient(135deg,var(--card-1),var(--card-2)); border-left:1px solid var(--border-medium); display:flex; flex-direction:column; transform:translateX(100%); transition:transform .5s var(--apple-spring); }
+  .settings-overlay.open .settings-panel { transform:translateX(0); }
+  .settings-header { padding:20px 22px; display:flex; align-items:center; gap:14px; border-bottom:1px solid var(--border-soft); }
+  .settings-header h2 { font-size:1.2rem; color:var(--text-1); font-weight:700; }
+  .settings-content { flex:1; overflow-y:auto; padding:20px 22px 30px; display:flex; flex-direction:column; gap:28px; }
+  .settings-content::-webkit-scrollbar { width:6px; } .settings-content::-webkit-scrollbar-thumb { background:var(--accent-1); border-radius:20px; }
+  .setting-group { display:flex; flex-direction:column; gap:12px; }
+  .setting-label { font-size:.85rem; color:var(--text-2); font-weight:600; letter-spacing:.5px; text-transform:uppercase; }
+  .theme-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .theme-swatch { aspect-ratio:1; border-radius:18px; cursor:pointer; border:2px solid transparent; transition:all .3s var(--apple-spring); position:relative; overflow:hidden; display:flex; align-items:flex-end; justify-content:center; padding-bottom:8px; }
+  .theme-swatch:hover { transform:scale(1.05); border-color:var(--border-strong); }
+  .theme-swatch.active { border-color:var(--accent-3); box-shadow:0 0 0 3px var(--accent-soft),0 0 30px var(--accent-soft); }
+  .theme-swatch.active::after { content:'✓'; position:absolute; top:6px; right:8px; color:#fff; font-size:1rem; font-weight:700; text-shadow:0 0 8px rgba(0,0,0,.8); }
+  .theme-swatch span { font-size:.68rem; color:#fff; font-weight:600; text-shadow:0 1px 3px rgba(0,0,0,.9); letter-spacing:.3px; }
+  .theme-pink{background:linear-gradient(135deg,#ffb6c1,#ffc9d4,#ffe4ec);}.theme-deepred{background:linear-gradient(135deg,#c02020,#ff5050,#ff8080);}.theme-deeppurple{background:linear-gradient(135deg,#4a0080,#7b2fbe,#b026ff);}.theme-deepblue{background:linear-gradient(135deg,#1e5fbb,#3a8fff,#7db8ff);}.theme-lightblue{background:linear-gradient(135deg,#1e9dd9,#4dc6ff,#8fe0ff);}.theme-green{background:linear-gradient(135deg,#146b32,#1e9e4a,#3ac46e);}.theme-yellow{background:linear-gradient(135deg,#d9a820,#ffcc40,#ffe080);}.theme-orange{background:linear-gradient(135deg,#d96720,#ff8b3a,#ffb37a);}.theme-mono{background:linear-gradient(135deg,#333,#777,#ccc);}
+  .perf-options { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .perf-option { padding:14px 8px; border-radius:16px; background:var(--bubble-bot-bg); border:2px solid var(--border-soft); color:var(--text-2); cursor:pointer; transition:all .3s var(--apple-spring); font-size:.9rem; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .perf-option:hover { transform:translateY(-3px); border-color:var(--border-strong); }
+  .perf-option.active { border-color:var(--accent-3); background:var(--accent-soft); color:var(--text-1); box-shadow:0 0 25px var(--accent-soft); }
+  .perf-option .perf-icon { font-size:1.4rem; }
 
-  /* ================= 性能等級調整 ================= */
-  body[data-perf="low"] .aurora-bg, body[data-perf="low"] .stars-bg, body[data-perf="low"] .energy-ripple { display: none !important; }
-  body[data-perf="low"] .app-container { animation: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; box-shadow: none !important; background: var(--card-2); }
-  body[data-perf="low"] .app-container::before, body[data-perf="low"] .app-container::after, body[data-perf="low"] .bubble::before, body[data-perf="low"] .bubble::after, body[data-perf="low"] .send-btn::before, body[data-perf="low"] .send-btn::after { display: none !important; }
-  body[data-perf="low"] * { animation-duration: 0s !important; transition-duration: 0.15s !important; }
-  body[data-perf="low"] .bubble, body[data-perf="low"] .send-btn, body[data-perf="low"] .conv-item, body[data-perf="low"] .input-field-wrapper { box-shadow: none !important; text-shadow: none !important; }
-  body[data-perf="low"] .conv-avatar, body[data-perf="low"] .status-dot, body[data-perf="low"] .followup-title .dot { animation: none !important; }
+  /* 性能調整 */
+  body[data-perf="low"] .aurora-bg,body[data-perf="low"] .stars-bg,body[data-perf="low"] .energy-ripple{display:none!important;}
+  body[data-perf="low"] .app-container{animation:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:none!important;background:var(--card-2);}
+  body[data-perf="low"] .app-container::before,body[data-perf="low"] .app-container::after,body[data-perf="low"] .bubble::before,body[data-perf="low"] .bubble::after,body[data-perf="low"] .send-btn::before,body[data-perf="low"] .send-btn::after{display:none!important;}
+  body[data-perf="low"] *{animation-duration:0s!important;transition-duration:.15s!important;}
+  body[data-perf="low"] .bubble,body[data-perf="low"] .send-btn,body[data-perf="low"] .conv-item,body[data-perf="low"] .chat-footer input,body[data-perf="low"] .api-input-wrapper input{box-shadow:none!important;text-shadow:none!important;}
+  body[data-perf="low"] .conv-avatar,body[data-perf="low"] .status-dot,body[data-perf="low"] .followup-title .dot{animation:none!important;}
+  body[data-perf="high"] .bubble{animation:bubbleBreathHigh 4s ease-in-out infinite;}
+  @keyframes bubbleBreathHigh{0%,100%{box-shadow:0 10px 25px -8px rgba(0,0,0,.2);}50%{box-shadow:0 18px 40px -8px var(--accent-soft),0 0 50px var(--accent-glow);}}
+  body[data-perf="high"] .app-container{box-shadow:0 40px 100px -20px var(--accent-soft),0 0 100px var(--accent-soft);}
+  body[data-perf="high"] .send-btn{animation:sendBreathHigh 3s ease-in-out infinite;}
+  @keyframes sendBreathHigh{0%,100%{box-shadow:0 8px 25px var(--accent-soft);}50%{box-shadow:0 12px 35px var(--accent-soft),0 0 60px var(--accent-glow);}}
 
-  body[data-perf="high"] .bubble { animation: bubbleBreathHigh 4s ease-in-out infinite; }
-  @keyframes bubbleBreathHigh { 0%, 100% { box-shadow: 0 10px 25px -8px rgba(0,0,0,0.2); } 50% { box-shadow: 0 18px 40px -8px var(--accent-soft), 0 0 50px var(--accent-glow); } }
-  body[data-perf="high"] .app-container { box-shadow: 0 40px 100px -20px var(--accent-soft), 0 0 100px var(--accent-soft); }
-  body[data-perf="high"] .send-btn { animation: sendBreathHigh 3s ease-in-out infinite; }
-  @keyframes sendBreathHigh { 0%, 100% { box-shadow: 0 8px 25px var(--accent-soft); } 50% { box-shadow: 0 12px 35px var(--accent-soft), 0 0 60px var(--accent-glow); } }
-
-  /* 響應式 */
-  @media (max-width: 520px) {
-    .app-container { height: 94vh; border-radius: 32px; }
-    .bubble { padding: 12px 18px; font-size: 0.92rem; }
-    .send-btn { width: 42px; height: 42px; }
-    .send-btn svg { width: 20px; height: 20px; }
-    .plus-btn { width: 36px; height: 36px; font-size: 1.6rem; }
-    .image-icon-btn { width: 32px; height: 32px; }
-    .text-ghost { padding: 10px 16px; font-size: 0.88rem; }
-    .list-title { font-size: 1.3rem; }
-    .settings-panel { max-width: 100%; }
-    .preview-item { width: 60px; height: 60px; }
-  }
+  @media (max-width:520px){.app-container{height:94vh;border-radius:32px;}.bubble{padding:12px 18px;font-size:.92rem;}.send-btn{width:48px;height:48px;font-size:1.4rem;}.attach-btn{width:38px;height:38px;font-size:1.2rem;}.text-ghost{padding:12px 18px;font-size:.88rem;}.list-title{font-size:1.3rem;}.settings-panel{max-width:100%;}.message-image{max-width:200px;}}
 </style>
 </head>
 <body data-theme="pink" data-perf="normal">
 
-<div class="aurora-bg">
-  <div class="aurora-layer aurora-1"></div>
-  <div class="aurora-layer aurora-2"></div>
-  <div class="aurora-layer aurora-3"></div>
-  <div class="aurora-layer aurora-4"></div>
-</div>
+<div class="aurora-bg"><div class="aurora-layer aurora-1"></div><div class="aurora-layer aurora-2"></div><div class="aurora-layer aurora-3"></div><div class="aurora-layer aurora-4"></div></div>
 <div class="stars-bg" id="starsBg"></div>
 
 <div class="app-container" id="appContainer">
@@ -574,10 +240,7 @@
       <div class="list-title-row">
         <div class="list-title"><span class="title-icon">✦</span><span>DEEPSEEK!</span></div>
         <button class="settings-btn" id="settingsBtn" aria-label="設定">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </button>
       </div>
       <div class="list-subtitle">選擇一個對話開始</div>
@@ -608,29 +271,19 @@
       <div class="followup-list" id="followupList"><span class="followup-empty">AI 回覆後將顯示跟進建議...</span></div>
     </div>
 
-    <!-- 底部輸入區（參考截圖重構） -->
     <div class="chat-footer">
-      <!-- 圖片預覽條 -->
-      <div class="image-preview-bar" id="imagePreviewBar"></div>
-      <!-- 輸入行 -->
-      <div class="input-row">
-        <button class="plus-btn" id="plusBtn" aria-label="上傳圖片">+</button>
-        <div class="input-field-wrapper">
-          <input type="text" id="messageInput" placeholder="輸入消息..." autocomplete="off">
-          <button class="image-icon-btn" id="imageIconBtn" aria-label="上傳圖片">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="3" ry="3"></rect>
-              <circle cx="8.5" cy="8.5" r="1.5"></circle>
-              <path d="M21 15l-5-5L5 21"></path>
-            </svg>
-          </button>
-        </div>
-        <button class="send-btn" id="sendBtn" aria-label="發送">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
-          </svg>
+      <button class="attach-btn" id="attachBtn" title="上傳照片">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      </button>
+      <div class="input-wrap">
+        <input type="text" id="messageInput" placeholder="输入消息..." autocomplete="off">
+        <button class="inline-attach" id="inlineAttachBtn" title="上傳照片">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
         </button>
       </div>
+      <button class="send-btn" id="sendBtn"><span>➤</span></button>
+      <div class="image-preview-bar" id="imagePreviewBar"></div>
+      <input type="file" id="fileInput" accept="image/*" style="display:none;">
     </div>
   </div>
 
@@ -669,7 +322,6 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<input type="file" id="fileInput" accept="image/*" style="display:none">
 
 <script>
 (function() {
@@ -679,17 +331,17 @@
   document.body.dataset.perf = savedPerf;
 
   const conversations = [
-    { id: 'normal', emoji: '💬', title: '正常對話', preview: '你好！我是 DeepSeek 助手...', time: '剛剛', avatarClass: 'avatar-1', status: '在线 · DeepSeek 已连接', welcome: '你好！我是 DeepSeek 助手 ✨<br><br>请先输入 API 密钥，然后就可以开始对话了。<br><br><span style="color: var(--text-3); font-size: 0.85em;">💡 点击任意气泡即可复制内容，也可以上传图片</span>', history: [] },
-    { id: 'roleplay', emoji: '🎭', title: '角色扮演', preview: '你是我的专属武侠小说家...', time: '昨天', avatarClass: 'avatar-2', status: '角色模式 · 武侠世界', welcome: '欢迎来到武侠世界 🗡️<br><br>我是你的专属武侠小说家。请告诉我你想扮演的角色或想展开的剧情。', history: [] },
-    { id: 'game', emoji: '🎮', title: '游戏询问', preview: '最近有什么好玩的游戏...', time: '昨天', avatarClass: 'avatar-3', status: '游戏助手 · 在线', welcome: '你好！我是你的游戏助手 🎮<br><br>想找新游戏？想了解攻略？还是想聊聊最近的热门大作？', history: [] },
-    { id: 'study', emoji: '📚', title: '学习助手', preview: '帮我解释一下量子力学...', time: '星期一', avatarClass: 'avatar-4', status: '学习模式 · 专注中', welcome: '你好！我是你的学习助手 📚<br><br>无论是数学、物理、编程还是语言学习，我都能帮你。', history: [] }
+    { id:'normal', emoji:'💬', title:'正常對話', preview:'你好！我是 DeepSeek 助手...', time:'剛剛', avatarClass:'avatar-1', status:'在线 · DeepSeek 已连接', welcome:'你好！我是 DeepSeek 助手 ✨<br><br>请先输入 API 密钥，然后就可以开始对话了。<br><br><span style="color: var(--text-3); font-size: 0.85em;">💡 点击任意气泡即可复制内容</span>', history:[] },
+    { id:'roleplay', emoji:'🎭', title:'角色扮演', preview:'你是我的专属武侠小说家...', time:'昨天', avatarClass:'avatar-2', status:'角色模式 · 武侠世界', welcome:'欢迎来到武侠世界 🗡️<br><br>我是你的专属武侠小说家。请告诉我你想扮演的角色或想展开的剧情。', history:[] },
+    { id:'game', emoji:'🎮', title:'游戏询问', preview:'最近有什么好玩的游戏...', time:'昨天', avatarClass:'avatar-3', status:'游戏助手 · 在线', welcome:'你好！我是你的游戏助手 🎮<br><br>想找新游戏？想了解攻略？还是想聊聊最近的热门大作？', history:[] },
+    { id:'study', emoji:'📚', title:'学习助手', preview:'帮我解释一下量子力学...', time:'星期一', avatarClass:'avatar-4', status:'学习模式 · 专注中', welcome:'你好！我是你的学习助手 📚<br><br>无论是数学、物理、编程还是语言学习，我都能帮你。', history:[] }
   ];
 
   let currentConversation = null;
   let apiKey = localStorage.getItem('deepseek_api_key') || '';
   let isWaitingForResponse = false;
   let autoFollowupEnabled = false;
-  let pendingImages = []; // 待發送的圖片（{file, dataUrl}）
+  let pendingImageBase64 = null; // 待發送的圖片
 
   const appContainer = document.getElementById('appContainer');
   const listView = document.getElementById('listView');
@@ -713,14 +365,14 @@
   const settingsBack = document.getElementById('settingsBack');
   const themeGrid = document.getElementById('themeGrid');
   const perfOptions = document.getElementById('perfOptions');
-  const plusBtn = document.getElementById('plusBtn');
-  const imageIconBtn = document.getElementById('imageIconBtn');
+  const attachBtn = document.getElementById('attachBtn');
+  const inlineAttachBtn = document.getElementById('inlineAttachBtn');
   const fileInput = document.getElementById('fileInput');
   const imagePreviewBar = document.getElementById('imagePreviewBar');
 
   if (apiKey) apiKeyInput.value = apiKey;
 
-  // ================= 設定邏輯 =================
+  // ================= 設定 =================
   document.querySelectorAll('.theme-swatch').forEach(sw => {
     if (sw.dataset.theme === savedTheme) sw.classList.add('active');
     sw.addEventListener('click', () => {
@@ -730,7 +382,6 @@
       localStorage.setItem('deepseek_theme', sw.dataset.theme);
     });
   });
-
   document.querySelectorAll('.perf-option').forEach(op => {
     if (op.dataset.perf === savedPerf) op.classList.add('active');
     op.addEventListener('click', () => {
@@ -741,7 +392,6 @@
       showToast(op.dataset.perf === 'low' ? '⚡ 已切換到極低細節' : op.dataset.perf === 'high' ? '💎 已切換到極高細節' : '✨ 已切換到一般細節');
     });
   });
-
   settingsBtn.addEventListener('click', () => settingsOverlay.classList.add('open'));
   settingsBack.addEventListener('click', () => settingsOverlay.classList.remove('open'));
   settingsOverlay.addEventListener('click', (e) => { if (e.target === settingsOverlay) settingsOverlay.classList.remove('open'); });
@@ -753,12 +403,7 @@
       const item = document.createElement('div');
       item.className = 'conv-item';
       item.style.animationDelay = (i * 0.1) + 's';
-      item.innerHTML = `
-        <div class="conv-avatar ${conv.avatarClass}">${conv.emoji}</div>
-        <div class="conv-content">
-          <div class="conv-name"><span>${conv.title}</span><span class="conv-time">${conv.time}</span></div>
-          <div class="conv-preview">${conv.preview}</div>
-        </div>`;
+      item.innerHTML = `<div class="conv-avatar ${conv.avatarClass}">${conv.emoji}</div><div class="conv-content"><div class="conv-name"><span>${conv.title}</span><span class="conv-time">${conv.time}</span></div><div class="conv-preview">${conv.preview}</div></div>`;
       item.addEventListener('click', () => openConversation(conv));
       conversationList.appendChild(item);
     });
@@ -769,22 +414,13 @@
     chatHeaderEmoji.textContent = conv.emoji;
     chatHeaderTitle.textContent = conv.title;
     chatHeaderStatus.textContent = conv.status;
-
     chatMessages.innerHTML = '';
     if (conv.history.length === 0) {
       addMessageToUI('bot', conv.welcome, true);
-      conv.history.push({ role: 'assistant', content: conv.welcome, isHTML: true });
+      conv.history.push({ role:'assistant', content: conv.welcome, isHTML: true });
     } else {
-      conv.history.forEach(msg => {
-        if (msg.images && msg.images.length > 0) {
-          addImageMessageToUI('user', msg.images);
-        }
-        if (msg.content) {
-          addMessageToUI(msg.role === 'user' ? 'user' : 'bot', msg.content, msg.isHTML);
-        }
-      });
+      conv.history.forEach(msg => addMessageToUI(msg.role === 'user' ? 'user' : 'bot', msg.content, msg.isHTML, false, msg.image));
     }
-
     listView.classList.add('view-hidden');
     chatView.classList.remove('view-right-hidden');
     setTimeout(() => { chatMessages.scrollTop = chatMessages.scrollHeight; messageInput.focus(); }, 500);
@@ -796,7 +432,6 @@
     setTimeout(() => { currentConversation = null; }, 600);
   });
 
-  // ================= 3D 傾斜 =================
   if (savedPerf !== 'low') {
     appContainer.addEventListener('mousemove', (e) => {
       const rect = appContainer.getBoundingClientRect();
@@ -807,7 +442,6 @@
     appContainer.addEventListener('mouseleave', () => { appContainer.style.transform = ''; });
   }
 
-  // ================= 星塵 =================
   function createStars() {
     if (savedPerf === 'low') return;
     const count = savedPerf === 'high' ? 100 : 70;
@@ -826,14 +460,12 @@
   }
   createStars();
 
-  // ================= Toast =================
   function showToast(text, duration = 2000) {
     toastEl.textContent = text; toastEl.classList.add('show');
     clearTimeout(window.toastTimer);
     window.toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration);
   }
 
-  // ================= 複製 =================
   function copyBubbleContent(bubble, e) {
     let text = bubble.innerText || bubble.textContent || '';
     text = text.trim(); if (!text) return;
@@ -847,111 +479,120 @@
     });
   }
 
-  // ================= 保存密鑰 =================
   saveApiBtn.addEventListener('click', () => {
     const key = apiKeyInput.value.trim();
     if (!key) { showToast('密钥不能为空'); return; }
     apiKey = key; localStorage.setItem('deepseek_api_key', key); showToast('✅ API 密钥已保存');
   });
 
-  // ================= 添加訊息到 UI =================
-  function addMessageToUI(role, content, isHTML = false, isLanding = false) {
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message', role);
+  // ================= 圖片上傳 =================
+  function openFilePicker() { fileInput.click(); }
+  attachBtn.addEventListener('click', openFilePicker);
+  inlineAttachBtn.addEventListener('click', openFilePicker);
 
-    const bubbleDiv = document.createElement('div');
-    bubbleDiv.classList.add('bubble');
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { showToast('❌ 請選擇圖片檔案'); return; }
+    if (file.size > 5 * 1024 * 1024) { showToast('❌ 圖片不能超過 5MB'); return; }
 
-    if (role === 'bot' && !isHTML) {
-      try {
-        const rawHtml = marked.parse(content);
-        bubbleDiv.innerHTML = DOMPurify.sanitize(rawHtml);
-        bubbleDiv.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
-      } catch (e) { bubbleDiv.textContent = content; }
-    } else if (isHTML) {
-      bubbleDiv.innerHTML = content;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      pendingImageBase64 = ev.target.result;
+      renderImagePreview();
+      showToast('🖼️ 圖片已準備好，按發送');
+    };
+    reader.readAsDataURL(file);
+    fileInput.value = '';
+  });
+
+  function renderImagePreview() {
+    imagePreviewBar.innerHTML = '';
+    if (pendingImageBase64) {
+      imagePreviewBar.classList.add('show');
+      const item = document.createElement('div');
+      item.className = 'image-preview-item';
+      item.innerHTML = `<img src="${pendingImageBase64}" alt="預覽"><button class="remove-img" id="removeImg">✕</button>`;
+      imagePreviewBar.appendChild(item);
+      document.getElementById('removeImg').addEventListener('click', () => {
+        pendingImageBase64 = null;
+        imagePreviewBar.classList.remove('show');
+        renderImagePreview();
+      });
     } else {
-      bubbleDiv.textContent = content;
+      imagePreviewBar.classList.remove('show');
     }
-
-    bubbleDiv.addEventListener('click', (e) => { e.stopPropagation(); copyBubbleContent(bubbleDiv, e); });
-
-    const timeDiv = document.createElement('div');
-    timeDiv.classList.add('time');
-    timeDiv.textContent = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-
-    messageDiv.appendChild(bubbleDiv); messageDiv.appendChild(timeDiv); chatMessages.appendChild(messageDiv);
-    
-    if (isLanding && savedPerf !== 'low') {
-      bubbleDiv.style.animation = 'none';
-      bubbleDiv.offsetHeight;
-      bubbleDiv.style.animation = 'bubbleLand 0.5s var(--apple-spring)';
-    }
-
-    requestAnimationFrame(() => chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' }));
-    return messageDiv;
   }
 
-  // ================= 添加圖片訊息 =================
-  function addImageMessageToUI(role, images) {
+  // ================= 消息 UI =================
+  function addMessageToUI(role, content, isHTML = false, isLanding = false, imageBase64 = null) {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', role);
-    messageDiv.classList.add('image-only');
 
-    const bubbleDiv = document.createElement('div');
-    bubbleDiv.classList.add('bubble');
+    // 圖片（若有）
+    if (imageBase64) {
+      const imgWrap = document.createElement('div');
+      imgWrap.className = 'message-image';
+      const img = document.createElement('img');
+      img.src = imageBase64;
+      img.alt = '上傳的圖片';
+      imgWrap.appendChild(img);
+      imgWrap.addEventListener('click', (e) => { e.stopPropagation(); window.open(imageBase64, '_blank'); });
+      messageDiv.appendChild(imgWrap);
+    }
 
-    const imgGrid = document.createElement('div');
-    imgGrid.style.display = 'flex';
-    imgGrid.style.gap = '4px';
-    imgGrid.style.flexWrap = 'wrap';
-
-    images.forEach(img => {
-      const imgEl = document.createElement('img');
-      imgEl.src = img.dataUrl || img;
-      imgEl.style.maxWidth = images.length > 1 ? '120px' : '240px';
-      imgEl.style.maxHeight = images.length > 1 ? '120px' : '240px';
-      imgGrid.appendChild(imgEl);
-    });
-
-    bubbleDiv.appendChild(imgGrid);
+    // 文字氣泡（若有文字）
+    if (content && content.trim()) {
+      const bubbleDiv = document.createElement('div');
+      bubbleDiv.classList.add('bubble');
+      if (role === 'bot' && !isHTML) {
+        try {
+          const rawHtml = marked.parse(content);
+          bubbleDiv.innerHTML = DOMPurify.sanitize(rawHtml);
+          bubbleDiv.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
+        } catch (e) { bubbleDiv.textContent = content; }
+      } else if (isHTML) {
+        bubbleDiv.innerHTML = content;
+      } else {
+        bubbleDiv.textContent = content;
+      }
+      bubbleDiv.addEventListener('click', (e) => { e.stopPropagation(); copyBubbleContent(bubbleDiv, e); });
+      messageDiv.appendChild(bubbleDiv);
+      if (isLanding && savedPerf !== 'low') {
+        bubbleDiv.style.animation = 'none';
+        bubbleDiv.offsetHeight;
+        bubbleDiv.style.animation = 'bubbleLand 0.5s var(--apple-spring)';
+      }
+    }
 
     const timeDiv = document.createElement('div');
     timeDiv.classList.add('time');
-    timeDiv.textContent = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-
-    messageDiv.appendChild(bubbleDiv);
+    timeDiv.textContent = new Date().toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' });
     messageDiv.appendChild(timeDiv);
     chatMessages.appendChild(messageDiv);
-
-    if (savedPerf !== 'low') {
-      bubbleDiv.style.animation = 'bubbleLand 0.5s var(--apple-spring)';
-    }
-
-    requestAnimationFrame(() => chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' }));
+    requestAnimationFrame(() => chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior:'smooth' }));
     return messageDiv;
   }
 
-  // ================= 打字指示器 =================
   function showTypingIndicator() {
     const typingDiv = document.createElement('div');
     typingDiv.classList.add('message', 'bot'); typingDiv.id = 'typingIndicator';
     typingDiv.innerHTML = '<div class="typing-wrapper"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
     chatMessages.appendChild(typingDiv);
-    requestAnimationFrame(() => chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' }));
+    requestAnimationFrame(() => chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior:'smooth' }));
   }
   function removeTypingIndicator() { const el = document.getElementById('typingIndicator'); if (el) el.remove(); }
 
   // ================= 跟進建議 =================
   function generateFollowups(userText, botText, convId) {
-    const suggestions = [];
-    if (convId === 'roleplay') suggestions.push('继续这个剧情', '换个场景', '加入一个角色');
-    else if (convId === 'game') suggestions.push('推荐类似游戏', '这个游戏怎么玩？', '有什么隐藏玩法？');
-    else if (convId === 'study') suggestions.push('可以详细解释吗？', '给我一个例题', '有什么实际应用？');
-    else if (botText.includes('```') || botText.includes('代码')) suggestions.push('可以帮我解释这段代码吗？', '给我一个更简单的例子', '这段代码有什么注意事项？');
-    else if (userText.length < 8) suggestions.push('可以详细解释吗？', '给我一个例子', '这有什么实际应用？');
-    else suggestions.push('继续深入讲讲', '能举个例子吗？', '这和其他概念有什么关系？');
-    return suggestions.slice(0, 3);
+    const s = [];
+    if (convId === 'roleplay') s.push('继续这个剧情','换个场景','加入一个角色');
+    else if (convId === 'game') s.push('推荐类似游戏','这个游戏怎么玩？','有什么隐藏玩法？');
+    else if (convId === 'study') s.push('可以详细解释吗？','给我一个例题','有什么实际应用？');
+    else if (botText.includes('```') || botText.includes('代码')) s.push('可以帮我解释这段代码吗？','给我一个更简单的例子','这段代码有什么注意事项？');
+    else if (userText.length < 8) s.push('可以详细解释吗？','给我一个例子','这有什么实际应用？');
+    else s.push('继续深入讲讲','能举个例子吗？','这和其他概念有什么关系？');
+    return s.slice(0, 3);
   }
   function showFollowups(suggestions) {
     followupList.innerHTML = '';
@@ -964,212 +605,98 @@
   }
   function resetFollowups() { followupList.innerHTML = '<span class="followup-empty">AI 回覆後將顯示跟進建議...</span>'; }
 
-  // ================= 調用 API =================
-  async function callDeepSeekAPI(userMessage, images) {
+  // ================= API =================
+  async function callDeepSeekAPI(userMessage, imageBase64) {
     if (!apiKey) { addMessageToUI('bot', '⚠️ 请先输入并保存 DeepSeek API 密钥。'); return null; }
-    const history = currentConversation.history.filter(m => !m.isHTML).slice(-10);
-    
-    // 構建 messages
-    const messages = [];
-    history.forEach(m => {
-      messages.push({
-        role: m.role === 'user' ? 'user' : 'assistant',
-        content: m.content || ''
-      });
+    const history = currentConversation.history.filter(m => !m.isHTML).slice(-8);
+    const messages = history.map(m => {
+      if (m.image) {
+        return {
+          role: m.role === 'user' ? 'user' : 'assistant',
+          content: [
+            { type: 'text', text: m.content || '（圖片）' },
+            { type: 'image_url', image_url: { url: m.image } }
+          ]
+        };
+      }
+      return { role: m.role === 'user' ? 'user' : 'assistant', content: m.content };
     });
 
-    // 若有圖片，構建多模態消息
-    if (images && images.length > 0) {
-      const contentParts = [];
-      images.forEach(img => {
-        contentParts.push({
-          type: 'image_url',
-          image_url: { url: img.dataUrl }
-        });
-      });
-      if (userMessage) {
-        contentParts.push({ type: 'text', text: userMessage });
-      }
-      messages.push({ role: 'user', content: contentParts });
+    let currentContent;
+    if (imageBase64) {
+      currentContent = [
+        { type: 'text', text: userMessage || '請看這張圖片' },
+        { type: 'image_url', image_url: { url: imageBase64 } }
+      ];
     } else {
-      messages.push({ role: 'user', content: userMessage });
+      currentContent = userMessage;
     }
+    messages.push({ role: 'user', content: currentContent });
 
     try {
-      // 先嘗試多模態模型
-      let model = 'deepseek-chat';
-      if (images && images.length > 0) {
-        model = 'deepseek-vl'; // 視覺模型
-      }
-
       const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({ 
-          model: model, 
-          messages: messages, 
-          temperature: 0.7, 
-          stream: false 
-        })
+        method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${apiKey}` },
+        body: JSON.stringify({ model:'deepseek-chat', messages, temperature:0.7, stream:false })
       });
-
-      if (!response.ok) {
-        // 如果視覺模型失敗，降級為純文字
-        if (images && images.length > 0) {
-          const textOnly = userMessage || '[用戶發送了一張圖片]';
-          const fallbackMessages = history.map(m => ({
-            role: m.role === 'user' ? 'user' : 'assistant',
-            content: m.content || ''
-          })).concat([{ role: 'user', content: textOnly + '\n（注：用戶嘗試上傳圖片，但當前模型不支援圖片識別）' }]);
-          
-          const fallbackRes = await fetch('https://api.deepseek.com/v1/chat/completions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-            body: JSON.stringify({ model: 'deepseek-chat', messages: fallbackMessages, temperature: 0.7, stream: false })
-          });
-          if (!fallbackRes.ok) { const err = await fallbackRes.json().catch(() => ({})); throw new Error(err.error?.message || `HTTP ${fallbackRes.status}`); }
-          const fbData = await fallbackRes.json();
-          const fbReply = fbData.choices?.[0]?.message?.content;
-          if (!fbReply) throw new Error('API 返回内容为空');
-          return fbReply + '\n\n（提示：當前模型無法直接識別圖片，建議使用 deepseek-vl 模型或將圖片內容以文字描述）';
-        }
-        const err = await response.json().catch(() => ({})); 
-        throw new Error(err.error?.message || `HTTP ${response.status}`);
-      }
-
+      if (!response.ok) { const err = await response.json().catch(() => ({})); throw new Error(err.error?.message || `HTTP ${response.status}`); }
       const data = await response.json();
       const botReply = data.choices?.[0]?.message?.content;
-      if (!botReply) throw new Error('API 返回内容为空');
-      return botReply;
+      if (!botReply) throw new Error('API 返回内容为空'); return botReply;
     } catch (error) {
       let msg = '';
       if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) msg = '🌐 网络请求失败。可能是网络不通或浏览器阻挡。';
       else if (error.message.includes('401')) msg = '🔑 API 密钥无效或已过期。';
       else if (error.message.includes('402')) msg = '💰 帐户余额不足。';
-      else if (error.message.includes('model')) msg = '🖼️ 图片模型不可用，请确认 API 支援 deepseek-vl。';
       else msg = `❌ 请求失败：${error.message || '未知错误'}`;
       return msg;
     }
   }
 
-  // ================= 文字融入按鈕動畫 =================
+  // ================= 文字融入按鈕 =================
   function mergeTextToButton(text) {
     return new Promise((resolve) => {
-      if (savedPerf === 'low' || !text) { resolve(); return; }
-
+      if (savedPerf === 'low') { resolve(); return; }
       const inputRect = messageInput.getBoundingClientRect();
       const btnRect = sendBtn.getBoundingClientRect();
       const inputCx = inputRect.left + inputRect.width / 2;
       const inputCy = inputRect.top + inputRect.height / 2;
       const btnCx = btnRect.left + btnRect.width / 2;
       const btnCy = btnRect.top + btnRect.height / 2;
-
       const ghost = document.createElement('div');
       ghost.className = 'text-ghost';
-      ghost.textContent = text;
+      ghost.textContent = text || '🖼️';
       ghost.style.left = inputCx + 'px';
       ghost.style.top = inputCy + 'px';
       document.body.appendChild(ghost);
-
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           ghost.style.left = btnCx + 'px';
           ghost.style.top = btnCy + 'px';
-          ghost.style.transform = 'translate(-50%, -50%) scale(0.15)';
+          ghost.style.transform = 'translate(-50%,-50%) scale(0.15)';
           ghost.style.opacity = '0';
           ghost.style.filter = 'blur(6px)';
         });
       });
-
       setTimeout(() => { ghost.remove(); resolve(); }, 550);
     });
   }
 
-  // ================= 圖片上傳處理 =================
-  function handleFiles(files) {
-    if (!files || files.length === 0) return;
-    
-    Array.from(files).forEach(file => {
-      if (!file.type.startsWith('image/')) {
-        showToast('請選擇圖片檔案');
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        showToast('圖片過大，請選擇小於 5MB 的圖片');
-        return;
-      }
-      
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        pendingImages.push({ file, dataUrl: e.target.result });
-        renderImagePreview();
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  function renderImagePreview() {
-    imagePreviewBar.innerHTML = '';
-    if (pendingImages.length === 0) {
-      imagePreviewBar.classList.remove('active');
-      return;
-    }
-    imagePreviewBar.classList.add('active');
-    pendingImages.forEach((img, idx) => {
-      const item = document.createElement('div');
-      item.className = 'preview-item';
-      item.innerHTML = `
-        <img src="${img.dataUrl}" alt="preview">
-        <button class="preview-remove" data-idx="${idx}">×</button>
-      `;
-      item.querySelector('.preview-remove').addEventListener('click', (e) => {
-        e.stopPropagation();
-        pendingImages.splice(idx, 1);
-        renderImagePreview();
-      });
-      imagePreviewBar.appendChild(item);
-    });
-  }
-
-  // 點擊 + 按鈕
-  plusBtn.addEventListener('click', () => fileInput.click());
-  // 點擊圖片圖標按鈕
-  imageIconBtn.addEventListener('click', () => fileInput.click());
-  // 檔案選擇變更
-  fileInput.addEventListener('change', (e) => {
-    handleFiles(e.target.files);
-    fileInput.value = ''; // 允許重複選擇同一檔案
-  });
-  
-  // 支援拖曳上傳到輸入框
-  const footer = document.querySelector('.chat-footer');
-  footer.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); });
-  footer.addEventListener('drop', (e) => {
-    e.preventDefault(); e.stopPropagation();
-    handleFiles(e.dataTransfer.files);
-  });
-
-  // ================= 發送訊息 =================
+  // ================= 發送 =================
   async function sendMessage() {
     if (isWaitingForResponse || !currentConversation) return;
     const text = messageInput.value.trim();
-    const hasImages = pendingImages.length > 0;
-    
-    if (!text && !hasImages) { showToast('请输入消息或选择图片'); return; }
+    const hasImage = !!pendingImageBase64;
+    if (!text && !hasImage) { showToast('请输入消息或选择图片'); return; }
 
-    // 複製一份待發送圖片
-    const imagesToSend = [...pendingImages];
-
-    // 清空輸入
+    const imageToSend = pendingImageBase64;
     messageInput.value = '';
-    pendingImages = [];
+    pendingImageBase64 = null;
+    imagePreviewBar.classList.remove('show');
     renderImagePreview();
-    
-    // 按鈕脈衝
+
     sendBtn.classList.add('pulsing');
     setTimeout(() => sendBtn.classList.remove('pulsing'), 500);
 
-    // 能量波紋
     if (savedPerf !== 'low') {
       const btnRect = sendBtn.getBoundingClientRect();
       const cx = btnRect.left + btnRect.width / 2;
@@ -1180,44 +707,25 @@
           ripple.className = 'energy-ripple';
           ripple.style.left = cx + 'px';
           ripple.style.top = cy + 'px';
-          ripple.style.width = '50px';
-          ripple.style.height = '50px';
+          ripple.style.width = '60px';
+          ripple.style.height = '60px';
           document.body.appendChild(ripple);
           setTimeout(() => ripple.remove(), 900);
         }, i * 100);
       }
     }
 
-    // 文字融入按鈕動畫
-    if (text) await mergeTextToButton(text);
+    await mergeTextToButton(text || '🖼️');
 
-    // 顯示圖片訊息
-    if (imagesToSend.length > 0) {
-      addImageMessageToUI('user', imagesToSend);
-    }
-    // 顯示文字訊息
-    if (text) {
-      addMessageToUI('user', text, false, true);
-    }
+    // 顯示用戶訊息
+    addMessageToUI('user', text, false, true, imageToSend);
+    currentConversation.history.push({ role:'user', content: text, image: imageToSend });
 
-    // 儲存到歷史記錄
-    if (imagesToSend.length > 0) {
-      currentConversation.history.push({ 
-        role: 'user', 
-        content: text || '', 
-        images: imagesToSend.map(img => ({ dataUrl: img.dataUrl }))
-      });
-    } else {
-      currentConversation.history.push({ role: 'user', content: text });
-    }
-
-    // 檢查密鑰
     if (!apiKey) {
       addMessageToUI('bot', '🔑 尚未设置 API 密钥，请先在顶部输入并保存密钥。');
       return;
     }
 
-    // 執行 API 請求
     isWaitingForResponse = true;
     sendBtn.disabled = true;
     messageInput.disabled = true;
@@ -1225,12 +733,12 @@
     showTypingIndicator();
 
     try {
-      const reply = await callDeepSeekAPI(text, imagesToSend);
+      const reply = await callDeepSeekAPI(text, imageToSend);
       removeTypingIndicator();
       if (reply) {
         addMessageToUI('bot', reply, false, true);
-        currentConversation.history.push({ role: 'assistant', content: reply });
-        const suggestions = generateFollowups(text || '[圖片]', reply, currentConversation.id);
+        currentConversation.history.push({ role:'assistant', content: reply });
+        const suggestions = generateFollowups(text, reply, currentConversation.id);
         showFollowups(suggestions);
         if (autoFollowupEnabled && suggestions.length > 0) {
           setTimeout(() => {
@@ -1252,7 +760,6 @@
     }
   }
 
-  // ================= 綁定事件 =================
   sendBtn.addEventListener('click', () => { if (isWaitingForResponse) return; sendMessage(); });
   messageInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendBtn.click(); } });
   apiKeyInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') saveApiBtn.click(); });
@@ -1262,7 +769,6 @@
     showToast(autoFollowupEnabled ? '🤖 自动追问已开启' : '自动追问已关闭', 1500);
   });
 
-  // ================= 初始化 =================
   renderConversationList();
 })();
 </script>
