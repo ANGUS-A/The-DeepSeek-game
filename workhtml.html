@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>即時 HTML 編輯器 · 智能提示</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background-color: #1e1e1e;
+      font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+      color: #ddd;
+    }
+
+    .header {
+      padding: 10px 20px;
+      background-color: #2d2d2d;
+      border-bottom: 1px solid #444;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      color: #ccc;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header i {
+      font-style: normal;
+      font-size: 16px;
+    }
+
+    .split-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .editor-pane {
+      width: 50%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background-color: #1e1e1e;
+      border-right: 2px solid #3c3c3c;
+      position: relative;
+    }
+
+    .pane-header {
+      padding: 8px 16px;
+      background-color: #2a2a2a;
+      font-size: 13px;
+      font-weight: 600;
+      color: #aaa;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #3a3a3a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pane-header .lang-tag {
+      background-color: #3c3c3c;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      color: #b0b0b0;
+      font-weight: normal;
+    }
+
+    .editor-wrapper {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #codeEditor {
+      width: 100%;
+      height: 100%;
+      padding: 16px;
+      background-color: #1e1e1e;
+      color: #d4d4d4;
+      border: none;
+      outline: none;
+      resize: none;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 15px;
+      line-height: 1.6;
+      tab-size: 2;
+      white-space: pre;
+      overflow: auto;
+      caret-color: #569cd6;
+    }
+
+    #codeEditor::selection {
+      background-color: #264f78;
+    }
+
+    #codeEditor::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    #codeEditor::-webkit-scrollbar-track {
+      background: #252526;
+    }
+
+    #codeEditor::-webkit-scrollbar-thumb {
+      background: #3e3e3e;
+      border-radius: 5px;
+    }
+
+    #codeEditor::-webkit-scrollbar-thumb:hover {
+      background: #4e4e4e;
+    }
+
+    /* 自動完成下拉框 */
+    .autocomplete-container {
+      position: absolute;
+      background-color: #252526;
+      border: 1px solid #454545;
+      border-radius: 6px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      max-height: 240px;
+      overflow-y: auto;
+      width: 280px;
+      z-index: 1000;
+      display: none;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 14px;
+      color: #d4d4d4;
+      padding: 6px 0;
+    }
+
+    .autocomplete-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .autocomplete-container::-webkit-scrollbar-thumb {
+      background: #3e3e3e;
+      border-radius: 4px;
+    }
+
+    .autocomplete-item {
+      padding: 6px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.1s;
+    }
+
+    .autocomplete-item:hover,
+    .autocomplete-item.selected {
+      background-color: #094771;
+    }
+
+    .autocomplete-item .icon {
+      font-size: 14px;
+      width: 20px;
+      text-align: center;
+      color: #569cd6;
+    }
+
+    .autocomplete-item .label {
+      flex: 1;
+    }
+
+    .autocomplete-item .type {
+      font-size: 11px;
+      color: #888;
+      background-color: #333;
+      padding: 1px 8px;
+      border-radius: 12px;
+    }
+
+    .preview-pane {
+      width: 50%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background-color: #ffffff;
+    }
+
+    .preview-pane .pane-header {
+      background-color: #2a2a2a;
+      border-bottom: 1px solid #3a3a3a;
+      color: #aaa;
+    }
+
+    #previewFrame {
+      width: 100%;
+      flex: 1;
+      border: none;
+      background-color: #fff;
+    }
+
+    @media (max-width: 600px) {
+      .pane-header {
+        font-size: 11px;
+        padding: 6px 12px;
+      }
+      #codeEditor {
+        font-size: 13px;
+        padding: 12px;
+      }
+      .autocomplete-container {
+        width: 220px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <i>⚡</i> 即時 HTML 編輯器 · 智能提示 (試試輸入 str, div, col, con...)
+  </div>
+
+  <div class="split-container">
+    <!-- 左側編輯區 -->
+    <div class="editor-pane">
+      <div class="pane-header">
+        <span>📝 原始碼</span>
+        <span class="lang-tag">HTML / CSS / JS</span>
+      </div>
+      <div class="editor-wrapper">
+        <textarea id="codeEditor" spellcheck="false">
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>智能提示範例</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 16px;
+    }
+    .card {
+      background: white;
+      padding: 2rem 2.5rem;
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>✨ 試試輸入 str / con / bac</h1>
+    <p>會彈出 HTML、CSS、JS 的智能提示</p>
+    <button onclick="alert('你好！')">點我</button>
+  </div>
+</body>
+</html>
+        </textarea>
+        <!-- 自動完成下拉框 -->
+        <div id="autocompleteBox" class="autocomplete-container"></div>
+      </div>
+    </div>
+
+    <!-- 右側預覽區 -->
+    <div class="preview-pane">
+      <div class="pane-header">
+        <span>👁️ 即時預覽</span>
+        <span class="lang-tag">Live</span>
+      </div>
+      <iframe id="previewFrame" sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"></iframe>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const editor = document.getElementById('codeEditor');
+      const previewFrame = document.getElementById('previewFrame');
+      const autocompleteBox = document.getElementById('autocompleteBox');
+
+      // ---------- 1. 預覽功能 ----------
+      function updatePreview() {
+        const htmlContent = editor.value;
+        const frameDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+        frameDoc.open();
+        frameDoc.write(htmlContent);
+        frameDoc.close();
+      }
+
+      editor.addEventListener('input', function() {
+        updatePreview();
+        // 輸入時也更新提示
+        scheduleAutocomplete();
+      });
+
+      window.addEventListener('DOMContentLoaded', updatePreview);
+
+      // Tab 鍵插入縮排
+      editor.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const start = this.selectionStart;
+          const end = this.selectionEnd;
+          this.value = this.value.substring(0, start) + '  ' + this.value.substring(end);
+          this.selectionStart = this.selectionEnd = start + 2;
+          this.dispatchEvent(new Event('input'));
+        }
+      });
+
+      // ---------- 2. 智能提示數據庫 ----------
+      // 說明：包含 HTML 標籤、HTML 屬性、CSS 屬性、JS 關鍵字/方法/對象
+      // 每個項目格式：{ label: 顯示名稱, type: 'HTML標籤'/'HTML屬性'/'CSS'/'JS', insert: 插入內容 }
+      const suggestions = [
+        // HTML 標籤
+        { label: 'div', type: 'HTML標籤', insert: 'div' },
+        { label: 'span', type: 'HTML標籤', insert: 'span' },
+        { label: 'p', type: 'HTML標籤', insert: 'p' },
+        { label: 'a', type: 'HTML標籤', insert: 'a' },
+        { label: 'img', type: 'HTML標籤', insert: 'img' },
+        { label: 'ul', type: 'HTML標籤', insert: 'ul' },
+        { label: 'ol', type: 'HTML標籤', insert: 'ol' },
+        { label: 'li', type: 'HTML標籤', insert: 'li' },
+        { label: 'h1', type: 'HTML標籤', insert: 'h1' },
+        { label: 'h2', type: 'HTML標籤', insert: 'h2' },
+        { label: 'h3', type: 'HTML標籤', insert: 'h3' },
+        { label: 'h4', type: 'HTML標籤', insert: 'h4' },
+        { label: 'h5', type: 'HTML標籤', insert: 'h5' },
+        { label: 'h6', type: 'HTML標籤', insert: 'h6' },
+        { label: 'header', type: 'HTML標籤', insert: 'header' },
+        { label: 'footer', type: 'HTML標籤', insert: 'footer' },
+        { label: 'section', type: 'HTML標籤', insert: 'section' },
+        { label: 'article', type: 'HTML標籤', insert: 'article' },
+        { label: 'nav', type: 'HTML標籤', insert: 'nav' },
+        { label: 'main', type: 'HTML標籤', insert: 'main' },
+        { label: 'aside', type: 'HTML標籤', insert: 'aside' },
+        { label: 'button', type: 'HTML標籤', insert: 'button' },
+        { label: 'input', type: 'HTML標籤', insert: 'input' },
+        { label: 'form', type: 'HTML標籤', insert: 'form' },
+        { label: 'label', type: 'HTML標籤', insert: 'label' },
+        { label: 'select', type: 'HTML標籤', insert: 'select' },
+        { label: 'option', type: 'HTML標籤', insert: 'option' },
+        { label: 'textarea', type: 'HTML標籤', insert: 'textarea' },
+        { label: 'table', type: 'HTML標籤', insert: 'table' },
+        { label: 'tr', type: 'HTML標籤', insert: 'tr' },
+        { label: 'td', type: 'HTML標籤', insert: 'td' },
+        { label: 'th', type: 'HTML標籤', insert: 'th' },
+        { label: 'thead', type: 'HTML標籤', insert: 'thead' },
+        { label: 'tbody', type: 'HTML標籤', insert: 'tbody' },
+        { label: 'style', type: 'HTML標籤', insert: 'style' },
+        { label: 'script', type: 'HTML標籤', insert: 'script' },
+        { label: 'link', type: 'HTML標籤', insert: 'link' },
+        { label: 'meta', type: 'HTML標籤', insert: 'meta' },
+        { label: 'title', type: 'HTML標籤', insert: 'title' },
+        { label: 'head', type: 'HTML標籤', insert: 'head' },
+        { label: 'body', type: 'HTML標籤', insert: 'body' },
+        { label: 'html', type: 'HTML標籤', insert: 'html' },
+        { label: 'br', type: 'HTML標籤', insert: 'br' },
+        { label: 'hr', type: 'HTML標籤', insert: 'hr' },
+        { label: 'strong', type: 'HTML標籤', insert: 'strong' },
+        { label: 'em', type: 'HTML標籤', insert: 'em' },
+        { label: 'del', type: 'HTML標籤', insert: 'del' },
+        { label: 'ins', type: 'HTML標籤', insert: 'ins' },
+        { label: 'small', type: 'HTML標籤', insert: 'small' },
+        { label: 'mark', type: 'HTML標籤', insert: 'mark' },
+        { label: 'code', type: 'HTML標籤', insert: 'code' },
+        { label: 'pre', type: 'HTML標籤', insert: 'pre' },
+        { label: 'blockquote', type: 'HTML標籤', insert: 'blockquote' },
+        { label: 'iframe', type: 'HTML標籤', insert: 'iframe' },
+        { label: 'canvas', type: 'HTML標籤', insert: 'canvas' },
+        { label: 'svg', type: 'HTML標籤', insert: 'svg' },
+        { label: 'video', type: 'HTML標籤', insert: 'video' },
+        { label: 'audio', type: 'HTML標籤', insert: 'audio' },
+        { label: 'source', type: 'HTML標籤', insert: 'source' },
+
+        // HTML 屬性 (常用)
+        { label: 'class', type: 'HTML屬性', insert: 'class=""' },
+        { label: 'id', type: 'HTML屬性', insert: 'id=""' },
+        { label: 'style', type: 'HTML屬性', insert: 'style=""' },
+        { label: 'src', type: 'HTML屬性', insert: 'src=""' },
+        { label: 'href', type: 'HTML屬性', insert: 'href=""' },
+        { label: 'alt', type: 'HTML屬性', insert: 'alt=""' },
+        { label: 'title', type: 'HTML屬性', insert: 'title=""' },
+        { label: 'width', type: 'HTML屬性', insert: 'width=""' },
+        { label: 'height', type: 'HTML屬性', insert: 'height=""' },
+        { label: 'type', type: 'HTML屬性', insert: 'type=""' },
+        { label: 'value', type: 'HTML屬性', insert: 'value=""' },
+        { label: 'placeholder', type: 'HTML屬性', insert: 'placeholder=""' },
+        { label: 'disabled', type: 'HTML屬性', insert: 'disabled' },
+        { label: 'checked', type: 'HTML屬性', insert: 'checked' },
+        { label: 'readonly', type: 'HTML屬性', insert: 'readonly' },
+        { label: 'onclick', type: 'HTML屬性', insert: 'onclick=""' },
+        { label: 'onchange', type: 'HTML屬性', insert: 'onchange=""' },
+        { label: 'onsubmit', type: 'HTML屬性', insert: 'onsubmit=""' },
+        { label: 'target', type: 'HTML屬性', insert: 'target=""' },
+        { label: 'rel', type: 'HTML屬性', insert: 'rel=""' },
+        { label: 'charset', type: 'HTML屬性', insert: 'charset=""' },
+        { label: 'name', type: 'HTML屬性', insert: 'name=""' },
+        { label: 'content', type: 'HTML屬性', insert: 'content=""' },
+
+        // CSS 屬性 (常用)
+        { label: 'color', type: 'CSS', insert: 'color: ;' },
+        { label: 'background', type: 'CSS', insert: 'background: ;' },
+        { label: 'background-color', type: 'CSS', insert: 'background-color: ;' },
+        { label: 'font-size', type: 'CSS', insert: 'font-size: ;' },
+        { label: 'font-family', type: 'CSS', insert: 'font-family: ;' },
+        { label: 'font-weight', type: 'CSS', insert: 'font-weight: ;' },
+        { label: 'text-align', type: 'CSS', insert: 'text-align: ;' },
+        { label: 'margin', type: 'CSS', insert: 'margin: ;' },
+        { label: 'padding', type: 'CSS', insert: 'padding: ;' },
+        { label: 'border', type: 'CSS', insert: 'border: ;' },
+        { label: 'border-radius', type: 'CSS', insert: 'border-radius: ;' },
+        { label: 'display', type: 'CSS', insert: 'display: ;' },
+        { label: 'position', type: 'CSS', insert: 'position: ;' },
+        { label: 'top', type: 'CSS', insert: 'top: ;' },
+        { label: 'left', type: 'CSS', insert: 'left: ;' },
+        { label: 'right', type: 'CSS', insert: 'right: ;' },
+        { label: 'bottom', type: 'CSS', insert: 'bottom: ;' },
+        { label: 'width', type: 'CSS', insert: 'width: ;' },
+        { label: 'height', type: 'CSS', insert: 'height: ;' },
+        { label: 'max-width', type: 'CSS', insert: 'max-width: ;' },
+        { label: 'min-width', type: 'CSS', insert: 'min-width: ;' },
+        { label: 'flex', type: 'CSS', insert: 'flex: ;' },
+        { label: 'flex-direction', type: 'CSS', insert: 'flex-direction: ;' },
+        { label: 'justify-content', type: 'CSS', insert: 'justify-content: ;' },
+        { label: 'align-items', type: 'CSS', insert: 'align-items: ;' },
+        { label: 'gap', type: 'CSS', insert: 'gap: ;' },
+        { label: 'grid', type: 'CSS', insert: 'grid: ;' },
+        { label: 'grid-template-columns', type: 'CSS', insert: 'grid-template-columns: ;' },
+        { label: 'box-shadow', type: 'CSS', insert: 'box-shadow: ;' },
+        { label: 'transition', type: 'CSS', insert: 'transition: ;' },
+        { label: 'transform', type: 'CSS', insert: 'transform: ;' },
+        { label: 'opacity', type: 'CSS', insert: 'opacity: ;' },
+        { label: 'overflow', type: 'CSS', insert: 'overflow: ;' },
+        { label: 'z-index', type: 'CSS', insert: 'z-index: ;' },
+        { label: 'cursor', type: 'CSS', insert: 'cursor: ;' },
+
+        // JavaScript 關鍵字 / 方法 / 對象
+        { label: 'string', type: 'JS', insert: 'string' },
+        { label: 'number', type: 'JS', insert: 'number' },
+        { label: 'boolean', type: 'JS', insert: 'boolean' },
+        { label: 'object', type: 'JS', insert: 'object' },
+        { label: 'array', type: 'JS', insert: 'array' },
+        { label: 'function', type: 'JS', insert: 'function' },
+        { label: 'return', type: 'JS', insert: 'return' },
+        { label: 'if', type: 'JS', insert: 'if' },
+        { label: 'else', type: 'JS', insert: 'else' },
+        { label: 'for', type: 'JS', insert: 'for' },
+        { label: 'while', type: 'JS', insert: 'while' },
+        { label: 'do', type: 'JS', insert: 'do' },
+        { label: 'switch', type: 'JS', insert: 'switch' },
+        { label: 'case', type: 'JS', insert: 'case' },
+        { label: 'break', type: 'JS', insert: 'break' },
+        { label: 'continue', type: 'JS', insert: 'continue' },
+        { label: 'try', type: 'JS', insert: 'try' },
+        { label: 'catch', type: 'JS', insert: 'catch' },
+        { label: 'finally', type: 'JS', insert: 'finally' },
+        { label: 'throw', type: 'JS', insert: 'throw' },
+        { label: 'new', type: 'JS', insert: 'new' },
+        { label: 'this', type: 'JS', insert: 'this' },
+        { label: 'typeof', type: 'JS', insert: 'typeof' },
+        { label: 'instanceof', type: 'JS', insert: 'instanceof' },
+        { label: 'void', type: 'JS', insert: 'void' },
+        { label: 'delete', type: 'JS', insert: 'delete' },
+        { label: 'in', type: 'JS', insert: 'in' },
+        { label: 'of', type: 'JS', insert: 'of' },
+        { label: 'class', type: 'JS', insert: 'class' },
+        { label: 'extends', type: 'JS', insert: 'extends' },
+        { label: 'super', type: 'JS', insert: 'super' },
+        { label: 'import', type: 'JS', insert: 'import' },
+        { label: 'export', type: 'JS', insert: 'export' },
+        { label: 'default', type: 'JS', insert: 'default' },
+        { label: 'async', type: 'JS', insert: 'async' },
+        { label: 'await', type: 'JS', insert: 'await' },
+        { label: 'yield', type: 'JS', insert: 'yield' },
+        { label: 'let', type: 'JS', insert: 'let' },
+        { label: 'const', type: 'JS', insert: 'const' },
+        { label: 'var', type: 'JS', insert: 'var' },
+        { label: 'console.log', type: 'JS', insert: 'console.log()' },
+        { label: 'alert', type: 'JS', insert: 'alert()' },
+        { label: 'document', type: 'JS', insert: 'document' },
+        { label: 'window', type: 'JS', insert: 'window' },
+        { label: 'querySelector', type: 'JS', insert: 'querySelector()' },
+        { label: 'getElementById', type: 'JS', insert: 'getElementById()' },
+        { label: 'addEventListener', type: 'JS', insert: 'addEventListener()' },
+        { label: 'setTimeout', type: 'JS', insert: 'setTimeout()' },
+        { label: 'setInterval', type: 'JS', insert: 'setInterval()' },
+        { label: 'clearInterval', type: 'JS', insert: 'clearInterval()' },
+        { label: 'Math', type: 'JS', insert: 'Math' },
+        { label: 'Date', type: 'JS', insert: 'Date' },
+        { label: 'JSON', type: 'JS', insert: 'JSON' },
+        { label: 'parseInt', type: 'JS', insert: 'parseInt()' },
+        { label: 'parseFloat', type: 'JS', insert: 'parseFloat()' },
+        { label: 'isNaN', type: 'JS', insert: 'isNaN()' },
+        { label: 'map', type: 'JS', insert: 'map()' },
+        { label: 'filter', type: 'JS', insert: 'filter()' },
+        { label: 'reduce', type: 'JS', insert: 'reduce()' },
+        { label: 'forEach', type: 'JS', insert: 'forEach()' },
+        { label: 'push', type: 'JS', insert: 'push()' },
+        { label: 'pop', type: 'JS', insert: 'pop()' },
+        { label: 'shift', type: 'JS', insert: 'shift()' },
+        { label: 'unshift', type: 'JS', insert: 'unshift()' },
+        { label: 'slice', type: 'JS', insert: 'slice()' },
+        { label: 'splice', type: 'JS', insert: 'splice()' },
+        { label: 'concat', type: 'JS', insert: 'concat()' },
+        { label: 'join', type: 'JS', insert: 'join()' },
+        { label: 'split', type: 'JS', insert: 'split()' },
+        { label: 'replace', type: 'JS', insert: 'replace()' },
+        { label: 'toUpperCase', type: 'JS', insert: 'toUpperCase()' },
+        { label: 'toLowerCase', type: 'JS', insert: 'toLowerCase()' },
+        { label: 'trim', type: 'JS', insert: 'trim()' },
+        { label: 'charAt', type: 'JS', insert: 'charAt()' },
+        { label: 'indexOf', type: 'JS', insert: 'indexOf()' },
+        { label: 'includes', type: 'JS', insert: 'includes()' },
+        { label: 'startsWith', type: 'JS', insert: 'startsWith()' },
+        { label: 'endsWith', type: 'JS', insert: 'endsWith()' },
+        { label: 'length', type: 'JS', insert: 'length' },
+        { label: 'toString', type: 'JS', insert: 'toString()' },
+        { label: 'valueOf', type: 'JS', insert: 'valueOf()' },
+        { label: 'prototype', type: 'JS', insert: 'prototype' },
+        { label: 'constructor', type: 'JS', insert: 'constructor' },
+      ];
+
+      // 用於快速查找：建立 label -> 對象的映射
+      const suggestionMap = new Map();
+      suggestions.forEach(item => {
+        if (!suggestionMap.has(item.label)) {
+          suggestionMap.set(item.label, item);
+        }
+      });
+
+      // 排序：按 label 字母順序，但可以混合類型
+      suggestions.sort((a, b) => a.label.localeCompare(b.label));
+
+      // ---------- 3. 自動完成核心邏輯 ----------
+      let currentSelectedIndex = -1;
+      let currentSuggestions = [];
+      let autocompleteVisible = false;
+      let debounceTimer = null;
+
+      // 取得光標前的單詞
+      function getWordBeforeCursor(text, cursorPos) {
+        // 從 cursorPos 往前找到一個非字母、數字、底線、$ 的字符
+        const before = text.substring(0, cursorPos);
+        const match = before.match(/[\w$]+$/);
+        return match ? match[0] : '';
+      }
+
+      // 取得光標位置（考慮換行，但 textarea 的 selectionStart 就是純文本索引）
+      function getCursorPosition() {
+        return editor.selectionStart;
+      }
+
+      // 顯示自動完成框
+      function showAutocomplete(items, word) {
+        if (items.length === 0) {
+          hideAutocomplete();
+          return;
+        }
+
+        currentSuggestions = items;
+        currentSelectedIndex = 0; // 預設選中第一個
+        renderAutocompleteItems();
+
+        // 定位：相對於 editor-wrapper
+        const cursorPos = getCursorPosition();
+        const textBefore = editor.value.substring(0, cursorPos);
+        const lines = textBefore.split('\n');
+        const currentLine = lines.length;
+        const lastLine = lines[lines.length - 1] || '';
+        const charIndex = lastLine.length;
+
+        // 使用鏡像方法計算座標（簡化：使用固定行高估算）
+        const lineHeight = 24; // 對應 15px 字體 1.6 行高約 24px
+        const paddingTop = 16;
+        const paddingLeft = 16;
+        const charWidth = 9; // 近似值
+
+        // 計算 textarea 滾動偏移
+        const scrollTop = editor.scrollTop;
+        const scrollLeft = editor.scrollLeft;
+
+        // 粗略計算光標位置
+        let top = paddingTop + (currentLine - 1) * lineHeight - scrollTop;
+        let left = paddingLeft + charIndex * charWidth - scrollLeft;
+
+        // 邊界處理
+        const wrapper = editor.parentElement;
+        const wrapperRect = wrapper.getBoundingClientRect();
+        const boxWidth = 280;
+        const boxHeight = Math.min(240, items.length * 32 + 12);
+
+        // 如果右邊超出，向左偏移
+        if (left + boxWidth > wrapperRect.width) {
+          left = wrapperRect.width - boxWidth - 10;
+        }
+        if (left < 10) left = 10;
+
+        // 如果下面超出，向上顯示（簡單處理，先保留向下）
+        if (top + boxHeight > wrapperRect.height) {
+          top = top - boxHeight - 10;
+          if (top < 0) top = 10;
+        }
+
+        autocompleteBox.style.left = left + 'px';
+        autocompleteBox.style.top = top + 'px';
+        autocompleteBox.style.display = 'block';
+        autocompleteVisible = true;
+      }
+
+      // 渲染下拉項目
+      function renderAutocompleteItems() {
+        if (currentSuggestions.length === 0) {
+          autocompleteBox.innerHTML = '';
+          return;
+        }
+
+        let html = '';
+        currentSuggestions.forEach((item, index) => {
+          const selectedClass = index === currentSelectedIndex ? 'selected' : '';
+          let icon = '';
+          if (item.type.includes('HTML')) icon = '&#60;&#62;'; // <>
+          else if (item.type === 'CSS') icon = '&#123;&#125;'; // {}
+          else if (item.type === 'JS') icon = '&#40;&#41;'; // ()
+          else icon = '•';
+
+          html += `<div class="autocomplete-item ${selectedClass}" data-index="${index}">
+            <span class="icon">${icon}</span>
+            <span class="label">${item.label}</span>
+            <span class="type">${item.type}</span>
+          </div>`;
+        });
+
+        autocompleteBox.innerHTML = html;
+
+        // 綁定點擊事件
+        autocompleteBox.querySelectorAll('.autocomplete-item').forEach(el => {
+          el.addEventListener('click', function(e) {
+            const idx = parseInt(this.dataset.index, 10);
+            if (!isNaN(idx)) {
+              applySuggestion(currentSuggestions[idx]);
+            }
+          });
+        });
+      }
+
+      // 應用選中的建議
+      function applySuggestion(item) {
+        const cursorPos = editor.selectionStart;
+        const text = editor.value;
+        const word = getWordBeforeCursor(text, cursorPos);
+
+        // 計算要替換的範圍
+        const start = cursorPos - word.length;
+        const end = cursorPos;
+
+        // 決定插入的內容
+        let insertText = item.insert;
+
+        // 如果 insert 包含 () 或 "" 等，且當前已有部分內容，可以智能處理，但這裡保持簡單
+        // 若是 HTML 標籤，自動補上 > 或 </> 可選（這裡簡單插入標籤名）
+        // 但為了體驗，若為標籤且無 <，則插入完整 <tag> 形式？但用戶可能已經輸入了 <
+        // 做一個簡單優化：如果 insert 是純標籤名，且前一個字符是 '<'，則補上 '>' 和 '</tag>'
+        if (item.type === 'HTML標籤' && item.insert === item.label) {
+          // 檢查前一個字符是否為 '<'
+          const charBefore = text.charAt(start - 1);
+          if (charBefore === '<') {
+            // 插入 tag></tag> 但需要處理光標位置，這裡先簡單插入 tag>
+            insertText = item.label + '>';
+          }
+        }
+
+        // 替換
+        const newText = text.substring(0, start) + insertText + text.substring(end);
+        editor.value = newText;
+        // 設置光標位置
+        const newCursorPos = start + insertText.length;
+        editor.selectionStart = editor.selectionEnd = newCursorPos;
+
+        // 更新預覽
+        updatePreview();
+        // 隱藏提示
+        hideAutocomplete();
+      }
+
+      // 隱藏提示
+      function hideAutocomplete() {
+        autocompleteBox.style.display = 'none';
+        autocompleteVisible = false;
+        currentSuggestions = [];
+        currentSelectedIndex = -1;
+      }
+
+      // 根據當前單詞過濾建議
+      function updateSuggestions() {
+        if (!editor.value) {
+          hideAutocomplete();
+          return;
+        }
+
+        const cursorPos = getCursorPosition();
+        const text = editor.value;
+        const word = getWordBeforeCursor(text, cursorPos);
+
+        // 如果單詞長度為 0，隱藏
+        if (word.length === 0) {
+          hideAutocomplete();
+          return;
+        }
+
+        // 過濾建議：label 以 word 開頭（忽略大小寫）
+        const lowerWord = word.toLowerCase();
+        const filtered = suggestions.filter(item =>
+          item.label.toLowerCase().startsWith(lowerWord)
+        ).slice(0, 15); // 最多顯示 15 個
+
+        if (filtered.length === 0) {
+          hideAutocomplete();
+          return;
+        }
+
+        // 顯示
+        showAutocomplete(filtered, word);
+      }
+
+      // 使用 debounce 避免頻繁計算
+      function scheduleAutocomplete() {
+        if (debounceTimer) {
+          clearTimeout(debounceTimer);
+        }
+        debounceTimer = setTimeout(() => {
+          // 只有當焦點在編輯器時才顯示
+          if (document.activeElement === editor) {
+            updateSuggestions();
+          }
+        }, 120);
+      }
+
+      // ---------- 4. 事件監聽 ----------
+      // 輸入時觸發
+      editor.addEventListener('input', function(e) {
+        // 輸入時更新預覽
+        updatePreview();
+        // 更新提示
+        scheduleAutocomplete();
+      });
+
+      // 按鍵事件：上下鍵、Enter、Escape、Tab 等
+      editor.addEventListener('keydown', function(e) {
+        if (!autocompleteVisible || currentSuggestions.length === 0) {
+          // 如果不可見，但按下 Tab 之前已經處理過了，不衝突
+          return;
+        }
+
+        // 上下鍵
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          currentSelectedIndex = (currentSelectedIndex + 1) % currentSuggestions.length;
+          renderAutocompleteItems();
+          // 滾動到可視區域
+          const selectedEl = autocompleteBox.querySelector('.selected');
+          if (selectedEl) {
+            selectedEl.scrollIntoView({ block: 'nearest' });
+          }
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          currentSelectedIndex = (currentSelectedIndex - 1 + currentSuggestions.length) % currentSuggestions.length;
+          renderAutocompleteItems();
+          const selectedEl = autocompleteBox.querySelector('.selected');
+          if (selectedEl) {
+            selectedEl.scrollIntoView({ block: 'nearest' });
+          }
+        } else if (e.key === 'Enter') {
+          // 如果提示框可見，Enter 選中當前項而不是換行
+          if (autocompleteVisible && currentSelectedIndex >= 0) {
+            e.preventDefault();
+            applySuggestion(currentSuggestions[currentSelectedIndex]);
+          }
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          hideAutocomplete();
+        } else if (e.key === 'Tab') {
+          // 如果提示框可見，Tab 也選中
+          if (autocompleteVisible && currentSelectedIndex >= 0) {
+            e.preventDefault();
+            applySuggestion(currentSuggestions[currentSelectedIndex]);
+          } else {
+            // 原有的 Tab 縮排處理（但前面已經有 keydown 處理了，這裡不重複）
+            // 為了避免衝突，原有的 Tab 處理在另一個監聽器中，但那個監聽器會先執行。
+            // 我們需要確保 Tab 在提示可見時優先選中。可以合併，但這裡使用捕獲階段？其實先綁定的先執行。
+            // 我們讓第二個監聽器（原本的 Tab 處理）不處理提示可見的情況。
+            // 修改原有的 Tab 處理，但這裡不變，依靠事件順序？原 Tab 處理綁定在前面，會先執行。
+            // 所以我們需要調整：將原 Tab 處理改為條件執行。
+          }
+        }
+      });
+
+      // 原有的 Tab 縮排處理（調整：如果提示可見則不執行縮排）
+      editor.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+          // 如果提示框可見，不執行縮排，讓上一個監聽器處理
+          if (autocompleteVisible && currentSuggestions.length > 0) {
+            return;
+          }
+          e.preventDefault();
+          const start = this.selectionStart;
+          const end = this.selectionEnd;
+          this.value = this.value.substring(0, start) + '  ' + this.value.substring(end);
+          this.selectionStart = this.selectionEnd = start + 2;
+          this.dispatchEvent(new Event('input'));
+        }
+      });
+
+      // 點擊編輯器外部隱藏提示
+      document.addEventListener('click', function(e) {
+        if (!editor.contains(e.target) && !autocompleteBox.contains(e.target)) {
+          hideAutocomplete();
+        }
+      });
+
+      // 滾動編輯器時，重新定位提示框（或隱藏）
+      editor.addEventListener('scroll', function() {
+        if (autocompleteVisible) {
+          // 簡單隱藏，避免位置錯亂
+          hideAutocomplete();
+        }
+      });
+
+      // 視窗大小變化時隱藏
+      window.addEventListener('resize', function() {
+        hideAutocomplete();
+      });
+
+      // 初始化預覽
+      window.addEventListener('DOMContentLoaded', function() {
+        updatePreview();
+        // 讓編輯器獲得焦點
+        editor.focus();
+      });
+
+      // 焦點進入編輯器時，如果有內容可顯示提示？不需要，等輸入
+    })();
+  </script>
+</body>
+</html>
