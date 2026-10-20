@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>疾風對決 · 雙人競技</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: radial-gradient(circle at 50% 0%, #16203a 0%, #06080f 65%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+    color: #e8eefc;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  #wrap {
+    position: relative;
+    width: min(94vw, 900px);
+    aspect-ratio: 3 / 2;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 0 70px rgba(60,120,255,0.22), 0 0 0 1px rgba(120,160,255,0.15);
+  }
+
+  canvas { display: block; width: 100%; height: 100%; }
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(5,9,18,0.90);
+    backdrop-filter: blur(7px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(10px, 2.2vh, 24px);
+    padding: 20px;
+    text-align: center;
+  }
+  .overlay.hidden { display: none; }
+
+  h1 {
+    font-size: clamp(24px, 5.4vw, 52px);
+    letter-spacing: clamp(2px, 0.6vw, 8px);
+    font-weight: 800;
+    background: linear-gradient(90deg, #2ee6ff, #7b8cff 50%, #ff3d78);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 22px rgba(90,150,255,0.45));
+  }
+
+  .sub { font-size: clamp(11px, 1.5vw, 14px); letter-spacing: 4px; opacity: .55; margin-top: -6px; }
+
+  .controls {
+    display: flex;
+    gap: clamp(10px, 2.5vw, 30px);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(120,170,255,0.18);
+    border-radius: 12px;
+    padding: clamp(8px, 1.6vw, 15px) clamp(12px, 2vw, 22px);
+    min-width: clamp(160px, 26vw, 240px);
+  }
+  .card h2 { font-size: clamp(12px, 1.7vw, 16px); margin-bottom: 10px; letter-spacing: 3px; }
+  .card.p1 { border-color: rgba(46,230,255,0.35); }
+  .card.p2 { border-color: rgba(255,61,120,0.35); }
+  .card.p1 h2 { color: #2ee6ff; }
+  .card.p2 h2 { color: #ff3d78; }
+
+  .row { display: flex; align-items: center; gap: 5px; margin-bottom: 7px; font-size: clamp(10px, 1.4vw, 13px); }
+  .row:last-child { margin-bottom: 0; }
+
+  .k {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: clamp(22px, 3vw, 28px);
+    height: clamp(22px, 3vw, 28px);
+    padding: 0 6px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-bottom-width: 2px;
+    font-size: clamp(9px, 1.3vw, 12px);
+    font-weight: 700;
+  }
+  .desc { margin-left: 7px; opacity: .72; }
+
+  button {
+    padding: clamp(9px, 1.8vw, 15px) clamp(30px, 6vw, 56px);
+    font-size: clamp(14px, 2.2vw, 20px);
+    font-weight: 800;
+    letter-spacing: clamp(3px, 0.8vw, 7px);
+    color: #05080f;
+    background: linear-gradient(135deg, #2ee6ff, #7b8cff);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform .15s, box-shadow .15s;
+    box-shadow: 0 0 30px rgba(46,230,255,0.4);
+  }
+  button:hover { transform: translateY(-2px); box-shadow: 0 0 46px rgba(46,230,255,0.75); }
+  button:active { transform: translateY(0) scale(.96); }
+
+  #winText {
+    font-size: clamp(24px, 5vw, 48px);
+    letter-spacing: 6px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 0 44px currentColor;
+  }
+</style>
+</head>
+<body>
+
+<div id="wrap">
+  <canvas id="game" width="900" height="600"></canvas>
+
+  <!-- 開始畫面 -->
+  <div id="startScreen" class="overlay">
+    <h1>疾風對決</h1>
+    <p class="sub">雙 人 競 技 · 操 作 至 上</p>
+
+    <div class="controls">
+      <div class="card p1">
+        <h2>玩家一</h2>
+        <div class="row"><span class="k">W</span><span class="k">A</span><span class="k">S</span><span class="k">D</span><span class="desc">移動</span></div>
+        <div class="row"><span class="k">1</span><span class="desc">衝刺（短暫無敵）</span></div>
+        <div class="row"><span class="k">M</span><span class="desc">射擊</span></div>
+      </div>
+      <div class="card p2">
+        <h2>玩家二</h2>
+        <div class="row"><span class="k">↑</span><span class="k">←</span><span class="k">↓</span><span class="k">→</span><span class="desc">移動</span></div>
+        <div class="row"><span class="k">N</span><span class="desc">衝刺（短暫無敵）</span></div>
+        <div class="row"><span class="k">M</span><span class="desc">射擊</span></div>
+      </div>
+    </div>
+
+    <button id="startBtn">開 始 遊 戲</button>
+  </div>
+
+  <!-- 結束畫面 -->
+  <div id="endScreen" class="overlay hidden">
+    <h1 id="winText">玩家一 獲勝</h1>
+    <button id="restartBtn">再 來 一 局</button>
+  </div>
+</div>
+
+<script>
+/* ==================== 基礎設定 ==================== */
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const W = canvas.width;
+const H = canvas.height;
+
+const COLOR = { p1: '#2ee6ff', p2: '#ff3d78' };
+
+const SPEED      = 240;   // 最大移動速度 px/s
+const ACCEL      = 1600;  // 加速度（越高反應越靈敏，越低慣性越明顯）
+const FRICTION   = 1400;  // 摩擦力（放開方向鍵後的減速阻力）
+const DASH_SPEED = 1150;  // 衝刺速度 px/s
+const DASH_TIME  = 0.14;  // 衝刺持續
+const DASH_CD    = 0.95;  // 衝刺冷卻
+const BULLET_SPD = 640;
+const BULLET_CD  = 0.26;
+const DAMAGE     = 12;
+const MAX_HP     = 100;
+
+const P1_KEYS = { up:'KeyW', left:'KeyA', down:'KeyS', right:'KeyD', dash:'Digit1', shoot:'KeyM' };
+const P2_KEYS = { up:'ArrowUp', left:'ArrowLeft', down:'ArrowDown', right:'ArrowRight', dash:'KeyN', shoot:'KeyM' };
+
+/* ==================== 狀態 ==================== */
+let state = 'menu';       // menu | playing | over
+let players = [];
+let bullets = [];
+let particles = [];
+let obstacles = [];
+
+const keys = {};
+const pressed = {};
+
+/* ==================== 輸入 ==================== */
+const BLOCK = ['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'];
+
+window.addEventListener('keydown', e => {
+  if (BLOCK.includes(e.code)) e.preventDefault();
+  if (e.repeat) return;
+  if (!keys[e.code]) pressed[e.code] = true;
+  keys[e.code] = true;
+});
+
+window.addEventListener('keyup', e => {
+  keys[e.code] = false;
+});
+
+window.addEventListener('blur', () => {
+  for (const k in keys) delete keys[k];
+});
+
+/* ==================== 建立物件 ==================== */
+function createPlayer(id, keymap, color, x, y, facing) {
+  return {
+    id, keys: keymap, color,
+    x, y, r: 15,
+    vx: 0, vy: 0, // 速度分量（用於慣性移動）
+    facing: { x: facing.x, y: facing.y },
+    hp: MAX_HP, maxHp: MAX_HP,
+    dashCd: 0, dashTime: 0, dashDir: { x: 1, y: 0 },
+    shootCd: 0,
+    invuln: 0,
+    hitFlash: 0,
+    trail: [],
+  };
+}
+
+function resetGame() {
+  players = [
+    createPlayer(1, P1_KEYS, COLOR.p1, 170, H / 2, { x: 1, y: 0 }),
+    createPlayer(2, P2_KEYS, COLOR.p2, W - 170, H / 2, { x: -1, y: 0 }),
+  ];
+  bullets = [];
+  particles = [];
+  obstacles = [
+    { x: W / 2 - 100, y: 145, w: 200, h: 26 },
+    { x: W / 2 - 100, y: H - 171, w: 200, h: 26 },
+  ];
+}
+
+/* ==================== 更新邏輯 ==================== */
+function updatePlayer(p, dt) {
+  if (p.hp <= 0) return;
+
+  p.dashCd   = Math.max(0, p.dashCd - dt);
+  p.shootCd  = Math.max(0, p.shootCd - dt);
+  p.invuln   = Math.max(0, p.invuln - dt);
+  p.hitFlash = Math.max(0, p.hitFlash - dt);
+
+  // 殘影淡出
+  for (const t of p.trail) t.life -= dt;
+  p.trail = p.trail.filter(t => t.life > 0);
+
+  // 讀取方向輸入
+  let dx = 0, dy = 0;
+  if (keys[p.keys.left])  dx -= 1;
+  if (keys[p.keys.right]) dx += 1;
+  if (keys[p.keys.up])    dy -= 1;
+  if (keys[p.keys.down])  dy += 1;
+
+  const mag = Math.hypot(dx, dy);
+  if (mag > 0) {
+    dx /= mag; dy /= mag;
+    p.facing.x = dx;
+    p.facing.y = dy;
+  }
+
+  // 衝刺（按下瞬間觸發）
+  if (pressed[p.keys.dash] && p.dashCd <= 0) {
+    const ddx = mag > 0 ? dx : p.facing.x;
+    const ddy = mag > 0 ? dy : p.facing.y;
+    p.dashDir.x = ddx;
+    p.dashDir.y = ddy;
+    p.dashTime = DASH_TIME;
+    p.dashCd = DASH_CD;
+    p.invuln = 0.20;
+    p.vx = 0;
+    p.vy = 0;
+    burst(p.x, p.y, p.color, 10, 260, 3.5);
+  }
+
+  // 位移與慣性計算
+  if (p.dashTime > 0) {
+    p.dashTime -= dt;
+    p.x += p.dashDir.x * DASH_SPEED * dt;
+    p.y += p.dashDir.y * DASH_SPEED * dt;
+    p.vx = p.dashDir.x * DASH_SPEED;
+    p.vy = p.dashDir.y * DASH_SPEED;
+    p.trail.push({ x: p.x, y: p.y, life: 0.22 });
+  } else {
+    // 慣性移動：根據輸入進行加速度運算，無輸入時則受摩擦力減速
+    if (mag > 0) {
+      p.vx += dx * ACCEL * dt;
+      p.vy += dy * ACCEL * dt;
+      const currentSpeed = Math.hypot(p.vx, p.vy);
+      if (currentSpeed > SPEED) {
+        p.vx = (p.vx / currentSpeed) * SPEED;
+        p.vy = (p.vy / currentSpeed) * SPEED;
+      }
+    } else {
+      const currentSpeed = Math.hypot(p.vx, p.vy);
+      if (currentSpeed > 0) {
+        const drop = FRICTION * dt;
+        if (currentSpeed <= drop) {
+          p.vx = 0;
+          p.vy = 0;
+        } else {
+          p.vx -= (p.vx / currentSpeed) * drop;
+          p.vy -= (p.vy / currentSpeed) * drop;
+        }
+      }
+    }
+
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+  }
+
+  clampToArena(p);
+
+  // 射擊
+  if (keys[p.keys.shoot] && p.shootCd <= 0) {
+    shoot(p);
+  }
+}
+
+function shoot(p) {
+  p.shootCd = BULLET_CD;
+  const fx = p.facing.x, fy = p.facing.y;
+
+  bullets.push({
+    x: p.x + fx * (p.r + 7),
+    y: p.y + fy * (p.r + 7),
+    vx: fx * BULLET_SPD,
+    vy: fy * BULLET_SPD,
+    r: 5,
+    life: 2.2,
+    owner: p.id,
+    color: p.color,
+  });
+
+  // 槍口火花
+  for (let i = 0; i < 4; i++) {
+    const a = Math.atan2(fy, fx) + (Math.random() - 0.5) * 0.9;
+    const s = 90 + Math.random() * 140;
+    particles.push({
+      x: p.x + fx * (p.r + 6),
+      y: p.y + fy * (p.r + 6),
+      vx: Math.cos(a) * s,
+      vy: Math.sin(a) * s,
+      life: 0.16 + Math.random() * 0.12,
+      size: 2.5,
+      color: p.color,
+    });
+  }
+}
+
+function clampToArena(p) {
+  p.x = Math.max(p.r, Math.min(W - p.r, p.x));
+  p.y = Math.max(p.r, Math.min(H - p.r, p.y));
+
+  for (const o of obstacles) {
+    const cx = Math.max(o.x, Math.min(o.x + o.w, p.x));
+    const cy = Math.max(o.y, Math.min(o.y + o.h, p.y));
+    const ox = p.x - cx, oy = p.y - cy;
+    const d = Math.hypot(ox, oy);
+
+    if (d < p.r) {
+      if (d > 0.0001) {
+        p.x = cx + (ox / d) * p.r;
+        p.y = cy + (oy / d) * p.r;
+        // 撞牆時將對應方向的速度歸零或反彈，避免黏牆
+        p.vx = 0;
+        p.vy = 0;
+      } else {
+        const dl = p.x - o.x, dr = o.x + o.w - p.x;
+        const dtp = p.y - o.y, db = o.y + o.h - p.y;
+        const m = Math.min(dl, dr, dtp, db);
+        if (m === dl)      p.x = o.x - p.r;
+        else if (m === dr) p.x = o.x + o.w + p.r;
+        else if (m === dtp) p.y = o.y - p.r;
+        else               p.y = o.y + o.h + p.r;
+        p.vx = 0;
+        p.vy = 0;
+      }
+    }
+  }
+}
+
+function updateBullets(dt) {
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    const b = bullets[i];
+    b.x += b.vx * dt;
+    b.y += b.vy * dt;
+    b.life -= dt;
+
+    let dead = b.life <= 0 || b.x < -30 || b.x > W + 30 || b.y < -30 || b.y > H + 30;
+
+    // 撞牆
+    if (!dead) {
+      for (const o of obstacles) {
+        if (b.x > o.x - b.r && b.x < o.x + o.w + b.r &&
+            b.y > o.y - b.r && b.y < o.y + o.h + b.r) {
+          dead = true;
+          burst(b.x, b.y, b.color, 6, 150, 2.5);
+          break;
+        }
+      }
+    }
+
+    // 命中玩家
+    if (!dead) {
+      for (const p of players) {
+        if (p.id === b.owner || p.hp <= 0 || p.invuln > 0) continue;
+        if (Math.hypot(p.x - b.x, p.y - b.y) < p.r + b.r) {
+          p.hp = Math.max(0, p.hp - DAMAGE);
+          p.hitFlash = 0.18;
+          p.vx += b.vx * 0.015;
+          p.vy += b.vy * 0.015;
+          clampToArena(p);
+          burst(b.x, b.y, p.color, 12, 260, 3.5);
+          dead = true;
+          break;
+        }
+      }
+    }
+
+    if (dead) bullets.splice(i, 1);
+  }
+}
+
+function burst(x, y, color, count, speed, size) {
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const s = speed * (0.3 + Math.random() * 0.7);
+    particles.push({
+      x, y,
+      vx: Math.cos(a) * s,
+      vy: Math.sin(a) * s,
+      life: 0.3 + Math.random() * 0.4,
+      size: size * (0.5 + Math.random()),
+      color,
+    });
+  }
+}
+
+function updateParticles(dt) {
+  const damp = Math.pow(0.02, dt);
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const pt = particles[i];
+    pt.x += pt.vx * dt;
+    pt.y += pt.vy * dt;
+    pt.vx *= damp;
+    pt.vy *= damp;
+    pt.life -= dt;
+    if (pt.life <= 0) particles.splice(i, 1);
+  }
+}
+
+function update(dt) {
+  for (const p of players) updatePlayer(p, dt);
+  updateBullets(dt);
+
+  // 勝負判定
+  const p1dead = players[0].hp <= 0;
+  const p2dead = players[1].hp <= 0;
+  if (p1dead || p2dead) {
+    state = 'over';
+    let text, color;
+    if (p1dead && p2dead) { text = '平　手'; color = '#ffffff'; }
+    else if (p1dead)      { text = '玩家二 獲勝'; color = COLOR.p2; }
+    else                  { text = '玩家一 獲勝'; color = COLOR.p1; }
+    showEnd(text, color);
+  }
+}
+
+/* ==================== 渲染 ==================== */
+function drawGrid() {
+  ctx.strokeStyle = 'rgba(70,120,200,0.10)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let x = 0; x <= W; x += 45) { ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, H); }
+  for (let y = 0; y <= H; y += 45) { ctx.moveTo(0, y + 0.5); ctx.lineTo(W, y + 0.5); }
+  ctx.stroke();
+
+  const g = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, W*0.6);
+  g.addColorStop(0, 'rgba(60,110,220,0.07)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+}
+
+function drawObstacles() {
+  for (const o of obstacles) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(110,150,255,0.55)';
+    ctx.shadowBlur = 18;
+    ctx.fillStyle = 'rgba(70,110,190,0.35)';
+    roundRect(o.x, o.y, o.w, o.h, 6);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.strokeStyle = 'rgba(140,180,255,0.5)';
+    ctx.lineWidth = 1.5;
+    roundRect(o.x, o.y, o.w, o.h, 6);
+    ctx.stroke();
+  }
+}
+
+function drawBullets() {
+  for (const b of bullets) {
+    ctx.save();
+    ctx.shadowColor = b.color;
+    ctx.shadowBlur = 16;
+    ctx.fillStyle = b.color;
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.r * 0.45, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawPlayer(p) {
+  if (p.hp <= 0) return;
+
+  const ang = Math.atan2(p.facing.y, p.facing.x);
+
+  // 殘影
+  for (const t of p.trail) {
+    ctx.globalAlpha = t.life * 2.2;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, p.r * 0.85, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // 無敵光圈
+  if (p.invuln > 0) {
+    ctx.strokeStyle = p.color;
+    ctx.globalAlpha = 0.55;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r + 9, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  // 本體
+  ctx.save();
+  ctx.shadowColor = p.color;
+  ctx.shadowBlur = 24;
+  ctx.fillStyle = p.hitFlash > 0 ? '#ffffff' : p.color;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // 內圈
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, p.r * 0.42, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 砲口
+  ctx.save();
+  ctx.translate(p.x + Math.cos(ang) * (p.r + 5), p.y + Math.sin(ang) * (p.r + 5));
+  ctx.rotate(ang);
+  ctx.fillStyle = p.color;
+  ctx.shadowColor = p.color;
+  ctx.shadowBlur = 12;
+  ctx.fillRect(-2, -3, 12, 6);
+  ctx.restore();
+}
+
+function drawParticles() {
+  for (const pt of particles) {
+    ctx.globalAlpha = Math.max(0, Math.min(1, pt.life * 2.5));
+    ctx.fillStyle = pt.color;
+    ctx.beginPath();
+    ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawHealthBar(p, x, y, w, h, rightAlign) {
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  roundRect(x, y, w, h, h / 2);
+  ctx.fill();
+
+  const ratio = Math.max(0, p.hp / p.maxHp);
+  const fw = w * ratio;
+  if (fw > 0.5) {
+    let col = p.color;
+    if (p.hp < 30) col = (Math.floor(Date.now() / 130) % 2) ? '#ff2244' : p.color;
+
+    ctx.save();
+    ctx.shadowColor = col;
+    ctx.shadowBlur = 14;
+    ctx.fillStyle = col;
+    roundRect(rightAlign ? x + w - fw : x, y, fw, h, h / 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  const cdRatio = 1 - Math.min(1, p.dashCd / DASH_CD);
+  const by = y + h + 5;
+  ctx.fillStyle = 'rgba(255,255,255,0.09)';
+  roundRect(x, by, w, 4, 2);
+  ctx.fill();
+
+  if (cdRatio > 0.01) {
+    const cw = w * cdRatio;
+    ctx.fillStyle = cdRatio >= 1 ? p.color : 'rgba(255,255,255,0.35)';
+    roundRect(rightAlign ? x + w - cw : x, by, cw, 4, 2);
+    ctx.fill();
+  }
+
+  ctx.fillStyle = 'rgba(255,255,255,0.88)';
+  ctx.font = 'bold 13px "Microsoft JhengHei", sans-serif';
+  ctx.textAlign = rightAlign ? 'right' : 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(
+    `玩家${p.id === 1 ? '一' : '二'}   ${Math.ceil(p.hp)}`,
+    rightAlign ? x + w : x,
+    by + 20
+  );
+}
+
+function drawHUD() {
+  drawHealthBar(players[0], 26, 20, 340, 16, false);
+  drawHealthBar(players[1], W - 26 - 340, 20, 340, 16, true);
+}
+
+function roundRect(x, y, w, h, r) {
+  if (w < 0) w = 0;
+  r = Math.min(r, w / 2, h / 2);
+  if (r < 0) r = 0;
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function render() {
+  ctx.fillStyle = '#070b14';
+  ctx.fillRect(0, 0, W, H);
+
+  drawGrid();
+
+  if (players.length === 0) return;
+
+  drawObstacles();
+  drawBullets();
+  for (const p of players) drawPlayer(p);
+  drawParticles();
+  drawHUD();
+}
+
+/* ==================== 主迴圈 ==================== */
+let lastTime = performance.now();
+
+function loop(now) {
+  const dt = Math.min((now - lastTime) / 1000, 0.033);
+  lastTime = now;
+
+  if (state === 'playing') {
+    update(dt);
+  }
+  updateParticles(dt);
+  render();
+
+  for (const k in pressed) delete pressed[k];
+
+  requestAnimationFrame(loop);
+}
+
+/* ==================== 畫面控制 ==================== */
+const startScreen = document.getElementById('startScreen');
+const endScreen   = document.getElementById('endScreen');
+const winText     = document.getElementById('winText');
+
+function startGame() {
+  resetGame();
+  state = 'playing';
+
+  for (const k in keys) delete keys[k];
+  for (const k in pressed) delete pressed[k];
+
+  startScreen.classList.add('hidden');
+  endScreen.classList.add('hidden');
+
+  document.activeElement && document.activeElement.blur();
+}
+
+function showEnd(text, color) {
+  winText.textContent = text;
+  winText.style.color = color;
+  endScreen.classList.remove('hidden');
+}
+
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('restartBtn').addEventListener('click', startGame);
+
+resetGame();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
